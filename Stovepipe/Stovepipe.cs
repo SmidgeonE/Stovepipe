@@ -102,8 +102,6 @@ namespace Stovepipe
         private static void SlidePatch(HandgunSlide __instance, ref float ___m_slideZ_forward, ref float ___m_slideZ_current, 
             float __state)
         {
-            Debug.Log("");
-
             if (!hasCollectedDefaultFrontPosition)
             {
                 Debug.Log("collecting default position");
@@ -236,6 +234,13 @@ namespace Stovepipe
             if (!isStovepiping) return;
 
             ___m_killAfter = 5f;
+        }
+
+        [HarmonyPatch(typeof(HandgunSlide), "SlideEvent_ExtractRoundFromMag")]
+        [HarmonyPrefix]
+        private static bool AbortExtractingMagIfStovepiping()
+        {
+            return !isStovepiping;
         }
 
     }
