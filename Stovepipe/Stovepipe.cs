@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Common;
 using HarmonyLib;
 using UnityEngine;
 using BepInEx;
@@ -112,7 +113,6 @@ namespace Stovepipe
 
             if (!isStovepiping)
             {
-                Debug.Log("setting forward position to default");
                 ___m_slideZ_forward = DefaultFrontPosition;
                 return;
             }
@@ -165,7 +165,7 @@ namespace Stovepipe
 
         [HarmonyPatch(typeof(FVRFireArmRound), "BeginAnimationFrom")]
         [HarmonyPrefix]
-        private static bool AustimoPAtch(bool ___m_canAnimate)
+        private static bool CancelAnimationPatch(bool ___m_canAnimate)
         {
             if(___m_canAnimate) Debug.Log("Can animate");
             else Debug.Log("cannot animate");
@@ -185,6 +185,7 @@ namespace Stovepipe
             EjectedRound.RootRigidbody.angularVelocity = Vector3.zero;
             EjectedRound.RootRigidbody.maxAngularVelocity = 0;
             EjectedRound.RootRigidbody.useGravity = false;
+            EjectedRound.IsDestroyedAfterCounter = false;
             
 
             EjectedRoundTransform.position = slide.Point_Slide_Forward.position;
@@ -199,6 +200,7 @@ namespace Stovepipe
             hasBulletBeenSetNonColliding = false;
             isStovepiping = false;
             EjectedRound.gameObject.layer = RoundDefaultLayer;
+            EjectedRound.IsDestroyedAfterCounter = false;
         }
         
         
@@ -224,15 +226,17 @@ namespace Stovepipe
             if (!__instance.IsHeld) return;
             
             SetBulletBackToNormal();
-
         }
+        
+        
+        [HarmonyPatch(typeof(FVRFireArmRound), "FVRUpdate")]
+        [HarmonyPostfix]
+        private static void BulletDecayPatch(ref float ___m_killAfter)
+        {
+            if (!isStovepiping) return;
 
-
-
-
-
-
-
+            ___m_killAfter = 5f;
+        }
 
     }
 }

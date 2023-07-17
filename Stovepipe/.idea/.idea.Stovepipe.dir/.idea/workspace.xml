@@ -7,6 +7,10 @@
     <list default="true" id="00e34b02-fdc5-4294-b447-9f3d7d1f4eb0" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Stovepipe.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Stovepipe.dir/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Stovepipe.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Stovepipe.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/Debug/net35/Stovepipe.dll" beforeDir="false" afterPath="$PROJECT_DIR$/bin/Debug/net35/Stovepipe.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/Debug/net35/Stovepipe.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/bin/Debug/net35/Stovepipe.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/Debug/net35/Stovepipe.dll" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net35/Stovepipe.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/Debug/net35/Stovepipe.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net35/Stovepipe.pdb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,7 +68,7 @@
       <workItem from="1689532475372" duration="5000" />
       <workItem from="1689532480925" duration="218000" />
       <workItem from="1689534038522" duration="5050000" />
-      <workItem from="1689595289949" duration="9223000" />
+      <workItem from="1689595289949" duration="11815000" />
     </task>
     <servers />
   </component>
