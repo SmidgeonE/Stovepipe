@@ -1,7 +1,9 @@
-﻿using HarmonyLib;
+﻿using System;
+using HarmonyLib;
 using UnityEngine;
 using BepInEx;
 using FistVR;
+using Random = UnityEngine.Random;
 
 
 namespace Stovepipe
@@ -14,11 +16,17 @@ namespace Stovepipe
         private static FVRFireArmRound EjectedRound;
         private static Rigidbody EjectedRoundRb;
         private static Transform EjectedRoundTransform;
+        private static int RoundDefaultLayer;
         private static float EjectedRoundWidth;
+        private static float DefaultFrontPosition;
+        
+        
         private const float stovepipeProb = 0.5f;
         private static bool isStovepiping;
         private static bool isClippingThroughbullet;
         private static bool hasBulletBeenSetNonColliding;
+
+        private static bool hasCollectedDefaultFrontPosition;
 
         private void Awake()
         {
@@ -43,15 +51,32 @@ namespace Stovepipe
                 + handgunTransform.forward * __instance.RoundEjectionSpin.z, 
                 __instance.RoundPos_Ejection.position, __instance.RoundPos_Ejection.rotation, 
                 false);
+
+            if (EjectedRound == null)
+            {
+                Debug.Log("Ejected round is null");
+                return false;
+            }
             
             EjectedRoundRb = EjectedRound.GetComponent<Rigidbody>();
             EjectedRoundTransform = EjectedRound.transform;
-
-            var bulletRenderer = EjectedRound.GetComponent<MeshRenderer>();
             
-            if (bulletRenderer is null) Debug.Log("bullet has no renderer");
+            
+            var bulletCollider = EjectedRound.GetComponent<CapsuleCollider>();
 
-            EjectedRoundWidth = bulletRenderer.bounds.size.y;
+            if (bulletCollider is null)
+            {
+                Debug.Log("bullet has no collider mesh");
+                return false;
+            }
+
+            if (!EjectedRound.IsSpent)
+            {
+                Debug.Log("No longer stovepipping");
+                isStovepiping = false;
+            }
+
+            EjectedRoundWidth = bulletCollider.bounds.size.y;
             
             Debug.Log("eject round has width:" + EjectedRoundWidth);
 
@@ -59,13 +84,11 @@ namespace Stovepipe
         }
 
         [HarmonyPatch(typeof(HandgunSlide), "SlideEvent_EjectRound")]
-        [HarmonyPostfix]
+        [HarmonyPrefix]
         private static void StovepipePatch(HandgunSlide __instance)
         {
             if (__instance.IsHeld) return;
             if (!__instance.Handgun.Chamber.IsFull) return;
-            if (!EjectedRound.IsSpent) return;
-            
             isStovepiping = Random.Range(0f, 1f) < stovepipeProb;
             hasBulletBeenSetNonColliding = false;
 
@@ -75,19 +98,49 @@ namespace Stovepipe
 
         [HarmonyPatch(typeof(HandgunSlide), "UpdateSlide")]
         [HarmonyPrefix]
-        private static void SlidePatch(HandgunSlide __instance, ref float ___m_slideZ_forward, ref float ___m_slideZ_current)
+        private static void SlidePatch(HandgunSlide __instance, ref float ___m_slideZ_forward, ref float ___m_slideZ_current, 
+            float __state)
         {
-            if (!isStovepiping) return;
-            
-            
-            Debug.Log("forward float:" + ___m_slideZ_forward);
-            Debug.Log("Ejected round width float: " + EjectedRoundWidth);
-            Debug.Log("current position float: " + (___m_slideZ_forward - EjectedRoundWidth));
+            Debug.Log("");
 
-            var forwardPositionLimit = ___m_slideZ_forward - EjectedRoundWidth;
-            if (___m_slideZ_current > forwardPositionLimit) isClippingThroughbullet = true;
+            if (!hasCollectedDefaultFrontPosition)
+            {
+                Debug.Log("collecting default position");
+                DefaultFrontPosition = ___m_slideZ_forward;
+                hasCollectedDefaultFrontPosition = true;
+            }
+
+            if (!isStovepiping)
+            {
+                Debug.Log("setting forward position to default");
+                ___m_slideZ_forward = DefaultFrontPosition;
+                return;
+            }
             
-            if (__instance.IsHeld) return;
+
+            if (!hasBulletBeenSetNonColliding)
+            {
+                Debug.Log("forward float:" + ___m_slideZ_forward);
+                Debug.Log("Ejected round width float: " + EjectedRoundWidth);
+                Debug.Log("forward position limit " + (DefaultFrontPosition - EjectedRoundWidth));
+            }
+
+            Debug.Log("Current slide position" + ___m_slideZ_current);
+            var forwardPositionLimit = DefaultFrontPosition - EjectedRoundWidth;
+            __state = forwardPositionLimit;
+            Debug.Log("Setting forwarad limit to " + forwardPositionLimit);
+            ___m_slideZ_forward = forwardPositionLimit;
+
+            /*
+            if (___m_slideZ_current < forwardPositionLimit) ___m_slideZ_current = forwardPositionLimit;
+            */
+
+            if (__instance.IsHeld)
+            {
+                Debug.Log("it is held, stopping stovepipe");
+                isStovepiping = false;
+                return;
+            }
 
             /* Stovepipe the round...
              */
@@ -96,16 +149,60 @@ namespace Stovepipe
 
         }
 
+        /*
+        [HarmonyPatch(typeof(HandgunSlide), "UpdateSlide")]
+        [HarmonyPostfix]
+        private static void ForceSlideToFrontPatch(float __state)
+        {
+            if (!isStovepiping) return;
+            
+            Debug.Log("Forcing the slide to the front with state value, " + __state);
+            
+            
+        }
+        */
+
+
+        [HarmonyPatch(typeof(FVRFireArmRound), "BeginAnimationFrom")]
+        [HarmonyPrefix]
+        private static bool AustimoPAtch(bool ___m_canAnimate)
+        {
+            if(___m_canAnimate) Debug.Log("Can animate");
+            else Debug.Log("cannot animate");
+
+            return !isStovepiping;
+        }
+
+
         private static void SetBulletToNonColliding(HandgunSlide slide)
         {
-            EjectedRoundRb.useGravity = false;
+            Debug.Log("setting bullet to non colliding");
+
+            RoundDefaultLayer = EjectedRound.gameObject.layer;
+            
             EjectedRound.gameObject.layer = LayerMask.NameToLayer("Interactable");
+            EjectedRound.RootRigidbody.velocity = Vector3.zero;
+            EjectedRound.RootRigidbody.angularVelocity = Vector3.zero;
+            EjectedRound.RootRigidbody.maxAngularVelocity = 0;
+            EjectedRound.RootRigidbody.useGravity = false;
+            
+
             EjectedRoundTransform.position = slide.Point_Slide_Forward.position;
             EjectedRoundTransform.parent = slide.Handgun.transform;
             hasBulletBeenSetNonColliding = true;
         }
+
+        private static void SetBulletBackToNormal()
+        {
+            Debug.Log("Setting bullet back to normal.");
+            EjectedRound.RootRigidbody.useGravity = true;
+            hasBulletBeenSetNonColliding = false;
+            isStovepiping = false;
+            EjectedRound.gameObject.layer = RoundDefaultLayer;
+        }
         
         
+        /*
         [HarmonyPatch(typeof(HandgunSlide), "UpdateSlide")]
         [HarmonyPostfix]
         private static void SlidePostfix(ref float ___m_slideZ_forward,
@@ -114,9 +211,20 @@ namespace Stovepipe
             if (isStovepiping && isClippingThroughbullet)
             {
                 Debug.Log("Is clipping through the bullet, returning to end of bullet");
-                ___m_slideZ_current = ___m_slideZ_forward - EjectedRoundWidth;
+                ___m_slideZ_current = (___m_slideZ_forward - EjectedRoundWidth) * 0.9f;
                 isClippingThroughbullet = false;
             }
+        }*/
+
+        [HarmonyPatch(typeof(FVRFireArmRound), "UpdateInteraction")]
+        [HarmonyPostfix]
+        private static void BulletInteractionPatch(FVRFireArmRound __instance)
+        {
+            if (!isStovepiping) return;
+            if (!__instance.IsHeld) return;
+            
+            SetBulletBackToNormal();
+
         }
 
 
