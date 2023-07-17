@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "dgSpecHash": "QrM07F7+R2QRzVfDtHDvwhBF4/zIdUSm5YfUBF0nEdoQKgfNk0HABNKa7pqoHu7CXYIJhqydKlnwxa4YjUdMbg==",
+  "success": true,
+  "projectFilePath": "D:\\Git\\Stovepipe\\Stovepipe\\Stovepipe.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Finlay\\.nuget\\packages\\harmonyx\\2.10.1\\harmonyx.2.10.1.nupkg.sha512",
+    "C:\\Users\\Finlay\\.nuget\\packages\\microsoft.netframework.referenceassemblies\\1.0.3\\microsoft.netframework.referenceassemblies.1.0.3.nupkg.sha512",
+    "C:\\Users\\Finlay\\.nuget\\packages\\microsoft.netframework.referenceassemblies.net35\\1.0.3\\microsoft.netframework.referenceassemblies.net35.1.0.3.nupkg.sha512",
+    "C:\\Users\\Finlay\\.nuget\\packages\\mono.cecil\\0.10.4\\mono.cecil.0.10.4.nupkg.sha512",
+    "C:\\Users\\Finlay\\.nuget\\packages\\monomod.runtimedetour\\22.3.23.4\\monomod.runtimedetour.22.3.23.4.nupkg.sha512",
+    "C:\\Users\\Finlay\\.nuget\\packages\\monomod.utils\\22.3.23.4\\monomod.utils.22.3.23.4.nupkg.sha512",
+    "C:\\Users\\Finlay\\.nuget\\packages\\unityengine\\1.0.0\\unityengine.1.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

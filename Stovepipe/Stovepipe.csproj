@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net35</TargetFramework>
+        <ImplicitUsings>disable</ImplicitUsings>
+        <Nullable>disable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Reference Include="Assembly-CSharp">
+        <HintPath>..\Assembly-CSharp.dll</HintPath>
+      </Reference>
+      <Reference Include="BepInEx">
+        <HintPath>..\BepInEx.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="HarmonyX" Version="2.10.1" />
+      <PackageReference Include="UnityEngine" Version="1.0.0" />
+    </ItemGroup>
+
+</Project>
