@@ -12,27 +12,10 @@ namespace Stovepipe
 
     [BepInPlugin("dll.smidgeon.failuretoeject", "Failure To Eject", "1.0.0")]
     [BepInProcess("h3vr.exe")]
-    public class EjectionFailure : BaseUnityPlugin
+    public class EjectionFailure
     {
-        private static FVRFireArmRound _ejectedRound;
-        private static Rigidbody _ejectedRoundRb;
-        private static Transform _ejectedRoundTransform;
-        private static int _roundDefaultLayer;
-        private static float _ejectedRoundWidth;
-        private static float _defaultFrontPosition;
+
         
-        private const float StovepipeProb = 0.5f;
-        private static bool _isStovepiping;
-        private static bool _hasBulletBeenSetNonColliding;
-
-        private static bool _hasCollectedDefaultFrontPosition;
-        private static CapsuleCollider _bulletCollider;
-
-        private void Awake()
-        {
-            Harmony.CreateAndPatchAll(typeof(EjectionFailure), null);
-        }
-
         [HarmonyPatch(typeof(Handgun), "EjectExtractedRound")]
         [HarmonyPrefix]
         private static bool GetBulletReference(Handgun __instance)
@@ -40,8 +23,15 @@ namespace Stovepipe
             if (!__instance.Chamber.IsFull) return false;
 
             var handgunTransform = __instance.transform;
+            var slideData = __instance.GetComponent(typeof(SlideStovepipeData)) as SlideStovepipeData;
+
+            if (slideData is null)
+            {
+                Debug.Log("Something is horribly wrong, the handgun does not have a data holder");
+                return true;
+            }
             
-            _ejectedRound = __instance.Chamber.EjectRound(__instance.RoundPos_Ejection.position, 
+            slideData.ejectedRound = __instance.Chamber.EjectRound(__instance.RoundPos_Ejection.position, 
                 handgunTransform.right * __instance.RoundEjectionSpeed.x 
                 + handgunTransform.up * __instance.RoundEjectionSpeed.y 
                 + handgunTransform.forward * __instance.RoundEjectionSpeed.z, 
@@ -51,30 +41,31 @@ namespace Stovepipe
                 __instance.RoundPos_Ejection.position, __instance.RoundPos_Ejection.rotation, 
                 false);
 
-            if (_ejectedRound == null)
+            var bulletDataHolder = slideData.ejectedRound.gameObject.AddComponent<BulletStovepipeData>();
+            bulletDataHolder.slideData = slideData;
+
+            if (slideData.ejectedRound == null)
             {
                 Debug.Log("Ejected round is null");
                 return false;
             }
             
-            _ejectedRoundRb = _ejectedRound.GetComponent<Rigidbody>();
-            _ejectedRoundTransform = _ejectedRound.transform;
-            _bulletCollider = _ejectedRound.GetComponent<CapsuleCollider>();
+            slideData.bulletCollider = slideData.ejectedRound.GetComponent<CapsuleCollider>();
 
-            if (_bulletCollider is null)
+            if (slideData.bulletCollider is null)
             {
                 Debug.Log("bullet has no collider mesh");
                 return false;
             }
 
-            if (!_ejectedRound.IsSpent)
+            if (!slideData.ejectedRound.IsSpent)
             {
-                _isStovepiping = false;
+                slideData.IsStovepiping = false;
             }
 
-            _ejectedRoundWidth = _bulletCollider.bounds.size.y;
+            slideData.ejectedRoundWidth = slideData.bulletCollider.bounds.size.y;
             
-            Debug.Log("eject round has width:" + _ejectedRoundWidth);
+            Debug.Log("eject round has width:" + slideData.ejectedRoundWidth);
 
             return false;
         }
@@ -83,10 +74,14 @@ namespace Stovepipe
         [HarmonyPrefix]
         private static void StovepipePatch(HandgunSlide __instance)
         {
+            var slideData = __instance.Handgun.GetComponent(typeof(SlideStovepipeData)) 
+                as SlideStovepipeData;
+            
             if (__instance.IsHeld) return;
             if (!__instance.Handgun.Chamber.IsFull) return;
-            _isStovepiping = Random.Range(0f, 1f) < StovepipeProb;
-            _hasBulletBeenSetNonColliding = false;
+            
+            slideData.IsStovepiping = Random.Range(0f, 1f) < slideData.stovepipeProb;
+            slideData.hasBulletBeenSetNonColliding = false;
         }
 
 
@@ -94,46 +89,53 @@ namespace Stovepipe
         [HarmonyPrefix]
         private static void SlidePatch(HandgunSlide __instance, ref float ___m_slideZ_forward, ref float ___m_slideZ_current)
         {
-            if (!_hasCollectedDefaultFrontPosition)
+            var slideData = __instance.Handgun.GetComponent(typeof(SlideStovepipeData)) 
+                as SlideStovepipeData;
+            
+            if (!slideData.hasCollectedDefaultFrontPosition)
             {
                 Debug.Log("collecting default position");
-                _defaultFrontPosition = ___m_slideZ_forward;
-                _hasCollectedDefaultFrontPosition = true;
+                slideData.defaultFrontPosition = ___m_slideZ_forward;
+                slideData.hasCollectedDefaultFrontPosition = true;
             }
 
-            if (!_isStovepiping)
+            if (!slideData.IsStovepiping)
             {
-                ___m_slideZ_forward = _defaultFrontPosition;
+                ___m_slideZ_forward = slideData.defaultFrontPosition;
                 return;
             }
+
+
+            var forwardPositionLimit = slideData.defaultFrontPosition - slideData.ejectedRoundWidth * 1.5f;
+            ___m_slideZ_forward = forwardPositionLimit;
             
-            if (!_hasBulletBeenSetNonColliding)
+            if (!slideData.hasBulletBeenSetNonColliding)
             {
                 Debug.Log("forward float:" + ___m_slideZ_forward);
-                Debug.Log("Ejected round width float: " + _ejectedRoundWidth);
-                Debug.Log("forward position limit " + (_defaultFrontPosition - _ejectedRoundWidth));
+                Debug.Log("Ejected round width float: " + slideData.ejectedRoundWidth);
+                Debug.Log("forward position limit " + forwardPositionLimit);
             }
-            
-            var forwardPositionLimit = _defaultFrontPosition - _ejectedRoundWidth;
-            ___m_slideZ_forward = forwardPositionLimit;
             
             if (__instance.IsHeld)
             {
-                _isStovepiping = false;
+                slideData.IsStovepiping = false;
                 return;
             }
 
             /* Stovepipe the round...
              */
             
-            if (!_hasBulletBeenSetNonColliding) SetBulletToStovepiping(__instance);
+            if (!slideData.hasBulletBeenSetNonColliding) SetBulletToStovepiping(slideData);
             
             /* Now setting the position and rotation while the bullet is stovepiping */
 
             var slideTransform = __instance.transform;
+
+            slideData.ejectedRound.RootRigidbody.position = new Vector3(slideTransform.position.x, slideTransform.position.y,
+                                                                 __instance.Handgun.RoundPos_Ejection.position.z)
+                                                             + 0.02f * slideTransform.up;
             
-            _ejectedRound.RootRigidbody.position = new Vector3(slideTransform.position.x, slideTransform.position.y, __instance.Handgun.RoundPos_Ejection.position.z);
-            _ejectedRound.RootRigidbody.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
+            slideData.ejectedRound.RootRigidbody.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
             
             
             
@@ -143,72 +145,89 @@ namespace Stovepipe
 
         [HarmonyPatch(typeof(FVRFireArmRound), "BeginAnimationFrom")]
         [HarmonyPrefix]
-        private static bool CancelAnimationPatch()
+        private static bool CancelAnimationPatch(FVRFireArmRound __instance)
         {
-            return !_isStovepiping;
+            var bulletData = __instance.gameObject.GetComponent(typeof(SlideStovepipeData)) 
+                as SlideStovepipeData;
+
+            if (bulletData is null) return true;
+            
+            return !bulletData.IsStovepiping;
         }
         
-        private static void SetBulletToStovepiping(HandgunSlide slide)
+        private static void SetBulletToStovepiping(SlideStovepipeData slideData)
         {
             Debug.Log("setting bullet to non colliding");
 
-            _roundDefaultLayer = _ejectedRound.gameObject.layer;
+            slideData.roundDefaultLayer = slideData.ejectedRound.gameObject.layer;
             
-            _ejectedRound.gameObject.layer = LayerMask.NameToLayer("Interactable");
-            _ejectedRound.RootRigidbody.velocity = Vector3.zero;
-            _ejectedRound.RootRigidbody.angularVelocity = Vector3.zero;
-            _ejectedRound.RootRigidbody.maxAngularVelocity = 0;
-            _ejectedRound.RootRigidbody.useGravity = false;
+            slideData.ejectedRound.gameObject.layer = LayerMask.NameToLayer("Interactable");
+            slideData.ejectedRound.RootRigidbody.velocity = Vector3.zero;
+            slideData.ejectedRound.RootRigidbody.angularVelocity = Vector3.zero;
+            slideData.ejectedRound.RootRigidbody.maxAngularVelocity = 0;
+            slideData.ejectedRound.RootRigidbody.useGravity = false;
 
-            _hasBulletBeenSetNonColliding = true;
-            _bulletCollider.isTrigger = true;
+            slideData.hasBulletBeenSetNonColliding = true;
+            slideData.bulletCollider.isTrigger = true;
         }
 
-        private static void SetBulletBackToNormal()
+        private static void SetBulletBackToNormal(SlideStovepipeData slideData)
         {
             Debug.Log("Setting bullet back to normal.");
-            _ejectedRound.RootRigidbody.useGravity = true;
-            _hasBulletBeenSetNonColliding = false;
-            _isStovepiping = false;
-            _ejectedRound.gameObject.layer = _roundDefaultLayer;
-            _bulletCollider.isTrigger = false;
-            _ejectedRound.RootRigidbody.maxAngularVelocity = 1000f;
+            slideData.ejectedRound.RootRigidbody.useGravity = true;
+            slideData.hasBulletBeenSetNonColliding = false;
+            slideData.IsStovepiping = false;
+            slideData.ejectedRound.gameObject.layer = slideData.roundDefaultLayer;
+            slideData.bulletCollider.isTrigger = false;
+            slideData.ejectedRound.RootRigidbody.maxAngularVelocity = 1000f;
         }
 
         [HarmonyPatch(typeof(FVRFireArmRound), "UpdateInteraction")]
         [HarmonyPostfix]
         private static void BulletInteractionPatch(FVRFireArmRound __instance)
         {
-            if (!_isStovepiping) return;
+            var bulletData = __instance.gameObject.GetComponent<BulletStovepipeData>();
+            if (bulletData is null) return;
+            
+            if (!bulletData.isStovepiping) return;
             if (!__instance.IsHeld) return;
             
-            SetBulletBackToNormal();
+            SetBulletBackToNormal(bulletData.slideData);
         }
         
         
         [HarmonyPatch(typeof(FVRFireArmRound), "FVRUpdate")]
         [HarmonyPostfix]
-        private static void BulletDecayPatch(ref float ___m_killAfter)
+        private static void BulletDecayPatch(ref float ___m_killAfter, FVRFireArmRound __instance)
         {
-            if (!_isStovepiping) return;
+            var bulletData = __instance.gameObject.GetComponent<BulletStovepipeData>();
+            if (bulletData is null) return;
+            
+            if (!bulletData.isStovepiping) return;
 
             ___m_killAfter = 5f;
         }
 
         [HarmonyPatch(typeof(HandgunSlide), "SlideEvent_ExtractRoundFromMag")]
         [HarmonyPrefix]
-        private static bool AbortExtractingMagIfStovepiping()
+        private static bool AbortExtractingMagIfStovepiping(HandgunSlide __instance)
         {
-            return !_isStovepiping;
+            var slideData = __instance.gameObject.GetComponent(typeof(SlideStovepipeData)) 
+                as SlideStovepipeData;
+            
+            return !slideData.IsStovepiping;
         }
 
         [HarmonyPatch(typeof(HandgunSlide), "BeginInteraction")]
         [HarmonyPostfix]
-        private static void SlideInteractionCancelsStovepiping()
+        private static void SlideInteractionCancelsStovepiping(HandgunSlide __instance)
         {
-            if (!_isStovepiping) return;
+            var slideData = __instance.gameObject.GetComponent(typeof(SlideStovepipeData)) 
+                as SlideStovepipeData;
             
-            SetBulletBackToNormal();
+            if (!slideData.IsStovepiping) return;
+            
+            SetBulletBackToNormal(slideData);
         }
         
 
