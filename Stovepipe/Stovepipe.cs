@@ -127,18 +127,23 @@ namespace Stovepipe
              */
             
             if (!_hasBulletBeenSetNonColliding) SetBulletToStovepiping(__instance);
+            
+            /* Now setting the position and rotation while the bullet is stovepiping */
 
             var slideTransform = __instance.transform;
             
             _ejectedRound.RootRigidbody.position = new Vector3(slideTransform.position.x, slideTransform.position.y, __instance.Handgun.RoundPos_Ejection.position.z);
             _ejectedRound.RootRigidbody.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
             
+            
+            
+            
         }
 
 
         [HarmonyPatch(typeof(FVRFireArmRound), "BeginAnimationFrom")]
         [HarmonyPrefix]
-        private static bool CancelAnimationPatch(bool ___m_canAnimate)
+        private static bool CancelAnimationPatch()
         {
             return !_isStovepiping;
         }
@@ -155,7 +160,6 @@ namespace Stovepipe
             _ejectedRound.RootRigidbody.maxAngularVelocity = 0;
             _ejectedRound.RootRigidbody.useGravity = false;
 
-            _ejectedRoundTransform.position = slide.Point_Slide_Forward.position;
             _hasBulletBeenSetNonColliding = true;
             _bulletCollider.isTrigger = true;
         }
@@ -168,6 +172,7 @@ namespace Stovepipe
             _isStovepiping = false;
             _ejectedRound.gameObject.layer = _roundDefaultLayer;
             _bulletCollider.isTrigger = false;
+            _ejectedRound.RootRigidbody.maxAngularVelocity = 1000f;
         }
 
         [HarmonyPatch(typeof(FVRFireArmRound), "UpdateInteraction")]
@@ -196,6 +201,16 @@ namespace Stovepipe
         {
             return !_isStovepiping;
         }
+
+        [HarmonyPatch(typeof(HandgunSlide), "BeginInteraction")]
+        [HarmonyPostfix]
+        private static void SlideInteractionCancelsStovepiping()
+        {
+            if (!_isStovepiping) return;
+            
+            SetBulletBackToNormal();
+        }
+        
 
     }
 }
