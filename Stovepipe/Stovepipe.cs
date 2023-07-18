@@ -9,9 +9,6 @@ using Random = UnityEngine.Random;
 
 namespace Stovepipe
 {
-
-    [BepInPlugin("dll.smidgeon.failuretoeject", "Failure To Eject", "1.0.0")]
-    [BepInProcess("h3vr.exe")]
     public class EjectionFailure
     {
 
@@ -23,7 +20,7 @@ namespace Stovepipe
             if (!__instance.Chamber.IsFull) return false;
 
             var handgunTransform = __instance.transform;
-            var slideData = __instance.GetComponent(typeof(SlideStovepipeData)) as SlideStovepipeData;
+            var slideData = __instance.Slide.GetComponent(typeof(SlideStovepipeData)) as SlideStovepipeData;
 
             if (slideData is null)
             {
@@ -74,7 +71,7 @@ namespace Stovepipe
         [HarmonyPrefix]
         private static void StovepipePatch(HandgunSlide __instance)
         {
-            var slideData = __instance.Handgun.GetComponent(typeof(SlideStovepipeData)) 
+            var slideData = __instance.gameObject.GetComponent(typeof(SlideStovepipeData)) 
                 as SlideStovepipeData;
             
             if (__instance.IsHeld) return;
@@ -89,8 +86,10 @@ namespace Stovepipe
         [HarmonyPrefix]
         private static void SlidePatch(HandgunSlide __instance, ref float ___m_slideZ_forward, ref float ___m_slideZ_current)
         {
-            var slideData = __instance.Handgun.GetComponent(typeof(SlideStovepipeData)) 
+            var slideData = __instance.gameObject.GetComponent(typeof(SlideStovepipeData)) 
                 as SlideStovepipeData;
+
+            if (slideData is null) return;
             
             if (!slideData.hasCollectedDefaultFrontPosition)
             {
@@ -224,6 +223,8 @@ namespace Stovepipe
         {
             var slideData = __instance.gameObject.GetComponent(typeof(SlideStovepipeData)) 
                 as SlideStovepipeData;
+
+            if (slideData == null) return;
             
             if (!slideData.IsStovepiping) return;
             

@@ -18,3 +18,4 @@ D:\Git\Stovepipe\Stovepipe\obj\Debug\net35\Stovepipe.csproj.CoreCompileInputs.ca
 D:\Git\Stovepipe\Stovepipe\obj\Debug\net35\Stovepipe.csproj.CopyComplete
 D:\Git\Stovepipe\Stovepipe\obj\Debug\net35\Stovepipe.dll
 D:\Git\Stovepipe\Stovepipe\obj\Debug\net35\Stovepipe.pdb
+D:\Git\Stovepipe\Stovepipe\bin\Debug\net35\BepInEx.MonoMod.HookGenPatcher.dll

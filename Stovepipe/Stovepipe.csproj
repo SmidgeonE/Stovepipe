@@ -13,6 +13,9 @@
       <Reference Include="BepInEx">
         <HintPath>..\BepInEx.dll</HintPath>
       </Reference>
+      <Reference Include="BepInEx.MonoMod.HookGenPatcher">
+        <HintPath>C:\Users\Finlay\Desktop\BepInEx.MonoMod.HookGenPatcher.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
     <ItemGroup>

@@ -18,7 +18,9 @@ namespace Stovepipe
             get => _isStovepiping;
             set
             {
-                ejectedRound.GetComponent<BulletStovepipeData>().isStovepiping = value;
+                if (ejectedRound == null) return;
+                var bulletData = ejectedRound.GetComponent<BulletStovepipeData>();
+                if (bulletData != null) bulletData.isStovepiping = value;
                 _isStovepiping = value;
             }
         }
