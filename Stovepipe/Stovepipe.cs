@@ -142,9 +142,16 @@ namespace Stovepipe
             
             if (!hasBulletBeenSetNonColliding) SetBulletToNonColliding(__instance);
 
+            
             EjectedRound.RootRigidbody.position = __instance.transform.position + 0.1f * __instance.transform.up.normalized;
-
-            EjectedRound.RootRigidbody.rotation = EjectedRound.RootRigidbody.rotation;
+            
+            
+            Debug.Log("Applying roaetatino");
+            /*
+            EjectedRound.RootRigidbody.rotation = __instance.transform.rotation;
+            */
+            
+            EjectedRound.RootRigidbody.rotation = Quaternion.LookRotation(__instance.transform.up, -__instance.transform.forward);
 
         }
 
@@ -166,9 +173,6 @@ namespace Stovepipe
         [HarmonyPrefix]
         private static bool CancelAnimationPatch(bool ___m_canAnimate)
         {
-            if(___m_canAnimate) Debug.Log("Can animate");
-            else Debug.Log("cannot animate");
-
             return !isStovepiping;
         }
 
