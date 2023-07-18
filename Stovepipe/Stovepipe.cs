@@ -26,6 +26,7 @@ namespace Stovepipe
         private static bool isStovepiping;
         private static bool isClippingThroughbullet;
         private static bool hasBulletBeenSetNonColliding;
+        private static bool hasBeenRotatedUpwards;
 
         private static bool hasCollectedDefaultFrontPosition;
 
@@ -99,8 +100,7 @@ namespace Stovepipe
 
         [HarmonyPatch(typeof(HandgunSlide), "UpdateSlide")]
         [HarmonyPrefix]
-        private static void SlidePatch(HandgunSlide __instance, ref float ___m_slideZ_forward, ref float ___m_slideZ_current, 
-            float __state)
+        private static void SlidePatch(HandgunSlide __instance, ref float ___m_slideZ_forward, ref float ___m_slideZ_current)
         {
             if (!hasCollectedDefaultFrontPosition)
             {
@@ -122,11 +122,8 @@ namespace Stovepipe
                 Debug.Log("Ejected round width float: " + EjectedRoundWidth);
                 Debug.Log("forward position limit " + (DefaultFrontPosition - EjectedRoundWidth));
             }
-
-            Debug.Log("Current slide position" + ___m_slideZ_current);
+            
             var forwardPositionLimit = DefaultFrontPosition - EjectedRoundWidth;
-            __state = forwardPositionLimit;
-            Debug.Log("Setting forwarad limit to " + forwardPositionLimit);
             ___m_slideZ_forward = forwardPositionLimit;
 
             /*
@@ -144,6 +141,10 @@ namespace Stovepipe
              */
             
             if (!hasBulletBeenSetNonColliding) SetBulletToNonColliding(__instance);
+
+            EjectedRound.RootRigidbody.position = __instance.transform.position + 0.1f * __instance.transform.up.normalized;
+
+            EjectedRound.RootRigidbody.rotation = EjectedRound.RootRigidbody.rotation;
 
         }
 
@@ -172,6 +173,7 @@ namespace Stovepipe
         }
 
 
+
         private static void SetBulletToNonColliding(HandgunSlide slide)
         {
             Debug.Log("setting bullet to non colliding");
@@ -184,10 +186,9 @@ namespace Stovepipe
             EjectedRound.RootRigidbody.maxAngularVelocity = 0;
             EjectedRound.RootRigidbody.useGravity = false;
             EjectedRound.IsDestroyedAfterCounter = false;
-            
+
 
             EjectedRoundTransform.position = slide.Point_Slide_Forward.position;
-            EjectedRoundTransform.parent = slide.Handgun.transform;
             hasBulletBeenSetNonColliding = true;
         }
 
@@ -199,6 +200,7 @@ namespace Stovepipe
             isStovepiping = false;
             EjectedRound.gameObject.layer = RoundDefaultLayer;
             EjectedRound.IsDestroyedAfterCounter = false;
+            hasBeenRotatedUpwards = false;
         }
         
         
