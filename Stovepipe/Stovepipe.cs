@@ -81,6 +81,12 @@ namespace Stovepipe
             if (__instance.IsHeld) return;
             if (!__instance.Handgun.Chamber.IsFull) return;
             if (!__instance.Handgun.Chamber.IsSpent) return;
+            if (__instance.HasLastRoundSlideHoldOpen)
+            {
+                if (__instance.Handgun.Magazine == null) return;
+                if (__instance.Handgun.Magazine.m_numRounds == 0) return;
+            }
+            
             
             slideData.IsStovepiping = Random.Range(0f, 1f) < slideData.stovepipeProb;
             slideData.hasBulletBeenSetNonColliding = false;
