@@ -149,8 +149,7 @@ namespace Stovepipe
             slideData.ejectedRound.RootRigidbody.position =
                 __instance.Handgun.Chamber.ProxyRound.position
                 + slideTransform.up.normalized * 0.1f
-                - slideTransform.forward.normalized * 0.5f * slideData.ejectedRoundHeight
-                + slideTransform.forward.normalized * 0.5f * slideData.ejectedRoundWidth;
+                - slideTransform.forward.normalized * 0.5f * slideData.ejectedRoundHeight;
 
             slideData.ejectedRound.RootRigidbody.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
             
@@ -169,7 +168,7 @@ namespace Stovepipe
 
             if (bulletData is null) return true;
             
-            return !bulletData.isStovepiping;
+            return !bulletData.slideData.IsStovepiping;
         }
         
         private static void SetBulletToStovepiping(SlideStovepipeData slideData)
@@ -199,7 +198,7 @@ namespace Stovepipe
             slideData.ejectedRound.RootRigidbody.maxAngularVelocity = 1000f;
         }
 
-        /*[HarmonyPatch(typeof(FVRFireArmRound), "UpdateInteraction")]
+        [HarmonyPatch(typeof(FVRFireArmRound), "UpdateInteraction")]
         [HarmonyPostfix]
         private static void BulletInteractionPatch(FVRFireArmRound __instance)
         {
@@ -209,7 +208,7 @@ namespace Stovepipe
                 return;
             }
 
-            if (!bulletData.isStovepiping)
+            if (!bulletData.slideData.IsStovepiping)
             {
                 return;
             }
@@ -222,7 +221,7 @@ namespace Stovepipe
             
             Debug.Log("setting bullet back to normal via being held");
             SetBulletBackToNormal(bulletData.slideData);
-        }*/
+        }
         
         
         [HarmonyPatch(typeof(FVRFireArmRound), "FVRUpdate")]
@@ -232,8 +231,9 @@ namespace Stovepipe
             var bulletData = __instance.gameObject.GetComponent<BulletStovepipeData>();
             if (bulletData is null) return;
             
-            if (!bulletData.isStovepiping) return;
+            if (!bulletData.slideData.IsStovepiping) return;
 
+            Debug.Log("resetting lifetime");
             ___m_killAfter = 5f;
         }
 
