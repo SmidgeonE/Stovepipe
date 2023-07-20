@@ -55,14 +55,18 @@ namespace Stovepipe
                 return false;
             }
 
-            if (!slideData.ejectedRound.IsSpent)
-            {
-                slideData.IsStovepiping = false;
-            }
-
             slideData.ejectedRoundWidth = slideData.bulletCollider.bounds.size.y;
+            slideData.ejectedRoundHeight = slideData.bulletCollider.bounds.size.z;
+            
+            /*
+            Debug.Log("Bullets dimensions in x y z :");
+            Debug.Log(slideData.bulletCollider.bounds.size.x);
+            Debug.Log(slideData.bulletCollider.bounds.size.y);
+            Debug.Log(slideData.bulletCollider.bounds.size.z);
+            Debug.Log("");
             
             Debug.Log("eject round has width:" + slideData.ejectedRoundWidth);
+            */
 
             return false;
         }
@@ -76,6 +80,7 @@ namespace Stovepipe
             
             if (__instance.IsHeld) return;
             if (!__instance.Handgun.Chamber.IsFull) return;
+            if (!__instance.Handgun.Chamber.IsSpent) return;
             
             slideData.IsStovepiping = Random.Range(0f, 1f) < slideData.stovepipeProb;
             slideData.hasBulletBeenSetNonColliding = false;
@@ -110,17 +115,11 @@ namespace Stovepipe
             
             if (!slideData.hasBulletBeenSetNonColliding)
             {
-                Debug.Log("forward float:" + ___m_slideZ_forward);
+                /*Debug.Log("forward float:" + ___m_slideZ_forward);
                 Debug.Log("Ejected round width float: " + slideData.ejectedRoundWidth);
-                Debug.Log("forward position limit " + forwardPositionLimit);
+                Debug.Log("forward position limit " + forwardPositionLimit);*/
             }
             
-            if (__instance.IsHeld)
-            {
-                slideData.IsStovepiping = false;
-                return;
-            }
-
             /* Stovepipe the round...
              */
             
@@ -130,10 +129,23 @@ namespace Stovepipe
 
             var slideTransform = __instance.transform;
 
-            slideData.ejectedRound.RootRigidbody.position = new Vector3(slideTransform.position.x, slideTransform.position.y,
-                                                                 __instance.Handgun.RoundPos_Ejection.position.z)
-                                                             + 0.02f * slideTransform.up;
-            
+            if (slideData.ejectedRound is null) return;
+
+            if (__instance.Handgun is null) Debug.Log("handgun is null");
+            if (__instance.Handgun.Chamber == null) Debug.Log("chamber is null");
+
+            if (__instance.Handgun.Chamber.ProxyRound == null)
+            {
+                Debug.Log("Proxy round transform is null");
+                return;
+            }
+
+            slideData.ejectedRound.RootRigidbody.position =
+                __instance.Handgun.Chamber.ProxyRound.position
+                + slideTransform.up.normalized * 0.1f
+                - slideTransform.forward.normalized * 0.5f * slideData.ejectedRoundHeight
+                + slideTransform.forward.normalized * 0.5f * slideData.ejectedRoundWidth;
+
             slideData.ejectedRound.RootRigidbody.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
             
             
@@ -146,12 +158,12 @@ namespace Stovepipe
         [HarmonyPrefix]
         private static bool CancelAnimationPatch(FVRFireArmRound __instance)
         {
-            var bulletData = __instance.gameObject.GetComponent(typeof(SlideStovepipeData)) 
-                as SlideStovepipeData;
+            var bulletData = __instance.gameObject.GetComponent(typeof(BulletStovepipeData)) 
+                as BulletStovepipeData;
 
             if (bulletData is null) return true;
             
-            return !bulletData.IsStovepiping;
+            return !bulletData.isStovepiping;
         }
         
         private static void SetBulletToStovepiping(SlideStovepipeData slideData)
@@ -181,18 +193,30 @@ namespace Stovepipe
             slideData.ejectedRound.RootRigidbody.maxAngularVelocity = 1000f;
         }
 
-        [HarmonyPatch(typeof(FVRFireArmRound), "UpdateInteraction")]
+        /*[HarmonyPatch(typeof(FVRFireArmRound), "UpdateInteraction")]
         [HarmonyPostfix]
         private static void BulletInteractionPatch(FVRFireArmRound __instance)
         {
             var bulletData = __instance.gameObject.GetComponent<BulletStovepipeData>();
-            if (bulletData is null) return;
+            if (bulletData is null)
+            {
+                return;
+            }
+
+            if (!bulletData.isStovepiping)
+            {
+                return;
+            }
+            Debug.Log("This bullet is stovepiping");
+
+            if (!__instance.IsHeld)
+            {
+                return;
+            }
             
-            if (!bulletData.isStovepiping) return;
-            if (!__instance.IsHeld) return;
-            
+            Debug.Log("setting bullet back to normal via being held");
             SetBulletBackToNormal(bulletData.slideData);
-        }
+        }*/
         
         
         [HarmonyPatch(typeof(FVRFireArmRound), "FVRUpdate")]
@@ -230,7 +254,6 @@ namespace Stovepipe
             
             SetBulletBackToNormal(slideData);
         }
-        
 
     }
 }

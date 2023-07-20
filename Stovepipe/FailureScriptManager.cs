@@ -12,7 +12,6 @@ namespace Stovepipe
     {
         private void Awake()
         {
-            Debug.Log("Why is this not working");
             Harmony.CreateAndPatchAll(typeof(EjectionFailure), null);
             Harmony.CreateAndPatchAll(typeof(FailureScriptManager), null);
         }
