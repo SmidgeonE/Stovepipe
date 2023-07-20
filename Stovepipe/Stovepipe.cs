@@ -58,7 +58,6 @@ namespace Stovepipe
             slideData.ejectedRoundWidth = slideData.bulletCollider.bounds.size.y;
             slideData.ejectedRoundHeight = slideData.bulletCollider.bounds.size.z;
             
-            /*
             Debug.Log("Bullets dimensions in x y z :");
             Debug.Log(slideData.bulletCollider.bounds.size.x);
             Debug.Log(slideData.bulletCollider.bounds.size.y);
@@ -66,7 +65,6 @@ namespace Stovepipe
             Debug.Log("");
             
             Debug.Log("eject round has width:" + slideData.ejectedRoundWidth);
-            */
 
             return false;
         }
@@ -149,7 +147,8 @@ namespace Stovepipe
             slideData.ejectedRound.RootRigidbody.position =
                 __instance.Handgun.Chamber.ProxyRound.position
                 + slideTransform.up.normalized * 0.1f
-                - slideTransform.forward.normalized * 0.5f * slideData.ejectedRoundHeight;
+                - slideTransform.forward.normalized * 0.5f * slideData.ejectedRoundHeight
+                - slideTransform.forward.normalized * slideData.ejectedRoundWidth;
 
             slideData.ejectedRound.RootRigidbody.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
             
