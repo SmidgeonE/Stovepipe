@@ -127,8 +127,12 @@ namespace Stovepipe
             
             /* Stovepipe the round...
              */
-            
-            if (!slideData.hasBulletBeenSetNonColliding) SetBulletToStovepiping(slideData);
+
+            if (!slideData.hasBulletBeenSetNonColliding)
+            {
+                SetBulletToStovepiping(slideData);
+                slideData.randomPosAndRot = GenerateRandomNoise();
+            }
             
             /* Now setting the position and rotation while the bullet is stovepiping */
 
@@ -145,16 +149,29 @@ namespace Stovepipe
                 return;
             }
 
+            
+            Debug.Log("random positiong: " + slideData.randomPosAndRot[0]);
 
             slideData.ejectedRound.transform.position =
                 __instance.Handgun.Chamber.ProxyRound.position
-                + slideTransform.up.normalized * 0f
+                + slideTransform.up.normalized *  slideData.randomPosAndRot[0]
                 - slideTransform.forward.normalized * 0.5f * slideData.ejectedRoundHeight
-                - slideTransform.forward.normalized * 0.8f * slideData.ejectedRoundWidth;
+                - slideTransform.forward.normalized * 1f * slideData.ejectedRoundWidth;
 
             slideData.ejectedRound.transform.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
+            
+            slideData.ejectedRound.transform.Rotate(slideTransform.forward, slideData.randomPosAndRot[1], Space.World);
+            slideData.ejectedRound.transform.Rotate(slideTransform.right, slideData.randomPosAndRot[2], Space.World);
         }
 
+        private static float[] GenerateRandomNoise()
+        {
+            // Returns a 3-array of floats, first being randomness in the up/down pos, 
+            // Next being random angle about the forward slide direction
+            // Final being random angle about the perpendicular slide direction (left / right)
+
+            return new[] { Random.Range(-0.005f, 0.02f), Random.Range(-30f, 30f), Random.Range(0, 10f) };
+        }
 
         [HarmonyPatch(typeof(FVRFireArmRound), "BeginAnimationFrom")]
         [HarmonyPrefix]

@@ -10,6 +10,8 @@ namespace Stovepipe
         public float ejectedRoundWidth;
         public float ejectedRoundHeight;
         public float defaultFrontPosition;
+
+        public float[] randomPosAndRot;
         
         public float stovepipeProb = 0.5f;
         private bool _isStovepiping;
