@@ -55,16 +55,17 @@ namespace Stovepipe
                 return false;
             }
 
-            slideData.ejectedRoundWidth = slideData.bulletCollider.bounds.size.y;
-            slideData.ejectedRoundHeight = slideData.bulletCollider.bounds.size.z;
+            slideData.ejectedRoundWidth = slideData.bulletCollider.radius;
+            slideData.ejectedRoundHeight = slideData.bulletCollider.height;
             
-            Debug.Log("Bullets dimensions in x y z :");
+            /*Debug.Log("Bullets dimensions in x y z :");
             Debug.Log(slideData.bulletCollider.bounds.size.x);
             Debug.Log(slideData.bulletCollider.bounds.size.y);
-            Debug.Log(slideData.bulletCollider.bounds.size.z);
+            Debug.Log(slideData.bulletCollider.bounds.size.z);*/
+            Debug.Log("Radius : " + slideData.bulletCollider.radius);
             Debug.Log("");
             
-            Debug.Log("eject round has width:" + slideData.ejectedRoundWidth);
+            Debug.Log("jecet round has height: " + slideData.bulletCollider.height);
 
             return false;
         }
@@ -114,7 +115,7 @@ namespace Stovepipe
             }
 
 
-            var forwardPositionLimit = slideData.defaultFrontPosition - slideData.ejectedRoundWidth * 1.5f;
+            var forwardPositionLimit = slideData.defaultFrontPosition - slideData.ejectedRoundWidth * 3f;
             ___m_slideZ_forward = forwardPositionLimit;
             
             if (!slideData.hasBulletBeenSetNonColliding)
@@ -143,13 +144,13 @@ namespace Stovepipe
                 Debug.Log("Proxy round transform is null");
                 return;
             }
-            
-            
+
+
             slideData.ejectedRound.transform.position =
                 __instance.Handgun.Chamber.ProxyRound.position
                 + slideTransform.up.normalized * 0f
                 - slideTransform.forward.normalized * 0.5f * slideData.ejectedRoundHeight
-                - slideTransform.forward.normalized * slideData.ejectedRoundWidth;
+                - slideTransform.forward.normalized * 0.8f * slideData.ejectedRoundWidth;
 
             slideData.ejectedRound.transform.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
         }
