@@ -1,4 +1,5 @@
 ﻿using BepInEx;
+using BepInEx.Configuration;
 using FistVR;
 using HarmonyLib;
 using UnityEngine;
@@ -10,8 +11,12 @@ namespace Stovepipe
     [BepInProcess("h3vr.exe")]
     public class FailureScriptManager : BaseUnityPlugin
     {
+        public static ConfigEntry<float> stovepipeProb;
+        
         private void Awake()
         {
+            stovepipeProb = Config.Bind("Probability - Stovepipe", "Probability", 0.016f, "");
+            
             Harmony.CreateAndPatchAll(typeof(EjectionFailure), null);
             Harmony.CreateAndPatchAll(typeof(FailureScriptManager), null);
         }
@@ -27,7 +32,7 @@ namespace Stovepipe
                     continue;
                 }
                 
-                handgun.Slide.gameObject.AddComponent<SlideStovepipeData>();
+                handgun.Slide.gameObject.AddComponent<SlideStovepipeData>().stovepipeProb = stovepipeProb.Value;
             }
         }
 
@@ -41,14 +46,8 @@ namespace Stovepipe
         {
             var handgun = ((GameObject)__result).GetComponent<Handgun>();
             if (handgun != null)
-            {
-                Debug.Log("Handgun instantiated");
-                handgun.Slide.gameObject.AddComponent<SlideStovepipeData>();
-            }
+                handgun.Slide.gameObject.AddComponent<SlideStovepipeData>().stovepipeProb = stovepipeProb.Value;
             
-            /*
-            foreach (var item in ((GameObject)__result).GetComponents<Component>()) Debug.Log(" items " + item.GetType());
-        */
         }
     }
 }
