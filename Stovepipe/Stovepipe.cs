@@ -143,18 +143,15 @@ namespace Stovepipe
                 Debug.Log("Proxy round transform is null");
                 return;
             }
-
-            slideData.ejectedRound.RootRigidbody.position =
+            
+            
+            slideData.ejectedRound.transform.position =
                 __instance.Handgun.Chamber.ProxyRound.position
-                + slideTransform.up.normalized * 0.1f
+                + slideTransform.up.normalized * 0f
                 - slideTransform.forward.normalized * 0.5f * slideData.ejectedRoundHeight
                 - slideTransform.forward.normalized * slideData.ejectedRoundWidth;
 
-            slideData.ejectedRound.RootRigidbody.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
-            
-            
-            
-            
+            slideData.ejectedRound.transform.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
         }
 
 
@@ -176,17 +173,23 @@ namespace Stovepipe
 
             slideData.roundDefaultLayer = slideData.ejectedRound.gameObject.layer;
             
-            slideData.ejectedRound.gameObject.layer = LayerMask.NameToLayer("Interactable");
+            slideData.ejectedRound.gameObject.layer = LayerMask.NameToLayer("Water");
             slideData.ejectedRound.RootRigidbody.velocity = Vector3.zero;
             slideData.ejectedRound.RootRigidbody.angularVelocity = Vector3.zero;
             slideData.ejectedRound.RootRigidbody.maxAngularVelocity = 0;
             slideData.ejectedRound.RootRigidbody.useGravity = false;
+            slideData.ejectedRound.RootRigidbody.detectCollisions = false;
+            slideData.bulletCollider.enabled = false;
+            
+            if (slideData.transform.parent != null)
+                slideData.ejectedRound.SetParentage(slideData.transform);
+            else slideData.ejectedRound.SetParentage(slideData.transform.parent);
 
             slideData.hasBulletBeenSetNonColliding = true;
             slideData.bulletCollider.isTrigger = true;
         }
 
-        private static void SetBulletBackToNormal(SlideStovepipeData slideData)
+        private static void SetBulletBackToNormal(SlideStovepipeData slideData, bool breakParentage)
         {
             Debug.Log("Setting bullet back to normal.");
             slideData.ejectedRound.RootRigidbody.useGravity = true;
@@ -195,31 +198,23 @@ namespace Stovepipe
             slideData.ejectedRound.gameObject.layer = slideData.roundDefaultLayer;
             slideData.bulletCollider.isTrigger = false;
             slideData.ejectedRound.RootRigidbody.maxAngularVelocity = 1000f;
+            slideData.ejectedRound.RootRigidbody.detectCollisions = true;
+            slideData.bulletCollider.enabled = true;
+            
+            if (breakParentage) slideData.ejectedRound.SetParentage(null);
         }
 
         [HarmonyPatch(typeof(FVRFireArmRound), "UpdateInteraction")]
         [HarmonyPostfix]
         private static void BulletInteractionPatch(FVRFireArmRound __instance)
         {
-            var bulletData = __instance.gameObject.GetComponent<BulletStovepipeData>();
-            if (bulletData is null)
-            {
-                return;
-            }
-
-            if (!bulletData.slideData.IsStovepiping)
-            {
-                return;
-            }
-            Debug.Log("This bullet is stovepiping");
-
-            if (!__instance.IsHeld)
-            {
-                return;
-            }
+            if (!__instance.IsHeld) return;
             
-            Debug.Log("setting bullet back to normal via being held");
-            SetBulletBackToNormal(bulletData.slideData);
+            var bulletData = __instance.gameObject.GetComponent<BulletStovepipeData>();
+            if (bulletData is null) return;
+            if (!bulletData.slideData.IsStovepiping) return;
+
+            SetBulletBackToNormal(bulletData.slideData, false);
         }
         
         
@@ -231,8 +226,7 @@ namespace Stovepipe
             if (bulletData is null) return;
             
             if (!bulletData.slideData.IsStovepiping) return;
-
-            Debug.Log("resetting lifetime");
+            
             ___m_killAfter = 5f;
         }
 
@@ -257,7 +251,7 @@ namespace Stovepipe
             
             if (!slideData.IsStovepiping) return;
             
-            SetBulletBackToNormal(slideData);
+            SetBulletBackToNormal(slideData, true);
         }
 
     }
