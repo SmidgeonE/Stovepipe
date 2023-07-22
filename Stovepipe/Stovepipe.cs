@@ -11,6 +11,7 @@ namespace Stovepipe
 {
     public class EjectionFailure
     {
+        private const float timeUntilCanPhysicsSlideUnStovepipe = 0.1f;
 
         
         [HarmonyPatch(typeof(Handgun), "EjectExtractedRound")]
@@ -50,17 +51,12 @@ namespace Stovepipe
             slideData.ejectedRoundWidth = slideData.bulletCollider.radius;
             slideData.ejectedRoundHeight = slideData.bulletCollider.height;
             
-            /*
-            Debug.Log("Radius : " + slideData.bulletCollider.radius);
-            Debug.Log("jecet round has height: " + slideData.bulletCollider.height);
-            */
-
             return false;
         }
 
         [HarmonyPatch(typeof(HandgunSlide), "SlideEvent_EjectRound")]
         [HarmonyPrefix]
-        private static void StovepipePatch(HandgunSlide __instance)
+        private static void StovepipeDiceroll(HandgunSlide __instance)
         {
             var slideData = __instance.gameObject.GetComponent(typeof(SlideStovepipeData)) 
                 as SlideStovepipeData;
@@ -76,7 +72,7 @@ namespace Stovepipe
             
             
             slideData.IsStovepiping = Random.Range(0f, 1f) < slideData.stovepipeProb;
-            slideData.hasBulletBeenSetNonColliding = false;
+            slideData.hasBulletBeenStovepiped = false;
         }
 
 
@@ -101,23 +97,15 @@ namespace Stovepipe
                 return;
             }
 
-
             var forwardPositionLimit = slideData.defaultFrontPosition - slideData.ejectedRoundWidth * 3f;
             ___m_slideZ_forward = forwardPositionLimit;
-            
-            if (!slideData.hasBulletBeenSetNonColliding)
-            {
-                /*Debug.Log("forward float:" + ___m_slideZ_forward);
-                Debug.Log("Ejected round width float: " + slideData.ejectedRoundWidth);
-                Debug.Log("forward position limit " + forwardPositionLimit);*/
-            }
-            
+
             /* Stovepipe the round...
              */
 
-            if (!slideData.hasBulletBeenSetNonColliding)
+            if (!slideData.hasBulletBeenStovepiped)
             {
-                SetBulletToStovepiping(slideData);
+                StartStovepipe(slideData);
                 slideData.randomPosAndRot = GenerateRandomNoise();
             }
             
@@ -126,8 +114,6 @@ namespace Stovepipe
             var slideTransform = __instance.transform;
 
             if (slideData.ejectedRound is null) return;
-            if (__instance.Handgun is null) Debug.Log("handgun is null");
-            if (__instance.Handgun.Chamber == null) Debug.Log("chamber is null");
             if (__instance.Handgun.Chamber.ProxyRound == null) return;
 
             slideData.ejectedRound.transform.position =
@@ -140,6 +126,8 @@ namespace Stovepipe
             
             slideData.ejectedRound.transform.Rotate(slideTransform.forward, slideData.randomPosAndRot[1], Space.World);
             slideData.ejectedRound.transform.Rotate(slideTransform.right, slideData.randomPosAndRot[2], Space.World);
+
+            slideData.timeSinceStovepiping += Time.deltaTime;
         }
 
         private static float[] GenerateRandomNoise()
@@ -148,7 +136,7 @@ namespace Stovepipe
             // Next being random angle about the forward slide direction
             // Final being random angle about the perpendicular slide direction (left / right)
 
-            return new[] { Random.Range(-0.005f, 0.02f), Random.Range(-30f, 30f), Random.Range(0, 10f) };
+            return new[] { Random.Range(0.005f, 0.02f), Random.Range(-30f, 30f), Random.Range(0, 10f) };
         }
 
         /*
@@ -165,44 +153,46 @@ namespace Stovepipe
         }
         */
         
-        private static void SetBulletToStovepiping(SlideStovepipeData slideData)
+        private static void StartStovepipe(SlideStovepipeData slideData)
         {
             slideData.roundDefaultLayer = slideData.ejectedRound.gameObject.layer;
             
-            slideData.ejectedRound.gameObject.layer = LayerMask.NameToLayer("Water");
+            slideData.ejectedRound.gameObject.layer = LayerMask.NameToLayer("Interactable");
             slideData.ejectedRound.RootRigidbody.velocity = Vector3.zero;
             slideData.ejectedRound.RootRigidbody.angularVelocity = Vector3.zero;
             slideData.ejectedRound.RootRigidbody.maxAngularVelocity = 0;
             slideData.ejectedRound.RootRigidbody.useGravity = false;
             slideData.ejectedRound.RootRigidbody.detectCollisions = false;
-            slideData.bulletCollider.enabled = false;
+            /*slideData.bulletCollider.enabled = false;*/
             
             if (slideData.transform.parent != null)
                 slideData.ejectedRound.SetParentage(slideData.transform);
             else slideData.ejectedRound.SetParentage(slideData.transform.parent);
 
-            slideData.hasBulletBeenSetNonColliding = true;
-            slideData.bulletCollider.isTrigger = true;
-            
+            slideData.hasBulletBeenStovepiped = true;
+            /*slideData.bulletCollider.isTrigger = true;*/
+
+            slideData.timeSinceStovepiping = 0f;
         }
 
-        private static void SetBulletBackToNormal(SlideStovepipeData slideData, bool breakParentage)
+        private static void UnStovepipe(SlideStovepipeData slideData, bool breakParentage)
         {
             slideData.ejectedRound.RootRigidbody.useGravity = true;
-            slideData.hasBulletBeenSetNonColliding = false;
+            slideData.hasBulletBeenStovepiped = false;
             slideData.IsStovepiping = false;
             slideData.ejectedRound.gameObject.layer = slideData.roundDefaultLayer;
             slideData.bulletCollider.isTrigger = false;
             slideData.ejectedRound.RootRigidbody.maxAngularVelocity = 1000f;
             slideData.ejectedRound.RootRigidbody.detectCollisions = true;
             slideData.bulletCollider.enabled = true;
+            slideData.timeSinceStovepiping = 0f;
             
             if (breakParentage) slideData.ejectedRound.SetParentage(null);
         }
 
         [HarmonyPatch(typeof(FVRFireArmRound), "UpdateInteraction")]
         [HarmonyPostfix]
-        private static void BulletInteractionPatch(FVRFireArmRound __instance)
+        private static void BulletGrabUnStovepipes(FVRFireArmRound __instance)
         {
             if (!__instance.IsHeld) return;
             
@@ -210,7 +200,25 @@ namespace Stovepipe
             if (bulletData is null) return;
             if (!bulletData.slideData.IsStovepiping) return;
 
-            SetBulletBackToNormal(bulletData.slideData, false);
+            UnStovepipe(bulletData.slideData, false);
+        }
+
+        [HarmonyPatch(typeof(HandgunSlide), "UpdateSlide")]
+        [HarmonyPostfix]
+        private static void SlideStovepipeCancelPatch(HandgunSlide __instance, 
+            float ___m_slideZ_current, float ___m_slideZ_forward)
+        {
+            var slideData = __instance.gameObject.GetComponent<SlideStovepipeData>();
+
+            if (slideData == null)
+            {
+                Debug.Log("Something has gone terribly wrong with stovepiping");
+                return;
+            }
+
+            if (slideData.IsStovepiping == false) return;
+            if (slideData.timeSinceStovepiping < timeUntilCanPhysicsSlideUnStovepipe) return;
+            if (___m_slideZ_current < ___m_slideZ_forward - 0.01f) UnStovepipe(slideData, true);
         }
         
         
@@ -242,7 +250,7 @@ namespace Stovepipe
 
         [HarmonyPatch(typeof(HandgunSlide), "BeginInteraction")]
         [HarmonyPostfix]
-        private static void SlideInteractionCancelsStovepiping(HandgunSlide __instance)
+        private static void SlideInteractionUnStovepipes(HandgunSlide __instance)
         {
             var slideData = __instance.gameObject.GetComponent(typeof(SlideStovepipeData)) 
                 as SlideStovepipeData;
@@ -250,7 +258,7 @@ namespace Stovepipe
             if (slideData == null) return;
             if (!slideData.IsStovepiping) return;
             
-            SetBulletBackToNormal(slideData, true);
+            UnStovepipe(slideData, true);
         }
 
     }

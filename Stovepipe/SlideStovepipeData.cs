@@ -11,10 +11,12 @@ namespace Stovepipe
         public float ejectedRoundHeight;
         public float defaultFrontPosition;
         public float[] randomPosAndRot;
-        public float stovepipeProb = 0.9f;
-        public bool IsStovepiping { get; set; }
-        public bool hasBulletBeenSetNonColliding;
+        public float stovepipeProb;
+        public bool hasBulletBeenStovepiped;
         public bool hasCollectedDefaultFrontPosition;
         public CapsuleCollider bulletCollider;
+        public float timeSinceStovepiping;
+        
+        public bool IsStovepiping { get; set; }
     }
 }

@@ -26,12 +26,8 @@ namespace Stovepipe
             foreach (var o in FindObjectsOfType(typeof(Handgun)))
             {
                 var handgun = (Handgun)o;
-                if (handgun is null)
-                {
-                    Debug.Log("Handgun found is null");
-                    continue;
-                }
-                
+                if (handgun is null) continue;
+
                 handgun.Slide.gameObject.AddComponent<SlideStovepipeData>().stovepipeProb = stovepipeProb.Value;
             }
         }
