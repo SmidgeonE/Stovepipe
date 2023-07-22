@@ -4,6 +4,7 @@ using HarmonyLib;
 using UnityEngine;
 using BepInEx;
 using FistVR;
+using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
 
@@ -116,13 +117,19 @@ namespace Stovepipe
             if (slideData.ejectedRound is null) return;
             if (__instance.Handgun.Chamber.ProxyRound == null) return;
 
+
+            var ejectionPortDir = GetVectorThatPointsOutOfEjectionPort(__instance);
+            var dirPerpOfSlideAndEjectionPort = Vector3.Cross(ejectionPortDir, slideTransform.forward);
+
             slideData.ejectedRound.transform.position =
                 __instance.Handgun.Chamber.ProxyRound.position
-                + slideTransform.up.normalized *  slideData.randomPosAndRot[0]
-                - slideTransform.forward.normalized * 0.5f * slideData.ejectedRoundHeight
-                - slideTransform.forward.normalized * 1f * slideData.ejectedRoundWidth;
+                + ejectionPortDir * slideData.randomPosAndRot[0]
+                - slideTransform.forward * 0.5f * slideData.ejectedRoundHeight
+                - slideTransform.forward * 1f * slideData.ejectedRoundWidth
+                + slideTransform.up * 0.002f
+                - slideTransform.right * 0.012f * (1f - Mathf.InverseLerp(-30, 20, slideData.randomPosAndRot[1]));
 
-            slideData.ejectedRound.transform.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
+            slideData.ejectedRound.transform.rotation = Quaternion.LookRotation(ejectionPortDir, -slideTransform.forward);
             
             slideData.ejectedRound.transform.Rotate(slideTransform.forward, slideData.randomPosAndRot[1], Space.World);
             slideData.ejectedRound.transform.Rotate(slideTransform.right, slideData.randomPosAndRot[2], Space.World);
@@ -135,8 +142,9 @@ namespace Stovepipe
             // Returns a 3-array of floats, first being randomness in the up/down pos, 
             // Next being random angle about the forward slide direction
             // Final being random angle about the perpendicular slide direction (left / right)
+            // The rotation about the forward axis is randomised more to the right, as most handguns eject from the right
 
-            return new[] { Random.Range(0.005f, 0.02f), Random.Range(-30f, 30f), Random.Range(0, 10f) };
+            return new[] { Random.Range(0.005f, 0.013f), Random.Range(-20f, 20f), Random.Range(0, 15f) };
         }
 
         /*
@@ -163,16 +171,30 @@ namespace Stovepipe
             slideData.ejectedRound.RootRigidbody.maxAngularVelocity = 0;
             slideData.ejectedRound.RootRigidbody.useGravity = false;
             slideData.ejectedRound.RootRigidbody.detectCollisions = false;
-            /*slideData.bulletCollider.enabled = false;*/
-            
+            slideData.hasBulletBeenStovepiped = true;
+            slideData.timeSinceStovepiping = 0f;
+
             if (slideData.transform.parent != null)
                 slideData.ejectedRound.SetParentage(slideData.transform);
             else slideData.ejectedRound.SetParentage(slideData.transform.parent);
 
-            slideData.hasBulletBeenStovepiped = true;
-            /*slideData.bulletCollider.isTrigger = true;*/
+            // DEBUG CUUUUUUUUUBE
+            /*var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.name = "beep";
+            cube.transform.localScale = Vector3.one * 0.01f;
+            cube.transform.position = slideData.gameObject.GetComponent<HandgunSlide>().Handgun.RoundPos_Ejection.position;
+            if (slideData.transform.parent != null)
+                cube.transform.parent = slideData.transform.parent;
+            else cube.transform.parent = slideData.transform;*/
+        }
 
-            slideData.timeSinceStovepiping = 0f;
+        private static Vector3 GetVectorThatPointsOutOfEjectionPort(HandgunSlide slide)
+        {
+            var ejectionDir = slide.Handgun.RoundPos_Ejection.position - slide.transform.position;
+            var componentAlongSlide = Vector3.Dot(slide.transform.forward, ejectionDir);
+            ejectionDir -= componentAlongSlide * slide.transform.forward;
+
+            return ejectionDir.normalized;
         }
 
         private static void UnStovepipe(SlideStovepipeData slideData, bool breakParentage)
@@ -181,13 +203,12 @@ namespace Stovepipe
             slideData.hasBulletBeenStovepiped = false;
             slideData.IsStovepiping = false;
             slideData.ejectedRound.gameObject.layer = slideData.roundDefaultLayer;
-            slideData.bulletCollider.isTrigger = false;
             slideData.ejectedRound.RootRigidbody.maxAngularVelocity = 1000f;
             slideData.ejectedRound.RootRigidbody.detectCollisions = true;
-            slideData.bulletCollider.enabled = true;
             slideData.timeSinceStovepiping = 0f;
-            
             if (breakParentage) slideData.ejectedRound.SetParentage(null);
+            
+            /*Object.Destroy(GameObject.Find("beep"));*/
         }
 
         [HarmonyPatch(typeof(FVRFireArmRound), "UpdateInteraction")]

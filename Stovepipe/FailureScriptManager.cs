@@ -7,7 +7,7 @@ using BepInEx.MonoMod.HookGenPatcher;
 
 namespace Stovepipe
 {
-    [BepInPlugin("dll.smidgeon.failuretoeject", "Failure To Eject", "1.0.0")]
+    [BepInPlugin("dll.smidgeon.failuretoeject", "Failure To Eject", "1.1.0")]
     [BepInProcess("h3vr.exe")]
     public class FailureScriptManager : BaseUnityPlugin
     {
