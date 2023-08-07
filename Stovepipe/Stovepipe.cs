@@ -61,17 +61,20 @@ namespace Stovepipe
         {
             var slideData = __instance.gameObject.GetComponent(typeof(SlideStovepipeData)) 
                 as SlideStovepipeData;
-            
+
             if (__instance.IsHeld) return;
-            if (!__instance.Handgun.Chamber.IsFull) return;
-            if (!__instance.Handgun.Chamber.IsSpent) return;
+            
+            var handgun = __instance.Handgun;
+
+            if (!handgun.Chamber.IsFull) return;
+            if (!handgun.Chamber.IsSpent) return;
+            if (handgun.Chamber.GetRound().IsCaseless) return;
             if (__instance.HasLastRoundSlideHoldOpen)
             {
-                if (__instance.Handgun.Magazine == null) return;
-                if (__instance.Handgun.Magazine.m_numRounds == 0) return;
+                if (handgun.Magazine == null) return;
+                if (handgun.Magazine.m_numRounds == 0) return;
             }
-            
-            
+
             slideData.IsStovepiping = Random.Range(0f, 1f) < slideData.stovepipeProb;
             slideData.hasBulletBeenStovepiped = false;
         }
@@ -79,7 +82,7 @@ namespace Stovepipe
 
         [HarmonyPatch(typeof(HandgunSlide), "UpdateSlide")]
         [HarmonyPrefix]
-        private static void SlidePatch(HandgunSlide __instance, ref float ___m_slideZ_forward, ref float ___m_slideZ_current)
+        private static void SlideAndBulletUpdate(HandgunSlide __instance, ref float ___m_slideZ_forward, ref float ___m_slideZ_current)
         {
             var slideData = __instance.gameObject.GetComponent(typeof(SlideStovepipeData)) 
                 as SlideStovepipeData;
@@ -132,6 +135,8 @@ namespace Stovepipe
             slideData.ejectedRound.transform.rotation = Quaternion.LookRotation(ejectionPortDir, -slideTransform.forward);
             
             slideData.ejectedRound.transform.Rotate(slideTransform.forward, slideData.randomPosAndRot[1], Space.World);
+            
+            // Note to self: this should probably be using the dirPerp of slide and ejection port for more consistent results
             slideData.ejectedRound.transform.Rotate(slideTransform.right, slideData.randomPosAndRot[2], Space.World);
 
             slideData.timeSinceStovepiping += Time.deltaTime;
@@ -226,7 +231,7 @@ namespace Stovepipe
 
         [HarmonyPatch(typeof(HandgunSlide), "UpdateSlide")]
         [HarmonyPostfix]
-        private static void SlideStovepipeCancelPatch(HandgunSlide __instance, 
+        private static void PhysicsSlideStovepipeCancelPatch(HandgunSlide __instance, 
             float ___m_slideZ_current, float ___m_slideZ_forward)
         {
             var slideData = __instance.gameObject.GetComponent<SlideStovepipeData>();

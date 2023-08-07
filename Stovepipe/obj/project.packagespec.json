@@ -1,1 +1,42 @@
-﻿"restore":{"projectUniqueName":"D:\\Git\\Stovepipe\\Stovepipe\\Stovepipe.csproj","projectName":"Stovepipe","projectPath":"D:\\Git\\Stovepipe\\Stovepipe\\Stovepipe.csproj","outputPath":"D:\\Git\\Stovepipe\\Stovepipe\\obj\\","projectStyle":"PackageReference","originalTargetFrameworks":["net35"],"sources":{"https://api.nuget.org/v3/index.json":{}},"frameworks":{"net35":{"targetAlias":"net35","projectReferences":{}}},"warningProperties":{"warnAsError":["NU1605"]}}"frameworks":{"net35":{"targetAlias":"net35","dependencies":{"HarmonyX":{"target":"Package","version":"[2.10.1, )"},"Microsoft.NETFramework.ReferenceAssemblies":{"suppressParent":"All","target":"Package","version":"[1.0.3, )","autoReferenced":true},"UnityEngine":{"target":"Package","version":"[1.0.0, )"}},"runtimeIdentifierGraphPath":"C:\\Program Files\\dotnet\\sdk\\7.0.302\\RuntimeIdentifierGraph.json"}}
+﻿{
+  "version": "1.0.0",
+  "restore": {
+    "projectUniqueName": "C:\\Git\\Stovepipe\\Stovepipe\\Stovepipe.csproj",
+    "projectName": "Stovepipe",
+    "projectPath": "C:\\Git\\Stovepipe\\Stovepipe\\Stovepipe.csproj",
+    "outputPath": "C:\\Git\\Stovepipe\\Stovepipe\\obj\\",
+    "projectStyle": "PackageReference",
+    "originalTargetFrameworks": [
+      "net35"
+    ],
+    "sources": {
+      "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+      "https://api.nuget.org/v3/index.json": {}
+    },
+    "frameworks": {
+      "net35": {
+        "projectReferences": {}
+      }
+    },
+    "warningProperties": {
+      "warnAsError": [
+        "NU1605"
+      ]
+    }
+  },
+  "frameworks": {
+    "net35": {
+      "dependencies": {
+        "HarmonyX": {
+          "target": "Package",
+          "version": "[2.10.1, )"
+        },
+        "UnityEngine": {
+          "target": "Package",
+          "version": "[1.0.0, )"
+        }
+      },
+      "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.302\\RuntimeIdentifierGraph.json"
+    }
+  }
+}
