@@ -40,11 +40,11 @@ namespace Stovepipe
                 __instance.RoundPos_Ejection.position, __instance.RoundPos_Ejection.rotation, 
                 false);
 
+            if (slideData.ejectedRound is null) return false;
+
             var bulletDataHolder = slideData.ejectedRound.gameObject.AddComponent<BulletStovepipeData>();
             bulletDataHolder.slideData = slideData;
-
-            if (slideData.ejectedRound == null) return false;
-
+            
             slideData.bulletCollider = slideData.ejectedRound.GetComponent<CapsuleCollider>();
 
             if (slideData.bulletCollider is null) return false;

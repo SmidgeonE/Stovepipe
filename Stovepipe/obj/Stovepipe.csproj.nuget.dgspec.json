@@ -1,31 +1,30 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Git\\Stovepipe\\Stovepipe\\Stovepipe.csproj": {}
+    "D:\\Git\\Stovepipe\\Stovepipe\\Stovepipe.csproj": {}
   },
   "projects": {
-    "C:\\Git\\Stovepipe\\Stovepipe\\Stovepipe.csproj": {
+    "D:\\Git\\Stovepipe\\Stovepipe\\Stovepipe.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Git\\Stovepipe\\Stovepipe\\Stovepipe.csproj",
+        "projectUniqueName": "D:\\Git\\Stovepipe\\Stovepipe\\Stovepipe.csproj",
         "projectName": "Stovepipe",
-        "projectPath": "C:\\Git\\Stovepipe\\Stovepipe\\Stovepipe.csproj",
-        "packagesPath": "C:\\Users\\finla\\.nuget\\packages\\",
-        "outputPath": "C:\\Git\\Stovepipe\\Stovepipe\\obj\\",
+        "projectPath": "D:\\Git\\Stovepipe\\Stovepipe\\Stovepipe.csproj",
+        "packagesPath": "C:\\Users\\Finlay\\.nuget\\packages\\",
+        "outputPath": "D:\\Git\\Stovepipe\\Stovepipe\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\finla\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Finlay\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net35"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net35": {
+            "targetAlias": "net35",
             "projectReferences": {}
           }
         },
@@ -37,17 +36,24 @@
       },
       "frameworks": {
         "net35": {
+          "targetAlias": "net35",
           "dependencies": {
             "HarmonyX": {
               "target": "Package",
               "version": "[2.10.1, )"
+            },
+            "Microsoft.NETFramework.ReferenceAssemblies": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[1.0.3, )",
+              "autoReferenced": true
             },
             "UnityEngine": {
               "target": "Package",
               "version": "[1.0.0, )"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.302\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.302\\RuntimeIdentifierGraph.json"
         }
       }
     }
