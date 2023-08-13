@@ -10,7 +10,7 @@ using Random = UnityEngine.Random;
 
 namespace Stovepipe
 {
-    public class EjectionFailure
+    public class Stovepipe
     {
         private const float timeUntilCanPhysicsSlideUnStovepipe = 0.1f;
 
@@ -126,19 +126,24 @@ namespace Stovepipe
 
             slideData.ejectedRound.transform.position =
                 __instance.Handgun.Chamber.ProxyRound.position
-                + ejectionPortDir * slideData.randomPosAndRot[0]
                 - slideTransform.forward * 0.5f * slideData.ejectedRoundHeight
                 - slideTransform.forward * 1f * slideData.ejectedRoundWidth
-                + slideTransform.up * 0.002f
-                - slideTransform.right * 0.012f * (1f - Mathf.InverseLerp(-30, 20, slideData.randomPosAndRot[1]));
+                + slideTransform.up * slideData.randomPosAndRot[0];
 
-            slideData.ejectedRound.transform.rotation = Quaternion.LookRotation(ejectionPortDir, -slideTransform.forward);
-            
-            slideData.ejectedRound.transform.Rotate(slideTransform.forward, slideData.randomPosAndRot[1], Space.World);
-            
-            // Note to self: this should probably be using the dirPerp of slide and ejection port for more consistent results
-            slideData.ejectedRound.transform.Rotate(slideTransform.right, slideData.randomPosAndRot[2], Space.World);
+            slideData.ejectedRound.transform.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
+            slideData.ejectedRound.transform.Rotate(slideData.ejectedRound.transform.right, slideData.randomPosAndRot[2], Space.World);
 
+            if (slideData.ejectsToTheLeft)
+            {
+                slideData.ejectedRound.transform.Rotate(slideTransform.forward, -slideData.randomPosAndRot[1], Space.World);
+                slideData.ejectedRound.transform.position -= 2 * slideData.ejectedRoundWidth * slideTransform.right * Mathf.Abs(Mathf.Sin(slideData.randomPosAndRot[1]));
+            }
+            else
+            {
+                slideData.ejectedRound.transform.Rotate(slideTransform.forward, slideData.randomPosAndRot[1], Space.World);
+                slideData.ejectedRound.transform.position += 2 * slideData.ejectedRoundWidth * slideTransform.right * Mathf.Abs(Mathf.Sin(slideData.randomPosAndRot[1]));
+            }
+            
             slideData.timeSinceStovepiping += Time.deltaTime;
         }
 
@@ -149,7 +154,7 @@ namespace Stovepipe
             // Final being random angle about the perpendicular slide direction (left / right)
             // The rotation about the forward axis is randomised more to the right, as most handguns eject from the right
 
-            return new[] { Random.Range(0.005f, 0.013f), Random.Range(-20f, 20f), Random.Range(0, 15f) };
+            return new[] { Random.Range(0.003f, 0.012f), -35f + Random.Range(-15f, 20f), Random.Range(0, 15f) };
         }
 
         /*
@@ -285,6 +290,17 @@ namespace Stovepipe
             if (!slideData.IsStovepiping) return;
             
             UnStovepipe(slideData, true);
+        }
+
+
+        public static bool FindIfGunEjectsToTheLeft(HandgunSlide slide)
+        {
+            // returns true if left, false if not.
+
+            var dirOutOfEjectionPort = GetVectorThatPointsOutOfEjectionPort(slide);
+            var componentToTheRight = Vector3.Dot(dirOutOfEjectionPort, slide.transform.right);
+
+            return componentToTheRight < -0.005f;
         }
 
     }

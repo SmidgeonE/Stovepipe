@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Stovepipe
 {
-    [BepInPlugin("dll.smidgeon.failuretoeject", "Failure To Eject", "1.1.4")]
+    [BepInPlugin("dll.smidgeon.failuretoeject", "Failure To Eject", "1.1.5")]
     [BepInProcess("h3vr.exe")]
     public class FailureScriptManager : BaseUnityPlugin
     {
@@ -16,7 +16,7 @@ namespace Stovepipe
         {
             stovepipeProb = Config.Bind("Probability - Stovepipe", "Probability", 0.016f, "");
             
-            Harmony.CreateAndPatchAll(typeof(EjectionFailure), null);
+            Harmony.CreateAndPatchAll(typeof(Stovepipe), null);
             Harmony.CreateAndPatchAll(typeof(FailureScriptManager), null);
         }
 
