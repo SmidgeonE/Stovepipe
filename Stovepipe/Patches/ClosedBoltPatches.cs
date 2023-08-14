@@ -88,7 +88,7 @@ namespace Stovepipe
                 data.hasCollectedWeaponCharacteristics = true;
             }
             
-            var forwardPositionLimit = data.defaultFrontPosition - data.ejectedRoundWidth * 3f;
+            var forwardPositionLimit = data.defaultFrontPosition - data.ejectedRoundWidth * 5f;
 
             if (!data.IsStovepiping)
             {
@@ -114,17 +114,20 @@ namespace Stovepipe
             if (data.ejectedRound is null) return;
             if (__instance.Weapon.Chamber.ProxyRound == null) return;
             
-            var ejectionPortDir = -GetVectorThatPointsOutOfEjectionPort(__instance);
-            var dirPerpOfSlideAndEjectionPort = Vector3.Cross(ejectionPortDir, slideTransform.forward);
+            var ejectionPortDir = GetVectorThatPointsOutOfEjectionPort(__instance);
+            var dirPerpOfSlideAndEjectionPort = -Vector3.Cross(ejectionPortDir, slideTransform.forward);
 
             data.ejectedRound.transform.position =
                 __instance.Weapon.Chamber.ProxyRound.position
-                - slideTransform.forward * 1f * data.ejectedRoundHeight
-                - slideTransform.forward * 2f * data.ejectedRoundWidth
+                - slideTransform.forward * 0.5f * data.ejectedRoundHeight
+                - slideTransform.forward * 3f * data.ejectedRoundWidth
                 + ejectionPortDir * data.randomPosAndRot[0];
 
             data.ejectedRound.transform.rotation = Quaternion.LookRotation(ejectionPortDir, -slideTransform.forward);
+            /*
             data.ejectedRound.transform.Rotate(dirPerpOfSlideAndEjectionPort, data.randomPosAndRot[2], Space.World);
+            */
+            
             data.ejectedRound.transform.Rotate(slideTransform.forward, data.randomPosAndRot[1], Space.World);
 
             data.timeSinceStovepiping += Time.deltaTime;
@@ -170,7 +173,7 @@ namespace Stovepipe
 
             if (slideData == null) return;
             if (!slideData.IsStovepiping) return;
-            
+
             UnStovepipe(slideData, true);
         }
     }

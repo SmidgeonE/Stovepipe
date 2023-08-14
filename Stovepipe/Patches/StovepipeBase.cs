@@ -20,7 +20,7 @@ namespace Stovepipe
         
         protected static float[] GenerateRandomRifleNoise()
         {
-            return new[] { Random.Range(0.005f, 0.015f), Random.Range(-15f, 15f), Random.Range(0, 15f) };
+            return new[] { Random.Range(0.015f, 0.03f), Random.Range(-15f, 15f), Random.Range(0, 15f) };
         }
 
         protected static void StartStovepipe(StovepipeData data)
@@ -126,6 +126,11 @@ namespace Stovepipe
             if (!bulletData.data.IsStovepiping) return;
 
             UnStovepipe(bulletData.data, false);
+        }
+
+        protected static bool DoesBulletAimAtFloor(FVRFireArmRound round)
+        {
+            return Vector3.Dot(round.transform.forward, Vector3.down) > 0;
         }
     }
 }
