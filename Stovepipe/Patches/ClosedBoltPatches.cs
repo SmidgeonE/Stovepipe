@@ -85,19 +85,11 @@ namespace Stovepipe
             if (!data.hasCollectedWeaponCharacteristics)
             {
                 data.defaultFrontPosition = ___m_boltZ_forward;
-                data.boltOrSlideRadius = __instance.gameObject.GetComponent<CapsuleCollider>().radius;
                 data.hasCollectedWeaponCharacteristics = true;
             }
             
             var forwardPositionLimit = data.defaultFrontPosition - data.ejectedRoundWidth * 3f;
-            
-            Debug.Log("");
-            if (!data.IsStovepiping && GetIfCasingIsStillInsideAction(data))
-            {
-                ___m_boltZ_forward = forwardPositionLimit;
-                return;
-            }
-            
+
             if (!data.IsStovepiping)
             {
                 ___m_boltZ_forward = data.defaultFrontPosition;
@@ -112,7 +104,7 @@ namespace Stovepipe
             if (!data.hasBulletBeenStovepiped)
             {
                 StartStovepipe(data);
-                data.randomPosAndRot = GenerateRandomNoise();
+                data.randomPosAndRot = GenerateRandomRifleNoise();
             }
             
             /* Now setting the position and rotation while the bullet is stovepiping */
@@ -121,31 +113,20 @@ namespace Stovepipe
 
             if (data.ejectedRound is null) return;
             if (__instance.Weapon.Chamber.ProxyRound == null) return;
-
-
-            var ejectionPortDir = GetVectorThatPointsOutOfEjectionPort(__instance);
+            
+            var ejectionPortDir = -GetVectorThatPointsOutOfEjectionPort(__instance);
             var dirPerpOfSlideAndEjectionPort = Vector3.Cross(ejectionPortDir, slideTransform.forward);
 
             data.ejectedRound.transform.position =
                 __instance.Weapon.Chamber.ProxyRound.position
-                - slideTransform.forward * 0.5f * data.ejectedRoundHeight
-                - slideTransform.forward * 1f * data.ejectedRoundWidth
-                + slideTransform.up * data.randomPosAndRot[0];
+                - slideTransform.forward * 1f * data.ejectedRoundHeight
+                - slideTransform.forward * 2f * data.ejectedRoundWidth
+                + ejectionPortDir * data.randomPosAndRot[0];
 
-            data.ejectedRound.transform.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
-            data.ejectedRound.transform.Rotate(data.ejectedRound.transform.right, data.randomPosAndRot[2], Space.World);
+            data.ejectedRound.transform.rotation = Quaternion.LookRotation(ejectionPortDir, -slideTransform.forward);
+            data.ejectedRound.transform.Rotate(dirPerpOfSlideAndEjectionPort, data.randomPosAndRot[2], Space.World);
+            data.ejectedRound.transform.Rotate(slideTransform.forward, data.randomPosAndRot[1], Space.World);
 
-            if (data.ejectsToTheLeft)
-            {
-                data.ejectedRound.transform.Rotate(slideTransform.forward, -data.randomPosAndRot[1], Space.World);
-                data.ejectedRound.transform.position -= 2 * data.ejectedRoundWidth * slideTransform.right * Mathf.Abs(Mathf.Sin(data.randomPosAndRot[1]));
-            }
-            else
-            {
-                data.ejectedRound.transform.Rotate(slideTransform.forward, data.randomPosAndRot[1], Space.World);
-                data.ejectedRound.transform.position += 2 * data.ejectedRoundWidth * slideTransform.right * Mathf.Abs(Mathf.Sin(data.randomPosAndRot[1]));
-            }
-            
             data.timeSinceStovepiping += Time.deltaTime;
         }
 
@@ -171,7 +152,7 @@ namespace Stovepipe
                 as StovepipeData;
 
             if (data is null) return true;
-            if (!data.IsStovepiping && !GetIfCasingIsStillInsideAction(data)) return true;
+            if (!data.IsStovepiping) return true;
             
             __instance.Weapon.PlayAudioEvent(FirearmAudioEventType.BoltSlideForwardHeld, 1f);
             return false;

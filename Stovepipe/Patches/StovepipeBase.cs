@@ -7,9 +7,8 @@ namespace Stovepipe
     public class StovepipeBase
     {
         protected const float TimeUntilCanPhysicsSlideUnStovepipe = 0.1f;
-        private const float BoltRadiusTolerance = 1.5f;
-        
-        protected static float[] GenerateRandomNoise()
+
+        protected static float[] GenerateRandomHandgunNoise()
         {
             // Returns a 3-array of floats, first being randomness in the up/down pos, 
             // Next being random angle about the forward slide direction
@@ -17,6 +16,11 @@ namespace Stovepipe
             // The rotation about the forward axis is randomised more to the right, as most handguns eject from the right
 
             return new[] { Random.Range(0.003f, 0.012f), -35f + Random.Range(-15f, 20f), Random.Range(0, 15f) };
+        }
+        
+        protected static float[] GenerateRandomRifleNoise()
+        {
+            return new[] { Random.Range(0.005f, 0.015f), Random.Range(-15f, 15f), Random.Range(0, 15f) };
         }
 
         protected static void StartStovepipe(StovepipeData data)
@@ -37,13 +41,13 @@ namespace Stovepipe
             else data.ejectedRound.SetParentage(data.transform.parent);
 
             // DEBUG CUUUUUUUUUBE
-            /*var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cube.name = "beep";
             cube.transform.localScale = Vector3.one * 0.01f;
-            cube.transform.position = slideData.gameObject.GetComponent<HandgunSlide>().Handgun.RoundPos_Ejection.position;
-            if (slideData.transform.parent != null)
-                cube.transform.parent = slideData.transform.parent;
-            else cube.transform.parent = slideData.transform;*/
+            cube.transform.position = data.gameObject.GetComponent<ClosedBolt>().Weapon.RoundPos_Ejection.position;
+            if (data.transform.parent != null)
+                cube.transform.parent = data.transform.parent;
+            else cube.transform.parent = data.transform;
         }
 
         protected static Vector3 GetVectorThatPointsOutOfEjectionPort(HandgunSlide slide)
@@ -106,7 +110,7 @@ namespace Stovepipe
             var bulletData = __instance.gameObject.GetComponent<BulletStovepipeData>();
             if (bulletData is null) return;
             
-            if (!bulletData.data.IsStovepiping && !GetIfCasingIsStillInsideAction(bulletData.data)) return;
+            if (!bulletData.data.IsStovepiping) return;
             
             ___m_killAfter = 5f;
         }
@@ -122,31 +126,6 @@ namespace Stovepipe
             if (!bulletData.data.IsStovepiping) return;
 
             UnStovepipe(bulletData.data, false);
-        }
-
-        protected static bool GetIfCasingIsStillInsideAction(StovepipeData data)
-        {
-            Debug.Log("asd");
-            if (data is null)
-            {
-                Debug.Log("data is null");
-                return false;
-            }
-            if (data.gameObject is null) Debug.Log("gameobject is null");
-            if (data.gameObject.transform is null) Debug.Log("gameobject transform is null");
-            if (data.ejectedRound is null)
-            {
-                Debug.Log("round is null");
-                return false;
-            }
-            if (data.ejectedRound.transform is null) Debug.Log("round transform is null");
-            
-            Debug.Log("asdasd");
-            Debug.Log(data.gameObject.transform.position.x);
-            Debug.Log(data.ejectedRound.transform.position.x);
-            
-            return (data.gameObject.transform.position - data.ejectedRound.transform.position).magnitude 
-                   < BoltRadiusTolerance * data.boltOrSlideRadius;
         }
     }
 }

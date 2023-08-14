@@ -87,26 +87,18 @@ namespace Stovepipe
                 as StovepipeData;
 
             if (slideData is null) return;
-            
+
             if (!slideData.hasCollectedWeaponCharacteristics)
             {
                 slideData.defaultFrontPosition = ___m_slideZ_forward;
-                slideData.boltOrSlideRadius = __instance.gameObject.GetComponent<CapsuleCollider>().radius;
                 slideData.hasCollectedWeaponCharacteristics = true;
             }
 
-            if (!slideData.IsStovepiping && GetIfCasingIsStillInsideAction(slideData))
-            {
-                ___m_slideZ_forward = slideData.defaultFrontPosition - slideData.ejectedRoundHeight * 1.3f;
-                return;
-            }
-            
             if (!slideData.IsStovepiping)
             {
                 ___m_slideZ_forward = slideData.defaultFrontPosition;
                 return;
             }
-
 
             var forwardPositionLimit = slideData.defaultFrontPosition - slideData.ejectedRoundWidth * 3f;
             ___m_slideZ_forward = forwardPositionLimit;
@@ -117,29 +109,24 @@ namespace Stovepipe
             if (!slideData.hasBulletBeenStovepiped)
             {
                 StartStovepipe(slideData);
-                slideData.randomPosAndRot = GenerateRandomNoise();
+                slideData.randomPosAndRot = GenerateRandomHandgunNoise();
             }
             
             /* Now setting the position and rotation while the bullet is stovepiping */
-
             var slideTransform = __instance.transform;
 
             if (slideData.ejectedRound is null) return;
             if (__instance.Handgun.Chamber.ProxyRound == null) return;
-
-
-            var ejectionPortDir = GetVectorThatPointsOutOfEjectionPort(__instance);
-            var dirPerpOfSlideAndEjectionPort = Vector3.Cross(ejectionPortDir, slideTransform.forward);
-
+            
             slideData.ejectedRound.transform.position =
                 __instance.Handgun.Chamber.ProxyRound.position
                 - slideTransform.forward * 0.5f * slideData.ejectedRoundHeight
                 - slideTransform.forward * 1f * slideData.ejectedRoundWidth
                 + slideTransform.up * slideData.randomPosAndRot[0];
-
+            
             slideData.ejectedRound.transform.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
             slideData.ejectedRound.transform.Rotate(slideData.ejectedRound.transform.right, slideData.randomPosAndRot[2], Space.World);
-
+            
             if (slideData.ejectsToTheLeft)
             {
                 slideData.ejectedRound.transform.Rotate(slideTransform.forward, -slideData.randomPosAndRot[1], Space.World);
