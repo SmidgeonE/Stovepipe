@@ -23,7 +23,7 @@ namespace Stovepipe
             return new[] { Random.Range(0.015f, 0.03f), Random.Range(-15f, 15f), Random.Range(0, 15f) };
         }
 
-        protected static void StartStovepipe(StovepipeData data)
+        protected static void StartStovepipe(StovepipeData data, bool setParentToWeapon = false)
         {
             data.roundDefaultLayer = data.ejectedRound.gameObject.layer;
 
@@ -36,18 +36,24 @@ namespace Stovepipe
             data.hasBulletBeenStovepiped = true;
             data.timeSinceStovepiping = 0f;
 
+            if (setParentToWeapon)
+            {
+                data.ejectedRound.SetParentage(data.GetComponent<ClosedBolt>().Weapon.transform);
+                return;
+            }
+            
             if (data.transform.parent != null)
                 data.ejectedRound.SetParentage(data.transform);
             else data.ejectedRound.SetParentage(data.transform.parent);
 
             // DEBUG CUUUUUUUUUBE
-            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            /*var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             cube.name = "beep";
             cube.transform.localScale = Vector3.one * 0.01f;
             cube.transform.position = data.gameObject.GetComponent<ClosedBolt>().Weapon.RoundPos_Ejection.position;
             if (data.transform.parent != null)
                 cube.transform.parent = data.transform.parent;
-            else cube.transform.parent = data.transform;
+            else cube.transform.parent = data.transform;*/
         }
 
         protected static Vector3 GetVectorThatPointsOutOfEjectionPort(HandgunSlide slide)
@@ -130,7 +136,14 @@ namespace Stovepipe
 
         protected static bool DoesBulletAimAtFloor(FVRFireArmRound round)
         {
-            return Vector3.Dot(round.transform.forward, Vector3.down) > 0;
+            if (Vector3.Dot(round.transform.forward, Vector3.down) > 0)
+            {
+                Debug.Log("object is airming down");
+                return true;
+            }
+            Debug.Log("object is not aiming down");
+            Debug.Log(round.transform.forward.y);
+            return false;
         }
     }
 }

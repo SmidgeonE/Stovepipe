@@ -103,7 +103,7 @@ namespace Stovepipe
 
             if (!data.hasBulletBeenStovepiped)
             {
-                StartStovepipe(data);
+                StartStovepipe(data, true);
                 data.randomPosAndRot = GenerateRandomRifleNoise();
             }
             
@@ -133,7 +133,7 @@ namespace Stovepipe
             data.timeSinceStovepiping += Time.deltaTime;
         }
 
-        [HarmonyPatch(typeof(ClosedBolt), "UpdateBolt")]
+        /*[HarmonyPatch(typeof(ClosedBolt), "UpdateBolt")]
         [HarmonyPostfix]
         private static void PhysicsBoltStovepipeCancelPatch(ClosedBolt __instance, 
             float ___m_boltZ_current, float ___m_boltZ_forward)
@@ -144,8 +144,9 @@ namespace Stovepipe
 
             if (slideData.IsStovepiping == false) return;
             if (slideData.timeSinceStovepiping < TimeUntilCanPhysicsSlideUnStovepipe) return;
+            if (__instance.Weapon.Handle.IsHeld) return;
             if (___m_boltZ_current < ___m_boltZ_forward - 0.01f) UnStovepipe(slideData, true);
-        }
+        }*/
         
         [HarmonyPatch(typeof(ClosedBolt), "BoltEvent_ExtractRoundFromMag")]
         [HarmonyPrefix]
@@ -161,20 +162,38 @@ namespace Stovepipe
             return false;
         }
 
-        [HarmonyPatch(typeof(FVRInteractiveObject), "BeginInteraction")]
+        [HarmonyPatch(typeof(ClosedBoltHandle), "UpdateInteraction")]
         [HarmonyPostfix]
-        private static void SlideInteractionUnStovepipes(FVRInteractiveObject __instance)
+        private static void BoltHandleInteractionUnStovepipes(ClosedBoltHandle __instance)
         {
-            if (!(__instance is ClosedBolt)) return;
+            var data = __instance.Weapon.Bolt.GetComponent<StovepipeData>();
 
-            __instance = (ClosedBolt)__instance;
-            
-            var slideData = __instance.gameObject.GetComponent(typeof(StovepipeData)) as StovepipeData;
+            Debug.Log("a");
+            if (data == null) return;
+            if (!data.IsStovepiping) return;
+            Debug.Log("b");
+            if (data.ejectedRound is null) return;
+            Debug.Log("c");
+            if (!DoesBulletAimAtFloor(data.ejectedRound)) return;
 
-            if (slideData == null) return;
-            if (!slideData.IsStovepiping) return;
+            UnStovepipe(data, true);
+        }
+        
+        [HarmonyPatch(typeof(ClosedBolt), "UpdateInteraction")]
+        [HarmonyPostfix]
+        private static void BoltInteractionUnStovepipes(ClosedBolt __instance)
+        {
+            var data = __instance.Weapon.Bolt.GetComponent<StovepipeData>();
 
-            UnStovepipe(slideData, true);
+            Debug.Log("a");
+            if (data == null) return;
+            if (!data.IsStovepiping) return;
+            Debug.Log("b");
+            if (data.ejectedRound is null) return;
+            Debug.Log("c");
+            if (!DoesBulletAimAtFloor(data.ejectedRound)) return;
+
+            UnStovepipe(data, true);
         }
     }
 }
