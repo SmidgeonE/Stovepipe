@@ -4,6 +4,6 @@ namespace Stovepipe
 {
     public class BulletStovepipeData : MonoBehaviour
     {
-        public SlideStovepipeData slideData;
+        public StovepipeData data;
     }
 }
