@@ -89,12 +89,12 @@ namespace Stovepipe
                 data.hasCollectedWeaponCharacteristics = true;
             }
             
-            if (data.ejectedRound is null) Debug.Log("asd");
-            if (__instance.transform is null) Debug.Log("What the fuck");
+            var forwardPositionLimit = data.defaultFrontPosition - data.ejectedRoundWidth * 3f;
             
-            if (!data.IsStovepiping && GetIfCasingIsStillInsideAction(__instance.transform, data.ejectedRound, data.boltOrSlideRadius))
+            Debug.Log("");
+            if (!data.IsStovepiping && GetIfCasingIsStillInsideAction(data))
             {
-                ___m_boltZ_forward = data.defaultFrontPosition - data.ejectedRoundHeight * 1.3f;
+                ___m_boltZ_forward = forwardPositionLimit;
                 return;
             }
             
@@ -104,8 +104,6 @@ namespace Stovepipe
                 return;
             }
 
-
-            var forwardPositionLimit = data.defaultFrontPosition - data.ejectedRoundWidth * 3f;
             ___m_boltZ_forward = forwardPositionLimit;
 
             /* Stovepipe the round...
@@ -169,15 +167,14 @@ namespace Stovepipe
         [HarmonyPrefix]
         private static bool AbortExtractingMagIfStovepiping(ClosedBolt __instance)
         {
-            var slideData = __instance.gameObject.GetComponent(typeof(StovepipeData)) 
+            var data = __instance.gameObject.GetComponent(typeof(StovepipeData)) 
                 as StovepipeData;
 
-            if (slideData is null) return true;
-            if (!slideData.IsStovepiping) return true;
+            if (data is null) return true;
+            if (!data.IsStovepiping && !GetIfCasingIsStillInsideAction(data)) return true;
             
             __instance.Weapon.PlayAudioEvent(FirearmAudioEventType.BoltSlideForwardHeld, 1f);
             return false;
-
         }
 
         [HarmonyPatch(typeof(FVRInteractiveObject), "BeginInteraction")]

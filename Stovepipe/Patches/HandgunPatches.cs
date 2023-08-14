@@ -95,7 +95,7 @@ namespace Stovepipe
                 slideData.hasCollectedWeaponCharacteristics = true;
             }
 
-            if (!slideData.IsStovepiping && GetIfCasingIsStillInsideAction(__instance.transform, slideData.ejectedRound, slideData.boltOrSlideRadius))
+            if (!slideData.IsStovepiping && GetIfCasingIsStillInsideAction(slideData))
             {
                 ___m_slideZ_forward = slideData.defaultFrontPosition - slideData.ejectedRoundHeight * 1.3f;
                 return;

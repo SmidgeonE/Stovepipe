@@ -123,25 +123,30 @@ namespace Stovepipe
 
             UnStovepipe(bulletData.data, false);
         }
-        
-        protected static bool GetIfCasingIsStillInsideAction(Transform actionTransform, FVRFireArmRound round, float radius)
-        {
-            Debug.Log("a");
-            if (round is null) return false;
-            Debug.Log("b");
-            if (actionTransform is null) Debug.Log("transform is null");
-            Debug.Log("c");
-            if (!round.IsSpent) return false;
-            Debug.Log("d");
-
-            if (actionTransform is null) Debug.Log("what the fuckasd");
-            return (actionTransform.position - round.transform.position).magnitude < BoltRadiusTolerance * radius;
-        }
 
         protected static bool GetIfCasingIsStillInsideAction(StovepipeData data)
         {
-            Debug.Log("Beep");
-            return GetIfCasingIsStillInsideAction(data.transform, data.ejectedRound, data.boltOrSlideRadius);
+            Debug.Log("asd");
+            if (data is null)
+            {
+                Debug.Log("data is null");
+                return false;
+            }
+            if (data.gameObject is null) Debug.Log("gameobject is null");
+            if (data.gameObject.transform is null) Debug.Log("gameobject transform is null");
+            if (data.ejectedRound is null)
+            {
+                Debug.Log("round is null");
+                return false;
+            }
+            if (data.ejectedRound.transform is null) Debug.Log("round transform is null");
+            
+            Debug.Log("asdasd");
+            Debug.Log(data.gameObject.transform.position.x);
+            Debug.Log(data.ejectedRound.transform.position.x);
+            
+            return (data.gameObject.transform.position - data.ejectedRound.transform.position).magnitude 
+                   < BoltRadiusTolerance * data.boltOrSlideRadius;
         }
     }
 }
