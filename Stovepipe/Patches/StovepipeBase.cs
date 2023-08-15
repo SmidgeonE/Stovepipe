@@ -20,7 +20,7 @@ namespace Stovepipe
         
         protected static float[] GenerateRandomRifleNoise()
         {
-            return new[] { Random.Range(0.005f, 0.011f), Random.Range(0, -15f), Random.Range(0, 15f) };
+            return new[] { Random.Range(0.005f, 0.011f), Random.Range(0, -20f), Random.Range(0, 15f) };
         }
 
         protected static void StartStovepipe(StovepipeData data, bool setParentToWeapon = false)

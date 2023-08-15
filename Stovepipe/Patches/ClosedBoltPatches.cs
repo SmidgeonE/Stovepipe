@@ -88,16 +88,12 @@ namespace Stovepipe
                 data.hasCollectedWeaponCharacteristics = true;
             }
             
-            var forwardPositionLimit = data.defaultFrontPosition - data.ejectedRoundRadius * 5f;
-
             if (!data.IsStovepiping)
             {
                 ___m_boltZ_forward = data.defaultFrontPosition;
                 return;
             }
-
-            ___m_boltZ_forward = forwardPositionLimit;
-
+            
             /* Stovepipe the round...
              */
 
@@ -126,7 +122,6 @@ namespace Stovepipe
             if (doesItEjectUp)
             {
                 bulletTransform.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
-                ___m_boltZ_forward += data.ejectedRoundRadius * 4;
                 bulletTransform.position += gunTransformForward * data.ejectedRoundRadius * 4;
             }
             else
@@ -145,22 +140,34 @@ namespace Stovepipe
             /* These are the weird cases where the default positioning doesnt work well */
 
             var weaponName = __instance.Weapon.name;
+            var isThisAnAK = false;
 
             if (weaponName.StartsWith("MP5"))
             {
                 bulletTransform.position -= gunTransform.forward * data.ejectedRoundRadius * 2;
-                ___m_boltZ_forward -= data.ejectedRoundRadius * 2;
             }
             else if (weaponName.StartsWith("AK") || __instance.UsesAKSafetyLock)
             {
                 bulletTransform.position += gunTransform.forward * data.ejectedRoundRadius * 3 
                                             + gunTransform.up * data.ejectedRoundRadius;
+                isThisAnAK = true;
             }
             else if (weaponName.StartsWith("Zip"))
             {
                 bulletTransform.position += gunTransform.forward * data.ejectedRoundRadius * 3;
-                ___m_boltZ_forward += data.ejectedRoundRadius * 5;
             }
+            
+            
+            /* Now setting the slide to the end of the bullet */
+
+            var dx = weapon.Chamber.transform.localPosition.z - bulletTransform.localPosition.z - data.ejectedRoundHeight/2;
+            var forwardPositionLimit = data.defaultFrontPosition - dx - 1.2f * data.ejectedRoundRadius;
+            
+            ___m_boltZ_forward = forwardPositionLimit;
+
+            if (isThisAnAK) ___m_boltZ_forward -= 2 * data.ejectedRoundRadius;
+
+            
 
             data.timeSinceStovepiping += Time.deltaTime;
         }
