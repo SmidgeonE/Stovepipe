@@ -121,9 +121,14 @@ namespace Stovepipe
                            gunTransform.up * weapon.EjectionSpeed.y +
                            gunTransform.forward * weapon.EjectionSpeed.z).normalized;
             var gunTransformForward = gunTransform.forward;
+            var doesItEjectUp = IsRifleThatEjectsUpwards(weapon.RoundPos_Ejection, __instance, data.ejectedRound);
 
-            if (IsRifleThatEjectsUpwards(weapon.RoundPos_Ejection, __instance, data.ejectedRound))
+            if (doesItEjectUp)
+            {
                 bulletTransform.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
+                ___m_boltZ_forward += data.ejectedRoundRadius * 4;
+                bulletTransform.position += gunTransformForward * data.ejectedRoundRadius * 4;
+            }
             else
                 bulletTransform.rotation = Quaternion.LookRotation(velDirec, -slideTransform.forward);
             
@@ -144,9 +149,9 @@ namespace Stovepipe
             if (weaponName.StartsWith("MP5"))
             {
                 bulletTransform.position -= gunTransform.forward * data.ejectedRoundRadius * 2;
-                ___m_boltZ_current -= data.ejectedRoundRadius * 2;
+                ___m_boltZ_forward -= data.ejectedRoundRadius * 2;
             }
-            else if (weaponName.StartsWith("AK"))
+            else if (weaponName.StartsWith("AK") || __instance.UsesAKSafetyLock)
             {
                 bulletTransform.position += gunTransform.forward * data.ejectedRoundRadius * 3 
                                             + gunTransform.up * data.ejectedRoundRadius;
@@ -154,7 +159,7 @@ namespace Stovepipe
             else if (weaponName.StartsWith("Zip"))
             {
                 bulletTransform.position += gunTransform.forward * data.ejectedRoundRadius * 3;
-                ___m_boltZ_current -= data.ejectedRoundRadius * 3;
+                ___m_boltZ_forward += data.ejectedRoundRadius * 5;
             }
 
             data.timeSinceStovepiping += Time.deltaTime;
