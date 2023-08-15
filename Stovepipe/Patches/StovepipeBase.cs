@@ -136,14 +136,12 @@ namespace Stovepipe
 
         protected static bool DoesBulletAimAtFloor(FVRFireArmRound round)
         {
-            if (Vector3.Dot(round.transform.forward, Vector3.down) > 0)
-            {
-                Debug.Log("object is airming down");
-                return true;
-            }
-            Debug.Log("object is not aiming down");
-            Debug.Log(round.transform.forward.y);
-            return false;
+            return Vector3.Dot(round.transform.forward, Vector3.down) > 0;
+        }
+
+        protected static bool IsEjectionPosAboveBolt(Transform ejectionPos, ClosedBolt bolt)
+        {
+            return Vector3.Dot(ejectionPos.position - bolt.transform.position, bolt.transform.up) > 0.015f;
         }
     }
 }

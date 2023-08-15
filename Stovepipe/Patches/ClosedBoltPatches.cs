@@ -31,7 +31,7 @@ namespace Stovepipe
                 __instance.RoundPos_Ejection.position, 
                 __instance.RoundPos_Ejection.rotation, 
                 false);
-            
+
             if (data.ejectedRound is null) return false;
 
             var bulletDataHolder = data.ejectedRound.gameObject.AddComponent<BulletStovepipeData>();
@@ -114,21 +114,46 @@ namespace Stovepipe
             if (data.ejectedRound is null) return;
             if (__instance.Weapon.Chamber.ProxyRound == null) return;
             
+            /*
             var ejectionPortDir = GetVectorThatPointsOutOfEjectionPort(__instance);
             var dirPerpOfSlideAndEjectionPort = -Vector3.Cross(ejectionPortDir, slideTransform.forward);
+            */
+
+            var weapon = __instance.Weapon;
+            var gunTransform = __instance.Weapon.transform;
+            var velDirec = (gunTransform.right * weapon.EjectionSpeed.x +
+                           gunTransform.up * weapon.EjectionSpeed.y +
+                           gunTransform.forward * weapon.EjectionSpeed.z).normalized;
+
+            if (IsEjectionPosAboveBolt(weapon.RoundPos_Ejection, __instance))
+            {
+                data.ejectedRound.transform.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
+                Debug.Log("ejection area is above the bolt");
+            }
+            else
+            {
+                data.ejectedRound.transform.rotation = Quaternion.LookRotation(velDirec, -slideTransform.forward);
+                Debug.Log("ejection area is not above the bolt ");
+            }
+
+            /*
+            data.ejectedRound.transform.Rotate(dirPerpOfSlideAndEjectionPort, data.randomPosAndRot[2], Space.World);
+            data.ejectedRound.transform.Rotate(slideTransform.forward, data.randomPosAndRot[1], Space.World);
+            */
 
             data.ejectedRound.transform.position =
                 __instance.Weapon.Chamber.ProxyRound.position
                 - slideTransform.forward * 0.5f * data.ejectedRoundHeight
                 - slideTransform.forward * 3f * data.ejectedRoundWidth
-                + ejectionPortDir * data.randomPosAndRot[0];
+                + data.ejectedRound.transform.forward * data.randomPosAndRot[0];
 
-            data.ejectedRound.transform.rotation = Quaternion.LookRotation(ejectionPortDir, -slideTransform.forward);
-            /*
-            data.ejectedRound.transform.Rotate(dirPerpOfSlideAndEjectionPort, data.randomPosAndRot[2], Space.World);
-            */
-            
-            data.ejectedRound.transform.Rotate(slideTransform.forward, data.randomPosAndRot[1], Space.World);
+            var weaponName = __instance.Weapon.name;
+
+            if (!weaponName.StartsWith("M4") && !weaponName.StartsWith("MP5"))
+            {
+                Debug.Log("name starts with neither m4 nor mp5");
+                data.ejectedRound.transform.position += __instance.Weapon.transform.up * 0.01f;
+            }
 
             data.timeSinceStovepiping += Time.deltaTime;
         }
@@ -167,13 +192,10 @@ namespace Stovepipe
         private static void BoltHandleInteractionUnStovepipes(ClosedBoltHandle __instance)
         {
             var data = __instance.Weapon.Bolt.GetComponent<StovepipeData>();
-
-            Debug.Log("a");
+            
             if (data == null) return;
             if (!data.IsStovepiping) return;
-            Debug.Log("b");
             if (data.ejectedRound is null) return;
-            Debug.Log("c");
             if (!DoesBulletAimAtFloor(data.ejectedRound)) return;
 
             UnStovepipe(data, true);
@@ -184,13 +206,10 @@ namespace Stovepipe
         private static void BoltInteractionUnStovepipes(ClosedBolt __instance)
         {
             var data = __instance.Weapon.Bolt.GetComponent<StovepipeData>();
-
-            Debug.Log("a");
+            
             if (data == null) return;
             if (!data.IsStovepiping) return;
-            Debug.Log("b");
             if (data.ejectedRound is null) return;
-            Debug.Log("c");
             if (!DoesBulletAimAtFloor(data.ejectedRound)) return;
 
             UnStovepipe(data, true);

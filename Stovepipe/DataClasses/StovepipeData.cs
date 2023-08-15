@@ -18,7 +18,8 @@ namespace Stovepipe
         public float timeSinceStovepiping;
         public bool IsStovepiping { get; set; }
         public bool ejectsToTheLeft;
-        
+
+
         public StovepipeData()
         {
             var slide = gameObject.GetComponent<HandgunSlide>();
