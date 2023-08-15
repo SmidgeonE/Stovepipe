@@ -41,7 +41,7 @@ namespace Stovepipe
 
             if (data.bulletCollider is null) return false;
 
-            data.ejectedRoundWidth = data.bulletCollider.radius;
+            data.ejectedRoundRadius = data.bulletCollider.radius;
             data.ejectedRoundHeight = data.bulletCollider.height;
             
             return false;
@@ -88,7 +88,7 @@ namespace Stovepipe
                 data.hasCollectedWeaponCharacteristics = true;
             }
             
-            var forwardPositionLimit = data.defaultFrontPosition - data.ejectedRoundWidth * 5f;
+            var forwardPositionLimit = data.defaultFrontPosition - data.ejectedRoundRadius * 5f;
 
             if (!data.IsStovepiping)
             {
@@ -113,46 +113,48 @@ namespace Stovepipe
 
             if (data.ejectedRound is null) return;
             if (__instance.Weapon.Chamber.ProxyRound == null) return;
-            
-            /*
-            var ejectionPortDir = GetVectorThatPointsOutOfEjectionPort(__instance);
-            var dirPerpOfSlideAndEjectionPort = -Vector3.Cross(ejectionPortDir, slideTransform.forward);
-            */
 
             var weapon = __instance.Weapon;
+            var bulletTransform = data.ejectedRound.transform;
             var gunTransform = __instance.Weapon.transform;
             var velDirec = (gunTransform.right * weapon.EjectionSpeed.x +
                            gunTransform.up * weapon.EjectionSpeed.y +
                            gunTransform.forward * weapon.EjectionSpeed.z).normalized;
+            var gunTransformForward = gunTransform.forward;
 
-            if (IsEjectionPosAboveBolt(weapon.RoundPos_Ejection, __instance))
-            {
-                data.ejectedRound.transform.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
-                Debug.Log("ejection area is above the bolt");
-            }
+            if (IsRifleThatEjectsUpwards(weapon.RoundPos_Ejection, __instance, data.ejectedRound))
+                bulletTransform.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
             else
-            {
-                data.ejectedRound.transform.rotation = Quaternion.LookRotation(velDirec, -slideTransform.forward);
-                Debug.Log("ejection area is not above the bolt ");
-            }
+                bulletTransform.rotation = Quaternion.LookRotation(velDirec, -slideTransform.forward);
+            
+            bulletTransform.Rotate(slideTransform.forward, data.randomPosAndRot[1], Space.World);
+            bulletTransform.Rotate(bulletTransform.right, data.randomPosAndRot[2], Space.World);
 
-            /*
-            data.ejectedRound.transform.Rotate(dirPerpOfSlideAndEjectionPort, data.randomPosAndRot[2], Space.World);
-            data.ejectedRound.transform.Rotate(slideTransform.forward, data.randomPosAndRot[1], Space.World);
-            */
-
-            data.ejectedRound.transform.position =
-                __instance.Weapon.Chamber.ProxyRound.position
-                - slideTransform.forward * 0.5f * data.ejectedRoundHeight
-                - slideTransform.forward * 3f * data.ejectedRoundWidth
-                + data.ejectedRound.transform.forward * data.randomPosAndRot[0];
+            bulletTransform.position = weapon.Chamber.ProxyRound.position
+                                       - gunTransformForward * data.ejectedRoundRadius * 4
+                                       - gunTransformForward * data.ejectedRoundHeight / 2
+                                       + bulletTransform.forward * data.ejectedRoundHeight * 0.3f
+                                       + bulletTransform.forward * data.randomPosAndRot[0];
+            
+            
+            /* These are the weird cases where the default positioning doesnt work well */
 
             var weaponName = __instance.Weapon.name;
 
-            if (!weaponName.StartsWith("M4") && !weaponName.StartsWith("MP5"))
+            if (weaponName.StartsWith("MP5"))
             {
-                Debug.Log("name starts with neither m4 nor mp5");
-                data.ejectedRound.transform.position += __instance.Weapon.transform.up * 0.01f;
+                bulletTransform.position -= gunTransform.forward * data.ejectedRoundRadius * 2;
+                ___m_boltZ_current -= data.ejectedRoundRadius * 2;
+            }
+            else if (weaponName.StartsWith("AK"))
+            {
+                bulletTransform.position += gunTransform.forward * data.ejectedRoundRadius * 3 
+                                            + gunTransform.up * data.ejectedRoundRadius;
+            }
+            else if (weaponName.StartsWith("Zip"))
+            {
+                bulletTransform.position += gunTransform.forward * data.ejectedRoundRadius * 3;
+                ___m_boltZ_current -= data.ejectedRoundRadius * 3;
             }
 
             data.timeSinceStovepiping += Time.deltaTime;

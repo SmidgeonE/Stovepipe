@@ -47,7 +47,7 @@ namespace Stovepipe
 
             if (slideData.bulletCollider is null) return false;
 
-            slideData.ejectedRoundWidth = slideData.bulletCollider.radius;
+            slideData.ejectedRoundRadius = slideData.bulletCollider.radius;
             slideData.ejectedRoundHeight = slideData.bulletCollider.height;
             
             return false;
@@ -100,7 +100,7 @@ namespace Stovepipe
                 return;
             }
 
-            var forwardPositionLimit = slideData.defaultFrontPosition - slideData.ejectedRoundWidth * 3f;
+            var forwardPositionLimit = slideData.defaultFrontPosition - slideData.ejectedRoundRadius * 3f;
             ___m_slideZ_forward = forwardPositionLimit;
 
             /* Stovepipe the round...
@@ -121,7 +121,7 @@ namespace Stovepipe
             slideData.ejectedRound.transform.position =
                 __instance.Handgun.Chamber.ProxyRound.position
                 - slideTransform.forward * 0.5f * slideData.ejectedRoundHeight
-                - slideTransform.forward * 1f * slideData.ejectedRoundWidth
+                - slideTransform.forward * 1f * slideData.ejectedRoundRadius
                 + slideTransform.up * slideData.randomPosAndRot[0];
             
             slideData.ejectedRound.transform.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
@@ -130,12 +130,12 @@ namespace Stovepipe
             if (slideData.ejectsToTheLeft)
             {
                 slideData.ejectedRound.transform.Rotate(slideTransform.forward, -slideData.randomPosAndRot[1], Space.World);
-                slideData.ejectedRound.transform.position -= 2 * slideData.ejectedRoundWidth * slideTransform.right * Mathf.Abs(Mathf.Sin(slideData.randomPosAndRot[1]));
+                slideData.ejectedRound.transform.position -= 2 * slideData.ejectedRoundRadius * slideTransform.right * Mathf.Abs(Mathf.Sin(slideData.randomPosAndRot[1]));
             }
             else
             {
                 slideData.ejectedRound.transform.Rotate(slideTransform.forward, slideData.randomPosAndRot[1], Space.World);
-                slideData.ejectedRound.transform.position += 2 * slideData.ejectedRoundWidth * slideTransform.right * Mathf.Abs(Mathf.Sin(slideData.randomPosAndRot[1]));
+                slideData.ejectedRound.transform.position += 2 * slideData.ejectedRoundRadius * slideTransform.right * Mathf.Abs(Mathf.Sin(slideData.randomPosAndRot[1]));
             }
             
             slideData.timeSinceStovepiping += Time.deltaTime;

@@ -7,7 +7,7 @@ namespace Stovepipe
     {
         public FVRFireArmRound ejectedRound;
         public int roundDefaultLayer;
-        public float ejectedRoundWidth;
+        public float ejectedRoundRadius;
         public float ejectedRoundHeight;
         public float defaultFrontPosition;
         public float[] randomPosAndRot;
