@@ -23,11 +23,17 @@ namespace Stovepipe
         {
             var slide = gameObject.GetComponent<HandgunSlide>();
             var bolt = gameObject.GetComponent<ClosedBolt>();
-            if (slide != null) ejectsToTheLeft = StovepipeBase.FindIfGunEjectsToTheLeft(slide);
-            else if (bolt != null) ejectsToTheLeft = StovepipeBase.FindIfGunEjectsToTheLeft(bolt);
-            else Debug.Log("Could not determine the direction of ejection");
-
-            stovepipeProb = StovepipeScriptManager.stovepipeProb.Value;
+            
+            if (slide != null)
+            {
+                ejectsToTheLeft = StovepipeBase.FindIfGunEjectsToTheLeft(slide);
+                stovepipeProb = StovepipeScriptManager.stovepipeHandgunProb.Value;
+            }
+            else if (bolt != null)
+            {
+                ejectsToTheLeft = StovepipeBase.FindIfGunEjectsToTheLeft(bolt);
+                stovepipeProb = StovepipeScriptManager.stovepipeRifleProb.Value;
+            }
         }
     }
 }

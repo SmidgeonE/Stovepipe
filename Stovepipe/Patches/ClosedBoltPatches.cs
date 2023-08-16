@@ -228,5 +228,36 @@ namespace Stovepipe
 
             UnStovepipe(data, true);
         }
+
+
+        [HarmonyPatch(typeof(ClosedBolt), "UpdateBolt")]
+        [HarmonyPostfix]
+        private static void UnStovepipeIfBoltIsLocked(ClosedBolt __instance)
+        {
+            var data = __instance.Weapon.Bolt.GetComponent<StovepipeData>();
+            
+            if (data == null) return;
+            if (!data.IsStovepiping) return;
+            if (data.ejectedRound is null) return;
+            if (!DoesBulletAimAtFloor(data.ejectedRound)) return;
+            if (!__instance.IsBoltLocked()) return;
+
+            UnStovepipe(data, true);
+        }
+        
+        [HarmonyPatch(typeof(ClosedBoltHandle), "UpdateHandle")]
+        [HarmonyPostfix]
+        private static void UnStovepipeIfBoltIsLockedUpwards(ClosedBoltHandle __instance, bool ___m_isAtLockAngle)
+        {
+            var data = __instance.Weapon.Bolt.GetComponent<StovepipeData>();
+            
+            if (data == null) return;
+            if (!data.IsStovepiping) return;
+            if (data.ejectedRound is null) return;
+            if (!DoesBulletAimAtFloor(data.ejectedRound)) return;
+            if (!___m_isAtLockAngle) return;
+
+            UnStovepipe(data, true);
+        }
     }
 }
