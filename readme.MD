@@ -1,10 +1,10 @@
 # Details
 
-This is a small mod that implements stovepipe failures for guns. Currently in developement, so only works for handguns. You can change the probability as your heart desires.
+This is a small mod that implements stovepipe failures for guns. Currently in developement, but it now works for all weapons that can stovpipe in real life. You can change the probability as your heart desires.
 
 As far as I know, there is no compatibility issue with Meatyceiver.
 
-I will likely expand this to other weapons in the future. Some of the bullet poses are slighlty odd (may clip through weapon slightly), because parts of this mod are very hacky :)
+Some of the bullet poses are slighlty odd (may clip through weapon slightly), because parts of this mod are very hacky :)
 
 
 # Contact
