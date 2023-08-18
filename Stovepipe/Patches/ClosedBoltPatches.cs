@@ -1,6 +1,8 @@
-﻿using FistVR;
+﻿using System.Diagnostics;
+using FistVR;
 using HarmonyLib;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Stovepipe
 {
@@ -117,16 +119,23 @@ namespace Stovepipe
                            gunTransform.up * weapon.EjectionSpeed.y +
                            gunTransform.forward * weapon.EjectionSpeed.z).normalized;
             var gunTransformForward = gunTransform.forward;
-            var doesItEjectUp = IsRifleThatEjectsUpwards(weapon.RoundPos_Ejection, __instance, data.ejectedRound);
 
-            if (doesItEjectUp)
+            if (!data.hasFoundIfItEjectsUpwards)
+            {
+                data.ejectsUpwards = IsRifleThatEjectsUpwards(weapon.RoundPos_Ejection, __instance, data.ejectedRound);
+                data.hasFoundIfItEjectsUpwards = true;
+            }
+            
+            if (data.ejectsUpwards)
             {
                 bulletTransform.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
                 bulletTransform.position += gunTransformForward * data.ejectedRoundRadius * 4;
             }
             else
+            {
                 bulletTransform.rotation = Quaternion.LookRotation(velDirec, -slideTransform.forward);
-            
+            }
+
             bulletTransform.Rotate(slideTransform.forward, data.randomPosAndRot[1], Space.World);
             bulletTransform.Rotate(bulletTransform.right, data.randomPosAndRot[2], Space.World);
 

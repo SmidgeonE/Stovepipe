@@ -141,7 +141,7 @@ namespace Stovepipe
 
         protected static bool IsRifleThatEjectsUpwards(Transform ejectionPos, ClosedBolt bolt, FVRFireArmRound round)
         {
-            return Vector3.Dot(ejectionPos.position - bolt.transform.position, bolt.transform.up) > 0.015f
+            return Vector3.Dot(ejectionPos.position - bolt.transform.position, bolt.transform.up) > 0.017f
                    && round.RoundType != FireArmRoundType.a9_19_Parabellum && round.RoundType != FireArmRoundType.a10mmAuto;
         }
     }

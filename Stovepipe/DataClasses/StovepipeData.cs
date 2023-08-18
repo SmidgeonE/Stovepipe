@@ -18,6 +18,8 @@ namespace Stovepipe
         public float timeSinceStovepiping;
         public bool IsStovepiping { get; set; }
         public bool ejectsToTheLeft;
+        public bool hasFoundIfItEjectsUpwards;
+        public bool ejectsUpwards;
         
         public StovepipeData()
         {
