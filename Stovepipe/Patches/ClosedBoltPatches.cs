@@ -221,7 +221,7 @@ namespace Stovepipe
             if (data.ejectedRound is null) return;
             if (!DoesBulletAimAtFloor(data.ejectedRound)) return;
 
-            UnStovepipe(data, true);
+            UnStovepipe(data, true, __instance.Weapon.GetComponent<Rigidbody>());
         }
         
         [HarmonyPatch(typeof(ClosedBolt), "UpdateInteraction")]
@@ -235,7 +235,7 @@ namespace Stovepipe
             if (data.ejectedRound is null) return;
             if (!DoesBulletAimAtFloor(data.ejectedRound)) return;
 
-            UnStovepipe(data, true);
+            UnStovepipe(data, true, __instance.Weapon.GetComponent<Rigidbody>());
         }
 
 
@@ -251,7 +251,7 @@ namespace Stovepipe
             if (!DoesBulletAimAtFloor(data.ejectedRound)) return;
             if (!__instance.IsBoltLocked()) return;
 
-            UnStovepipe(data, true);
+            UnStovepipe(data, true, __instance.Weapon.GetComponent<Rigidbody>());
         }
         
         [HarmonyPatch(typeof(ClosedBoltHandle), "UpdateHandle")]
@@ -266,7 +266,7 @@ namespace Stovepipe
             if (!DoesBulletAimAtFloor(data.ejectedRound)) return;
             if (!___m_isAtLockAngle) return;
 
-            UnStovepipe(data, true);
+            UnStovepipe(data, true, __instance.Weapon.GetComponent<Rigidbody>());
         }
     }
 }

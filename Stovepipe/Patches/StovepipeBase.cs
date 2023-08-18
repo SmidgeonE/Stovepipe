@@ -74,7 +74,7 @@ namespace Stovepipe
             return ejectionDir.normalized;
         }
 
-        protected static void UnStovepipe(StovepipeData data, bool breakParentage)
+        protected static void UnStovepipe(StovepipeData data, bool breakParentage, Rigidbody weaponRb)
         {
             data.ejectedRound.RootRigidbody.useGravity = true;
             data.hasBulletBeenStovepiped = false;
@@ -83,8 +83,17 @@ namespace Stovepipe
             data.ejectedRound.RootRigidbody.maxAngularVelocity = 1000f;
             data.ejectedRound.RootRigidbody.detectCollisions = true;
             data.timeSinceStovepiping = 0f;
-            if (breakParentage) data.ejectedRound.SetParentage(null);
-
+            if (breakParentage)
+            {
+                data.ejectedRound.SetParentage(null);
+            }
+            
+            if (weaponRb is null) Debug.Log("Cant find RB for weapon, giving zero velocity to stovepiped bullet");
+            else
+            {
+                data.ejectedRound.RootRigidbody.velocity = weaponRb.velocity;
+                data.ejectedRound.RootRigidbody.angularVelocity = weaponRb.angularVelocity;
+            }
             /*Object.Destroy(GameObject.Find("beep"));*/
         }
 
@@ -121,6 +130,7 @@ namespace Stovepipe
             ___m_killAfter = 5f;
         }
         
+        /*
         [HarmonyPatch(typeof(FVRFireArmRound), "UpdateInteraction")]
         [HarmonyPostfix]
         private static void BulletGrabUnStovepipes(FVRFireArmRound __instance)
@@ -133,6 +143,7 @@ namespace Stovepipe
 
             UnStovepipe(bulletData.data, false);
         }
+        */
 
         protected static bool DoesBulletAimAtFloor(FVRFireArmRound round)
         {
