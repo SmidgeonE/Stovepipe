@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 
 namespace Stovepipe
 {
-    [BepInPlugin("dll.smidgeon.failuretoeject", "Failure To Eject", "2.0.3")]
+    [BepInPlugin("dll.smidgeon.failuretoeject", "Failure To Eject", "2.0.4")]
     [BepInProcess("h3vr.exe")]
     public class StovepipeScriptManager : BaseUnityPlugin
     {
@@ -21,8 +21,8 @@ namespace Stovepipe
         {
             GrabPreviousUserValue();
 
-            stovepipeHandgunProb = Config.Bind("Probability - Stovepipe", "Handgun Probability", 0.016f, "");
-            stovepipeRifleProb = Config.Bind("Probability - Stovepipe", "Rifle Probability", 0.014f, "");
+            stovepipeHandgunProb = Config.Bind("Probability - Stovepipe", "Handgun Probability", 0.008f, "");
+            stovepipeRifleProb = Config.Bind("Probability - Stovepipe", "Rifle Probability", 0.004f, "");
 
             if (_userVal != 0f)
             {
@@ -72,7 +72,27 @@ namespace Stovepipe
                 cb.Bolt.gameObject.AddComponent<StovepipeData>();
         }
 
+        /*[HarmonyPatch(typeof(FVRViveHand), "Update")]
+        [HarmonyPostfix]
+        private static void CheckIfHandInteractsWithStovepipedRound(FVRViveHand __instance)
+        {
+            var currentClosest = __instance.ClosestPossibleInteractable;
 
+            Debug.Log("");
+            if (currentClosest is FVRFireArmRound) Debug.Log("round");
+            
+            if (currentClosest is FVRFireArmRound x &&
+                StovepipeData.CurrentStovepipedRounds.Contains(x)) Debug.Log("it is close to a stovepiped round!");
+                
+            if (__instance.Input.IsGrabDown && __instance.CurrentInteractable == null && currentClosest is FVRFireArmRound round &&
+                StovepipeData.CurrentStovepipedRounds.Contains(round))
+            {
+                Debug.Log("Unstovepiping via handling...");
+                StovepipeBase.UnStovepipe(round.GetComponent<BulletStovepipeData>().data, true, null);
+                round.BeginInteraction(__instance);
+            }
+        }*/
+        
         private void GrabPreviousUserValue()
         {
             var dir = Config.ConfigFilePath;

@@ -38,7 +38,7 @@ namespace Stovepipe
 
             var bulletDataHolder = data.ejectedRound.gameObject.AddComponent<BulletStovepipeData>();
             bulletDataHolder.data = data;
-            
+
             data.bulletCollider = data.ejectedRound.GetComponent<CapsuleCollider>();
 
             if (data.bulletCollider is null) return false;
@@ -181,21 +181,6 @@ namespace Stovepipe
             data.timeSinceStovepiping += Time.deltaTime;
         }
 
-        /*[HarmonyPatch(typeof(ClosedBolt), "UpdateBolt")]
-        [HarmonyPostfix]
-        private static void PhysicsBoltStovepipeCancelPatch(ClosedBolt __instance, 
-            float ___m_boltZ_current, float ___m_boltZ_forward)
-        {
-            var slideData = __instance.gameObject.GetComponent<StovepipeData>();
-
-            if (slideData == null) return;
-
-            if (slideData.IsStovepiping == false) return;
-            if (slideData.timeSinceStovepiping < TimeUntilCanPhysicsSlideUnStovepipe) return;
-            if (__instance.Weapon.Handle.IsHeld) return;
-            if (___m_boltZ_current < ___m_boltZ_forward - 0.01f) UnStovepipe(slideData, true);
-        }*/
-        
         [HarmonyPatch(typeof(ClosedBolt), "BoltEvent_ExtractRoundFromMag")]
         [HarmonyPrefix]
         private static bool AbortExtractingMagIfStovepiping(ClosedBolt __instance)
@@ -221,7 +206,7 @@ namespace Stovepipe
             if (data.ejectedRound is null) return;
             if (!DoesBulletAimAtFloor(data.ejectedRound)) return;
 
-            UnStovepipe(data, true, __instance.Weapon.GetComponent<Rigidbody>());
+            UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
         }
         
         [HarmonyPatch(typeof(ClosedBolt), "UpdateInteraction")]
@@ -235,7 +220,7 @@ namespace Stovepipe
             if (data.ejectedRound is null) return;
             if (!DoesBulletAimAtFloor(data.ejectedRound)) return;
 
-            UnStovepipe(data, true, __instance.Weapon.GetComponent<Rigidbody>());
+            UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
         }
 
 
@@ -251,7 +236,7 @@ namespace Stovepipe
             if (!DoesBulletAimAtFloor(data.ejectedRound)) return;
             if (!__instance.IsBoltLocked()) return;
 
-            UnStovepipe(data, true, __instance.Weapon.GetComponent<Rigidbody>());
+            UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
         }
         
         [HarmonyPatch(typeof(ClosedBoltHandle), "UpdateHandle")]
@@ -266,7 +251,41 @@ namespace Stovepipe
             if (!DoesBulletAimAtFloor(data.ejectedRound)) return;
             if (!___m_isAtLockAngle) return;
 
-            UnStovepipe(data, true, __instance.Weapon.GetComponent<Rigidbody>());
+            UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
+        }
+
+        [HarmonyPatch(typeof(ClosedBolt), "UpdateBolt")]
+        [HarmonyPostfix]
+        private static void UnStovepipeIfBulletCouldSlideOutwardsForBolt(ClosedBolt __instance)
+        {
+            var data = __instance.Weapon.Bolt.GetComponent<StovepipeData>();
+            
+            if (data == null) return;
+            if (!data.IsStovepiping) return;
+            if (data.ejectedRound is null) return;
+            if (!__instance.IsHeld) return;
+            if (__instance.Weapon.Handle != null && !__instance.Weapon.Handle.IsHeld) return;
+            if (!CouldBulletFallOutGunHorizontally(__instance.Weapon.RootRigidbody, data.ejectedRound.transform.forward)) 
+                return;
+            
+            UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
+        }
+        
+        [HarmonyPatch(typeof(ClosedBoltHandle), "UpdateHandle")]
+        [HarmonyPostfix]
+        private static void UnStovepipeIfBulletCouldSlideOutwards(ClosedBoltHandle __instance)
+        {
+            var data = __instance.Weapon.Bolt.GetComponent<StovepipeData>();
+            
+            if (data == null) return;
+            if (!data.IsStovepiping) return;
+            if (data.ejectedRound is null) return;
+            if (!__instance.IsHeld) return;
+            
+            if (!CouldBulletFallOutGunHorizontally(__instance.Weapon.RootRigidbody, data.ejectedRound.transform.forward)) 
+                return;
+
+            UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
         }
     }
 }

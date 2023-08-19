@@ -1,4 +1,5 @@
-﻿using FistVR;
+﻿using System.Collections.Generic;
+using FistVR;
 using UnityEngine;
 
 namespace Stovepipe
@@ -20,7 +21,7 @@ namespace Stovepipe
         public bool ejectsToTheLeft;
         public bool hasFoundIfItEjectsUpwards;
         public bool ejectsUpwards;
-        
+
         public StovepipeData()
         {
             var slide = gameObject.GetComponent<HandgunSlide>();

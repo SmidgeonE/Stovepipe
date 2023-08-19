@@ -1,6 +1,8 @@
-﻿using FistVR;
+﻿using System;
+using FistVR;
 using HarmonyLib;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Stovepipe
 {
@@ -27,12 +29,13 @@ namespace Stovepipe
         {
             data.roundDefaultLayer = data.ejectedRound.gameObject.layer;
 
-            data.ejectedRound.gameObject.layer = LayerMask.NameToLayer("Interactable");
+            /*data.ejectedRound.gameObject.layer = LayerMask.NameToLayer("Interactable");*/
             data.ejectedRound.RootRigidbody.velocity = Vector3.zero;
             data.ejectedRound.RootRigidbody.angularVelocity = Vector3.zero;
             data.ejectedRound.RootRigidbody.maxAngularVelocity = 0;
             data.ejectedRound.RootRigidbody.useGravity = false;
             data.ejectedRound.RootRigidbody.detectCollisions = false;
+
             data.hasBulletBeenStovepiped = true;
             data.timeSinceStovepiping = 0f;
 
@@ -55,6 +58,25 @@ namespace Stovepipe
                 cube.transform.parent = data.transform.parent;
             else cube.transform.parent = data.transform;*/
         }
+        
+        public static void UnStovepipe(StovepipeData data, bool breakParentage, Rigidbody weaponRb)
+        {
+            data.ejectedRound.RootRigidbody.useGravity = true;
+            data.hasBulletBeenStovepiped = false;
+            data.IsStovepiping = false;
+            data.ejectedRound.gameObject.layer = data.roundDefaultLayer;
+            data.ejectedRound.RootRigidbody.maxAngularVelocity = 1000f;
+            data.ejectedRound.RootRigidbody.detectCollisions = true;
+
+            data.timeSinceStovepiping = 0f;
+            if (breakParentage) data.ejectedRound.SetParentage(null);
+            if (weaponRb == null) return;
+            
+            data.ejectedRound.RootRigidbody.velocity = weaponRb.velocity;
+            data.ejectedRound.RootRigidbody.angularVelocity = weaponRb.angularVelocity;
+            
+            /*Object.Destroy(GameObject.Find("beep"));*/
+        }
 
         protected static Vector3 GetVectorThatPointsOutOfEjectionPort(HandgunSlide slide)
         {
@@ -72,29 +94,6 @@ namespace Stovepipe
             ejectionDir -= componentAlongSlide * bolt.transform.forward;
 
             return ejectionDir.normalized;
-        }
-
-        protected static void UnStovepipe(StovepipeData data, bool breakParentage, Rigidbody weaponRb)
-        {
-            data.ejectedRound.RootRigidbody.useGravity = true;
-            data.hasBulletBeenStovepiped = false;
-            data.IsStovepiping = false;
-            data.ejectedRound.gameObject.layer = data.roundDefaultLayer;
-            data.ejectedRound.RootRigidbody.maxAngularVelocity = 1000f;
-            data.ejectedRound.RootRigidbody.detectCollisions = true;
-            data.timeSinceStovepiping = 0f;
-            if (breakParentage)
-            {
-                data.ejectedRound.SetParentage(null);
-            }
-            
-            if (weaponRb is null) Debug.Log("Cant find RB for weapon, giving zero velocity to stovepiped bullet");
-            else
-            {
-                data.ejectedRound.RootRigidbody.velocity = weaponRb.velocity;
-                data.ejectedRound.RootRigidbody.angularVelocity = weaponRb.angularVelocity;
-            }
-            /*Object.Destroy(GameObject.Find("beep"));*/
         }
 
         public static bool FindIfGunEjectsToTheLeft(HandgunSlide slide)
@@ -131,17 +130,46 @@ namespace Stovepipe
         }
         
         /*
-        [HarmonyPatch(typeof(FVRFireArmRound), "UpdateInteraction")]
+        [HarmonyPatch(typeof(FVRFireArmRound), "FVRUpdate")]
         [HarmonyPostfix]
         private static void BulletGrabUnStovepipes(FVRFireArmRound __instance)
         {
-            if (!__instance.IsHeld) return;
-            
-            var bulletData = __instance.gameObject.GetComponent<BulletStovepipeData>();
-            if (bulletData is null) return;
-            if (!bulletData.data.IsStovepiping) return;
+            if (!StovepipeData.CurrentStovepipedRounds.Contains(__instance)) return;
 
-            UnStovepipe(bulletData.data, false);
+            FVRViveHand closestHand;
+            var bulletPos = __instance.transform.position;
+            var leftHandTransform = GM.CurrentPlayerBody.LeftHand;
+            var rightHandTransform = GM.CurrentPlayerBody.RightHand;
+
+            if (leftHandTransform == null || rightHandTransform == null)
+            {
+                Debug.Log("one of the hands is null");
+                return;
+            }
+            
+            var distanceFromLeft = (leftHandTransform.position - bulletPos).magnitude;
+            var distanceFromRight = (rightHandTransform.position - bulletPos).magnitude;
+
+            if (distanceFromLeft > 0.01f && distanceFromRight > 0.01f)
+            {
+                Debug.Log("neither hands are close enough");
+                return;
+            }
+            Debug.Log("one is close enough");
+
+            if (distanceFromLeft > distanceFromRight)
+                closestHand = rightHandTransform.GetComponent<FVRViveHand>();
+            else
+                closestHand = leftHandTransform.GetComponent<FVRViveHand>();
+
+            if (!closestHand.Input.GripDown || closestHand.CurrentInteractable != null)
+            {
+                Debug.Log("either something is in hand or it is not gripping down");
+                return;
+            }
+            
+            UnStovepipe(__instance.GetComponent<BulletStovepipeData>().data, true, null);
+            __instance.BeginInteraction(closestHand);
         }
         */
 
@@ -154,6 +182,12 @@ namespace Stovepipe
         {
             return Vector3.Dot(ejectionPos.position - bolt.transform.position, bolt.transform.up) > 0.017f
                    && round.RoundType != FireArmRoundType.a9_19_Parabellum && round.RoundType != FireArmRoundType.a10mmAuto;
+        }
+
+        protected static bool CouldBulletFallOutGunHorizontally(Rigidbody weaponRb,
+            Vector3 bulletDirection)
+        {
+            return Vector3.Dot(weaponRb.velocity - GM.CurrentPlayerBody.Hitboxes[1].GetComponent<Rigidbody>().velocity, bulletDirection) > 0.5f;
         }
     }
 }
