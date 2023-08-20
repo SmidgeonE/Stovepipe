@@ -39,12 +39,12 @@ namespace Stovepipe
             var bulletDataHolder = data.ejectedRound.gameObject.AddComponent<BulletStovepipeData>();
             bulletDataHolder.data = data;
 
-            data.bulletCollider = data.ejectedRound.GetComponent<CapsuleCollider>();
+            data.ejectedRoundCollider = data.ejectedRound.GetComponent<CapsuleCollider>();
 
-            if (data.bulletCollider is null) return false;
+            if (data.ejectedRoundCollider is null) return false;
 
-            data.ejectedRoundRadius = data.bulletCollider.radius;
-            data.ejectedRoundHeight = data.bulletCollider.height;
+            data.ejectedRoundRadius = data.ejectedRoundCollider.radius;
+            data.ejectedRoundHeight = data.ejectedRoundCollider.height;
             
             return false;
         }
@@ -204,7 +204,9 @@ namespace Stovepipe
             if (data == null) return;
             if (!data.IsStovepiping) return;
             if (data.ejectedRound is null) return;
-            if (!DoesBulletAimAtFloor(data.ejectedRound)) return;
+            if (!DoesBulletAimAtFloor(data.ejectedRound) && 
+                !CouldBulletFallOutGunHorizontally(__instance.Weapon.RootRigidbody, data.ejectedRound.transform.forward)) return;
+
 
             UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
         }
@@ -234,8 +236,9 @@ namespace Stovepipe
             if (data == null) return;
             if (!data.IsStovepiping) return;
             if (data.ejectedRound is null) return;
-            if (!DoesBulletAimAtFloor(data.ejectedRound)) return;
             if (!__instance.IsBoltLocked()) return;
+            if (!DoesBulletAimAtFloor(data.ejectedRound) && 
+                !CouldBulletFallOutGunHorizontally(__instance.Weapon.RootRigidbody, data.ejectedRound.transform.forward)) return;
 
             UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
         }
@@ -249,42 +252,9 @@ namespace Stovepipe
             if (data == null) return;
             if (!data.IsStovepiping) return;
             if (data.ejectedRound is null) return;
-            if (!DoesBulletAimAtFloor(data.ejectedRound)) return;
             if (!___m_isAtLockAngle) return;
-
-            UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
-        }
-
-        [HarmonyPatch(typeof(ClosedBolt), "UpdateBolt")]
-        [HarmonyPostfix]
-        private static void UnStovepipeIfBulletCouldSlideOutwardsForBolt(ClosedBolt __instance)
-        {
-            var data = __instance.Weapon.Bolt.GetComponent<StovepipeData>();
-            
-            if (data == null) return;
-            if (!data.IsStovepiping) return;
-            if (data.ejectedRound is null) return;
-            if (!__instance.IsHeld && !__instance.IsBoltLocked()) return;
-            if (__instance.Weapon.Handle != null && !__instance.Weapon.Handle.IsHeld) return;
-            if (!CouldBulletFallOutGunHorizontally(__instance.Weapon.RootRigidbody, data.ejectedRound.transform.forward)) 
-                return;
-            
-            UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
-        }
-        
-        [HarmonyPatch(typeof(ClosedBoltHandle), "UpdateHandle")]
-        [HarmonyPostfix]
-        private static void UnStovepipeIfBulletCouldSlideOutwards(ClosedBoltHandle __instance)
-        {
-            var data = __instance.Weapon.Bolt.GetComponent<StovepipeData>();
-            
-            if (data == null) return;
-            if (!data.IsStovepiping) return;
-            if (data.ejectedRound is null) return;
-            if (!__instance.IsHeld && !__instance.Weapon.Bolt.IsBoltLocked()) return;
-            
-            if (!CouldBulletFallOutGunHorizontally(__instance.Weapon.RootRigidbody, data.ejectedRound.transform.forward)) 
-                return;
+            if (!DoesBulletAimAtFloor(data.ejectedRound) && 
+                !CouldBulletFallOutGunHorizontally(__instance.Weapon.RootRigidbody, data.ejectedRound.transform.forward)) return;
 
             UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
         }

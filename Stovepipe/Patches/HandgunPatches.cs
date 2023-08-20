@@ -43,12 +43,12 @@ namespace Stovepipe
             var bulletDataHolder = slideData.ejectedRound.gameObject.AddComponent<BulletStovepipeData>();
             bulletDataHolder.data = slideData;
             
-            slideData.bulletCollider = slideData.ejectedRound.GetComponent<CapsuleCollider>();
+            slideData.ejectedRoundCollider = slideData.ejectedRound.GetComponent<CapsuleCollider>();
 
-            if (slideData.bulletCollider is null) return false;
+            if (slideData.ejectedRoundCollider is null) return false;
 
-            slideData.ejectedRoundRadius = slideData.bulletCollider.radius;
-            slideData.ejectedRoundHeight = slideData.bulletCollider.height;
+            slideData.ejectedRoundRadius = slideData.ejectedRoundCollider.radius;
+            slideData.ejectedRoundHeight = slideData.ejectedRoundCollider.height;
             
             return false;
         }

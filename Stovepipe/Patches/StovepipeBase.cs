@@ -36,7 +36,7 @@ namespace Stovepipe
             data.timeSinceStovepiping = 0f;
             
             data.ejectedRound.StoreAndDestroyRigidbody();
-            data.bulletCollider.isTrigger = false;
+            data.ejectedRoundCollider.isTrigger = false;
 
             if (setParentToWeapon)
             {
@@ -61,7 +61,7 @@ namespace Stovepipe
         public static void UnStovepipe(StovepipeData data, bool breakParentage, Rigidbody weaponRb)
         {
             data.ejectedRound.RecoverRigidbody();
-            data.bulletCollider.isTrigger = true;
+            data.ejectedRoundCollider.isTrigger = true;
             data.ejectedRound.RootRigidbody.useGravity = true;
             data.hasBulletBeenStovepiped = false;
             data.IsStovepiping = false;

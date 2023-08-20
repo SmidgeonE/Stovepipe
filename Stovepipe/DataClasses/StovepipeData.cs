@@ -15,7 +15,7 @@ namespace Stovepipe
         public float stovepipeProb;
         public bool hasBulletBeenStovepiped;
         public bool hasCollectedWeaponCharacteristics;
-        public CapsuleCollider bulletCollider;
+        public CapsuleCollider ejectedRoundCollider;
         public float timeSinceStovepiping;
         public bool ejectsToTheLeft;
         public bool hasFoundIfItEjectsUpwards;
