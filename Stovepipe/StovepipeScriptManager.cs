@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 
 namespace Stovepipe
 {
-    [BepInPlugin("dll.smidgeon.failuretoeject", "Failure To Eject", "2.0.4")]
+    [BepInPlugin("dll.smidgeon.failuretoeject", "Failure To Eject", "2.1.0")]
     [BepInProcess("h3vr.exe")]
     public class StovepipeScriptManager : BaseUnityPlugin
     {
