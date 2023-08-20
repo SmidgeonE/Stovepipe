@@ -6,8 +6,8 @@ namespace Stovepipe
 {
     public class StovepipeData : MonoBehaviour
     {
+        public bool IsStovepiping { get; set; }
         public FVRFireArmRound ejectedRound;
-        public int roundDefaultLayer;
         public float ejectedRoundRadius;
         public float ejectedRoundHeight;
         public float defaultFrontPosition;
@@ -17,7 +17,6 @@ namespace Stovepipe
         public bool hasCollectedWeaponCharacteristics;
         public CapsuleCollider bulletCollider;
         public float timeSinceStovepiping;
-        public bool IsStovepiping { get; set; }
         public bool ejectsToTheLeft;
         public bool hasFoundIfItEjectsUpwards;
         public bool ejectsUpwards;

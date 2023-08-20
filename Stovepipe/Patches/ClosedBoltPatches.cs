@@ -218,7 +218,8 @@ namespace Stovepipe
             if (data == null) return;
             if (!data.IsStovepiping) return;
             if (data.ejectedRound is null) return;
-            if (!DoesBulletAimAtFloor(data.ejectedRound)) return;
+            if (!DoesBulletAimAtFloor(data.ejectedRound) && 
+                !CouldBulletFallOutGunHorizontally(__instance.Weapon.RootRigidbody, data.ejectedRound.transform.forward)) return;
 
             UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
         }
@@ -263,7 +264,7 @@ namespace Stovepipe
             if (data == null) return;
             if (!data.IsStovepiping) return;
             if (data.ejectedRound is null) return;
-            if (!__instance.IsHeld) return;
+            if (!__instance.IsHeld && !__instance.IsBoltLocked()) return;
             if (__instance.Weapon.Handle != null && !__instance.Weapon.Handle.IsHeld) return;
             if (!CouldBulletFallOutGunHorizontally(__instance.Weapon.RootRigidbody, data.ejectedRound.transform.forward)) 
                 return;
@@ -280,7 +281,7 @@ namespace Stovepipe
             if (data == null) return;
             if (!data.IsStovepiping) return;
             if (data.ejectedRound is null) return;
-            if (!__instance.IsHeld) return;
+            if (!__instance.IsHeld && !__instance.Weapon.Bolt.IsBoltLocked()) return;
             
             if (!CouldBulletFallOutGunHorizontally(__instance.Weapon.RootRigidbody, data.ejectedRound.transform.forward)) 
                 return;

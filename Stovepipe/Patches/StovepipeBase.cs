@@ -27,17 +27,16 @@ namespace Stovepipe
 
         protected static void StartStovepipe(StovepipeData data, bool setParentToWeapon = false)
         {
-            data.roundDefaultLayer = data.ejectedRound.gameObject.layer;
-
-            /*data.ejectedRound.gameObject.layer = LayerMask.NameToLayer("Interactable");*/
             data.ejectedRound.RootRigidbody.velocity = Vector3.zero;
             data.ejectedRound.RootRigidbody.angularVelocity = Vector3.zero;
             data.ejectedRound.RootRigidbody.maxAngularVelocity = 0;
             data.ejectedRound.RootRigidbody.useGravity = false;
             data.ejectedRound.RootRigidbody.detectCollisions = false;
-
             data.hasBulletBeenStovepiped = true;
             data.timeSinceStovepiping = 0f;
+            
+            data.ejectedRound.StoreAndDestroyRigidbody();
+            data.bulletCollider.isTrigger = false;
 
             if (setParentToWeapon)
             {
@@ -61,14 +60,15 @@ namespace Stovepipe
         
         public static void UnStovepipe(StovepipeData data, bool breakParentage, Rigidbody weaponRb)
         {
+            data.ejectedRound.RecoverRigidbody();
+            data.bulletCollider.isTrigger = true;
             data.ejectedRound.RootRigidbody.useGravity = true;
             data.hasBulletBeenStovepiped = false;
             data.IsStovepiping = false;
-            data.ejectedRound.gameObject.layer = data.roundDefaultLayer;
             data.ejectedRound.RootRigidbody.maxAngularVelocity = 1000f;
             data.ejectedRound.RootRigidbody.detectCollisions = true;
-
             data.timeSinceStovepiping = 0f;
+
             if (breakParentage) data.ejectedRound.SetParentage(null);
             if (weaponRb == null) return;
             
@@ -129,49 +129,17 @@ namespace Stovepipe
             ___m_killAfter = 5f;
         }
         
-        /*
-        [HarmonyPatch(typeof(FVRFireArmRound), "FVRUpdate")]
-        [HarmonyPostfix]
-        private static void BulletGrabUnStovepipes(FVRFireArmRound __instance)
+        [HarmonyPatch(typeof(FVRFireArmRound), "BeginInteraction")]
+        [HarmonyPrefix]
+        private static void UnstovepipeWhenGrabbed(FVRFireArmRound __instance)
         {
-            if (!StovepipeData.CurrentStovepipedRounds.Contains(__instance)) return;
+            var bulletData = __instance.GetComponent<BulletStovepipeData>();
+            var data = bulletData.data;
 
-            FVRViveHand closestHand;
-            var bulletPos = __instance.transform.position;
-            var leftHandTransform = GM.CurrentPlayerBody.LeftHand;
-            var rightHandTransform = GM.CurrentPlayerBody.RightHand;
-
-            if (leftHandTransform == null || rightHandTransform == null)
-            {
-                Debug.Log("one of the hands is null");
-                return;
-            }
+            if (!data.IsStovepiping) return;
             
-            var distanceFromLeft = (leftHandTransform.position - bulletPos).magnitude;
-            var distanceFromRight = (rightHandTransform.position - bulletPos).magnitude;
-
-            if (distanceFromLeft > 0.01f && distanceFromRight > 0.01f)
-            {
-                Debug.Log("neither hands are close enough");
-                return;
-            }
-            Debug.Log("one is close enough");
-
-            if (distanceFromLeft > distanceFromRight)
-                closestHand = rightHandTransform.GetComponent<FVRViveHand>();
-            else
-                closestHand = leftHandTransform.GetComponent<FVRViveHand>();
-
-            if (!closestHand.Input.GripDown || closestHand.CurrentInteractable != null)
-            {
-                Debug.Log("either something is in hand or it is not gripping down");
-                return;
-            }
-            
-            UnStovepipe(__instance.GetComponent<BulletStovepipeData>().data, true, null);
-            __instance.BeginInteraction(closestHand);
+            UnStovepipe(data, true, null);
         }
-        */
 
         protected static bool DoesBulletAimAtFloor(FVRFireArmRound round)
         {
