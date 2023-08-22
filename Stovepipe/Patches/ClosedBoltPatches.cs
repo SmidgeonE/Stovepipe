@@ -92,7 +92,7 @@ namespace Stovepipe
             
             if (!data.IsStovepiping)
             {
-                ___m_boltZ_forward = data.defaultFrontPosition;
+                if (!DebugMode.IsInDebug) ___m_boltZ_forward = data.defaultFrontPosition;
                 return;
             }
             

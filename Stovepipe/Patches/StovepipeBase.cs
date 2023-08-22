@@ -134,6 +134,9 @@ namespace Stovepipe
         private static void UnstovepipeWhenGrabbed(FVRFireArmRound __instance)
         {
             var bulletData = __instance.GetComponent<BulletStovepipeData>();
+
+            if (bulletData is null) return;
+            
             var data = bulletData.data;
 
             if (!data.IsStovepiping) return;
