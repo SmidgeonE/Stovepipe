@@ -63,6 +63,10 @@ namespace Stovepipe
                 Directory.CreateDirectory(userDefsRoot);
                 File.Create(userDefsDir).Dispose();
             }
+            if (!File.Exists(defaultsDir))
+            {
+                File.Create(defaultsDir).Dispose();
+            }
 
             Defaults =
                 JsonConvert.DeserializeObject<Dictionary<string, StovepipeAdjustment>>(File.ReadAllText(defaultsDir));
