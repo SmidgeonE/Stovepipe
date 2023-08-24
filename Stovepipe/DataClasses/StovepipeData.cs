@@ -20,6 +20,8 @@ namespace Stovepipe
         public bool ejectsToTheLeft;
         public bool hasFoundIfItEjectsUpwards;
         public bool ejectsUpwards;
+        public StovepipeAdjustment Adjustments;
+        public bool hasFoundAdjustments;
 
         public StovepipeData()
         {

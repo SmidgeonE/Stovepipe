@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using BepInEx;
 using BepInEx.Configuration;
 using FistVR;
 using HarmonyLib;
+using Newtonsoft.Json;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -16,36 +20,30 @@ namespace Stovepipe
         public static ConfigEntry<float> stovepipeHandgunProb;
         public static ConfigEntry<float> stovepipeRifleProb;
         public static ConfigEntry<bool> isDebug;
+        public static ConfigEntry<bool> isWriteToDefault;
+
+        public static Dictionary<string, StovepipeAdjustment> Defaults;
+        public static Dictionary<string, StovepipeAdjustment> UserDefs;
+
+        private static string defaultsDir;
+        private static string userDefsDir;
+
+        private static JsonSerializerSettings ignoreSelfReference = new JsonSerializerSettings
+            { ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
         
         // This is the value if they are upgrading from 1.x.x
         private static float _previousUserProbability;
         private static bool _configIsFirstType;
-        
-        // These are the values read if they are upgrading from 2.1.x
-        private static float _previousUserHandgunProb;
-        private static float _previousUserRifleProb;
-        private static bool _configIsSecondType;
 
         private void Awake()
         {
             GrabPreviousUserValue();
-
-            stovepipeHandgunProb = Config.Bind("Probability - Stovepipe", "Handgun Probability", 0.008f, "");
-            stovepipeRifleProb = Config.Bind("Probability - Stovepipe", "Rifle Probability", 0.004f, "");
-            isDebug = Config.Bind("Debug Mode", "isActive", false, "This debug mode allows, " +
-                                                                   "once both triggers are pressed upwards, " +
-                                                                   "spawns a debug object that allows for manually changing the position / rotation of the bullet when its stovepiped. " +
-                                                                   "Once you leave the debug mode, it will save this position and rotation so you can use it again in future.");
-
+            GenerateConfigBinds();
+            
             if (_configIsFirstType)
             {
                 stovepipeRifleProb.Value = _previousUserProbability;
                 stovepipeHandgunProb.Value = _previousUserProbability;  
-            }
-            else if (_configIsSecondType)
-            {
-                stovepipeRifleProb.Value = _previousUserRifleProb;
-                stovepipeHandgunProb.Value = _previousUserHandgunProb;
             }
 
             Harmony.CreateAndPatchAll(typeof(HandgunPatches));
@@ -54,9 +52,69 @@ namespace Stovepipe
             Harmony.CreateAndPatchAll(typeof(StovepipeScriptManager));
             
             if (isDebug.Value == true) Harmony.CreateAndPatchAll(typeof(DebugMode));
+
+            var userDefsRoot = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/StovepipeData/";
+
+            userDefsDir = userDefsRoot + "userdefinitions.json";
+            defaultsDir = Paths.PluginPath + "/Smidgeon-Stovepipe/plugins/defaults.json";
+
+            if (!File.Exists(userDefsDir))
+            {
+                Directory.CreateDirectory(userDefsRoot);
+                File.Create(userDefsDir).Dispose();
+            }
+
+            Defaults =
+                JsonConvert.DeserializeObject<Dictionary<string, StovepipeAdjustment>>(File.ReadAllText(defaultsDir));
+            UserDefs =
+                JsonConvert.DeserializeObject<Dictionary<string, StovepipeAdjustment>>(File.ReadAllText(userDefsDir));
+
+            if (Defaults is null)
+                Defaults = new Dictionary<string, StovepipeAdjustment>();
+            if (UserDefs is null)
+                UserDefs = new Dictionary<string, StovepipeAdjustment>();
         }
-        
-        
+
+        public static void WriteNewAdjustment(string nameOfGun, StovepipeAdjustment adjustments)
+        {
+            if (isWriteToDefault.Value)
+                WriteOrReplaceInDict(nameOfGun, adjustments, Defaults, defaultsDir);
+            else
+                WriteOrReplaceInDict(nameOfGun, adjustments, UserDefs, userDefsDir);
+        }
+
+        private static void WriteOrReplaceInDict(string nameOfGun, StovepipeAdjustment adjustment,
+            IDictionary<string, StovepipeAdjustment> dict, string dictDir)
+        {
+            if (dict.TryGetValue(nameOfGun, out _)) dict.Remove(nameOfGun);
+            dict.Add(nameOfGun, adjustment);
+            File.WriteAllText(dictDir, JsonConvert.SerializeObject(dict, Formatting.Indented, ignoreSelfReference));
+        }
+
+        public static StovepipeAdjustment ReadAdjustment(string rawNameOfGun)
+        {
+            var cleanedName = rawNameOfGun.Remove(rawNameOfGun.Length - 7);
+
+            if (UserDefs.TryGetValue(cleanedName, out var adjustment)) return adjustment;
+
+            Defaults.TryGetValue(cleanedName, out adjustment);
+
+            return adjustment;
+        }
+
+        private void GenerateConfigBinds()
+        {
+            stovepipeHandgunProb = Config.Bind("Probability - Stovepipe", "Handgun Probability", 0.008f, "");
+            stovepipeRifleProb = Config.Bind("Probability - Stovepipe", "Rifle Probability", 0.004f, "");
+            isDebug = Config.Bind("Debug Mode", "isActive", false, "This debug mode allows, " +
+                                                                   "once both triggers are pressed upwards, " +
+                                                                   "spawns a debug object that allows for manually changing the position / rotation of the bullet when its stovepiped. " +
+                                                                   "Once you leave the debug mode, it will save this position and rotation so you can use it again in future.");
+            isWriteToDefault = Config.Bind("Debug Mode", "writeToDefault", false,
+                "Do not use this, this is for developing. " +
+                "If you do, it will overwrite the defaults, which will just be overwritten when the mod is updated.");
+        }
+
         private void Start()
         {
             foreach (var o in FindObjectsOfType(typeof(Handgun)))
@@ -104,22 +162,6 @@ namespace Stovepipe
             {
                 _previousUserProbability = float.Parse(data[7].Substring(13));
                 _configIsFirstType = true;
-            }
-            else if (data[0].Substring(57).StartsWith("2.1"))
-            {
-
-                var failedHandgun = float.TryParse(data[7].Substring(22), out _previousUserHandgunProb);
-                var failedRifle = float.TryParse(data[11].Substring(20), out _previousUserRifleProb);
-
-                if (failedHandgun || failedRifle)
-                {
-                    Debug.Log("Something went wrong with reading previous config file for stovepipe.");
-                    Debug.Log("Giving default values");
-                }
-                else
-                {
-                    _configIsSecondType = true;
-                }
             }
         }
     }

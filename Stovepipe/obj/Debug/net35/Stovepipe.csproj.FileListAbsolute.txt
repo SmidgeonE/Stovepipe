@@ -36,3 +36,4 @@ C:\Git\Stovepipe\Stovepipe\obj\Debug\net35\Stovepipe.AssemblyInfo.cs
 C:\Git\Stovepipe\Stovepipe\obj\Debug\net35\Stovepipe.csproj.CopyComplete
 C:\Git\Stovepipe\Stovepipe\obj\Debug\net35\Stovepipe.dll
 C:\Git\Stovepipe\Stovepipe\obj\Debug\net35\Stovepipe.pdb
+D:\Git\Stovepipe\Stovepipe\bin\Debug\net35\Newtonsoft.Json.dll

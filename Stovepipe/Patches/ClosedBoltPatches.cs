@@ -92,7 +92,7 @@ namespace Stovepipe
             
             if (!data.IsStovepiping)
             {
-                if (!DebugMode.IsInDebug) ___m_boltZ_forward = data.defaultFrontPosition;
+                if (!DebugMode.isDebuggingWeapon) ___m_boltZ_forward = data.defaultFrontPosition;
                 return;
             }
             
@@ -103,6 +103,8 @@ namespace Stovepipe
             {
                 StartStovepipe(data, true);
                 data.randomPosAndRot = GenerateRandomRifleNoise();
+                data.Adjustments = StovepipeScriptManager.ReadAdjustment(__instance.Weapon.name);
+                if (data.Adjustments != null) data.hasFoundAdjustments = true;
             }
             
             /* Now setting the position and rotation while the bullet is stovepiping */
@@ -114,10 +116,22 @@ namespace Stovepipe
 
             var weapon = __instance.Weapon;
             var bulletTransform = data.ejectedRound.transform;
+
+            if (data.hasFoundAdjustments)
+            {
+                // ReSharper disable once PossibleNullReferenceException
+                bulletTransform.localPosition = data.Adjustments.BulletLocalPos;
+                bulletTransform.localRotation = data.Adjustments.BulletDir;
+                ___m_boltZ_forward = data.Adjustments.BoltZ;
+                return;
+            }
+            
+            // If we couldn't find an adjustment set by the user, we just use the default positioning:
+
             var gunTransform = __instance.Weapon.transform;
             var velDirec = (gunTransform.right * weapon.EjectionSpeed.x +
-                           gunTransform.up * weapon.EjectionSpeed.y +
-                           gunTransform.forward * weapon.EjectionSpeed.z).normalized;
+                            gunTransform.up * weapon.EjectionSpeed.y +
+                            gunTransform.forward * weapon.EjectionSpeed.z).normalized;
             var gunTransformForward = gunTransform.forward;
 
             if (!data.hasFoundIfItEjectsUpwards)

@@ -74,7 +74,7 @@ namespace Stovepipe
             
             data.ejectedRound.RootRigidbody.velocity = weaponRb.velocity;
             data.ejectedRound.RootRigidbody.angularVelocity = weaponRb.angularVelocity;
-            
+
             /*Object.Destroy(GameObject.Find("beep"));*/
         }
 
