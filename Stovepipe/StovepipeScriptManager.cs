@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using BepInEx;
@@ -13,7 +14,7 @@ using Object = UnityEngine.Object;
 
 namespace Stovepipe
 {
-    [BepInPlugin("dll.smidgeon.failuretoeject", "Failure To Eject", "2.2.0")]
+    [BepInPlugin("dll.smidgeon.failuretoeject", "Failure To Eject", "2.2.2")]
     [BepInProcess("h3vr.exe")]
     public class StovepipeScriptManager : BaseUnityPlugin
     {
@@ -25,12 +26,9 @@ namespace Stovepipe
         public static Dictionary<string, StovepipeAdjustment> Defaults;
         public static Dictionary<string, StovepipeAdjustment> UserDefs;
 
-        private static string defaultsDir;
-        private static string userDefsDir;
+        public static string defaultsDir;
+        public static string userDefsDir;
 
-        private static JsonSerializerSettings ignoreSelfReference = new JsonSerializerSettings
-            { ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
-        
         // This is the value if they are upgrading from 1.x.x
         private static float _previousUserProbability;
         private static bool _configIsFirstType;
@@ -56,7 +54,7 @@ namespace Stovepipe
             var userDefsRoot = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/StovepipeData/";
 
             userDefsDir = userDefsRoot + "userdefinitions.json";
-            defaultsDir = Paths.PluginPath + "/Smidgeon-Stovepipe/plugins/defaults.json";
+            defaultsDir = Paths.PluginPath + "/Smidgeon-Stovepipe/defaults.json";
 
             if (!File.Exists(userDefsDir))
             {
@@ -78,23 +76,7 @@ namespace Stovepipe
             if (UserDefs is null)
                 UserDefs = new Dictionary<string, StovepipeAdjustment>();
         }
-
-        public static void WriteNewAdjustment(string nameOfGun, StovepipeAdjustment adjustments)
-        {
-            if (isWriteToDefault.Value)
-                WriteOrReplaceInDict(nameOfGun, adjustments, Defaults, defaultsDir);
-            else
-                WriteOrReplaceInDict(nameOfGun, adjustments, UserDefs, userDefsDir);
-        }
-
-        private static void WriteOrReplaceInDict(string nameOfGun, StovepipeAdjustment adjustment,
-            IDictionary<string, StovepipeAdjustment> dict, string dictDir)
-        {
-            if (dict.TryGetValue(nameOfGun, out _)) dict.Remove(nameOfGun);
-            dict.Add(nameOfGun, adjustment);
-            File.WriteAllText(dictDir, JsonConvert.SerializeObject(dict, Formatting.Indented, ignoreSelfReference));
-        }
-
+        
         public static StovepipeAdjustment ReadAdjustment(string rawNameOfGun)
         {
             var cleanedName = rawNameOfGun.Remove(rawNameOfGun.Length - 7);
@@ -108,8 +90,8 @@ namespace Stovepipe
 
         private void GenerateConfigBinds()
         {
-            stovepipeHandgunProb = Config.Bind("Probability - Stovepipe", "Handgun Probability", 0.008f, "");
-            stovepipeRifleProb = Config.Bind("Probability - Stovepipe", "Rifle Probability", 0.004f, "");
+            stovepipeHandgunProb = Config.Bind("Probability - Stovepipe", "Handgun Probability", 0.012f, "");
+            stovepipeRifleProb = Config.Bind("Probability - Stovepipe", "Rifle Probability", 0.01f, "");
             isDebug = Config.Bind("Debug Mode", "isActive", false, "This debug mode allows, " +
                                                                    "once both triggers are pressed upwards, " +
                                                                    "spawns a debug object that allows for manually changing the position / rotation of the bullet when its stovepiped. " +

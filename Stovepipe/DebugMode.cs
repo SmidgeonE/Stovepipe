@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using FistVR;
 using HarmonyLib;
+using Newtonsoft.Json;
 using UnityEngine;
 using Object = System.Object;
 
@@ -15,6 +18,9 @@ namespace Stovepipe
 
         private static bool _hasSetFrontBoltPos;
         private static float _currentBoltForward;
+        
+        private static JsonSerializerSettings ignoreSelfReference = new JsonSerializerSettings
+            { ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
 
 
         [HarmonyPatch(typeof(FVRViveHand), "Update")]
@@ -77,8 +83,24 @@ namespace Stovepipe
                     BoltZ = _currentBoltForward
             };
             
-            StovepipeScriptManager.WriteNewAdjustment(name, adjustment);
+            WriteNewAdjustment(name, adjustment);
             UnityEngine.Object.Destroy(_currentDebugRound);
+        }
+        
+        public static void WriteNewAdjustment(string nameOfGun, StovepipeAdjustment adjustments)
+        {
+            if (StovepipeScriptManager.isWriteToDefault.Value)
+                WriteOrReplaceInDict(nameOfGun, adjustments, StovepipeScriptManager.Defaults, StovepipeScriptManager.defaultsDir);
+            else
+                WriteOrReplaceInDict(nameOfGun, adjustments, StovepipeScriptManager.UserDefs, StovepipeScriptManager.userDefsDir);
+        }
+
+        private static void WriteOrReplaceInDict(string nameOfGun, StovepipeAdjustment adjustment,
+            IDictionary<string, StovepipeAdjustment> dict, string dictDir)
+        {
+            if (dict.TryGetValue(nameOfGun, out _)) dict.Remove(nameOfGun);
+            dict.Add(nameOfGun, adjustment);
+            File.WriteAllText(dictDir, JsonConvert.SerializeObject(dict, Formatting.Indented, ignoreSelfReference));
         }
 
         [HarmonyPatch(typeof(FVRPhysicalObject), "EndInteraction")]
