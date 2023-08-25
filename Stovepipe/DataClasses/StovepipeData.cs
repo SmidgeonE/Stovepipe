@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using FistVR;
+using Stovepipe.StovepipePatches;
 using UnityEngine;
 
 namespace Stovepipe
@@ -31,12 +32,12 @@ namespace Stovepipe
             if (slide != null)
             {
                 ejectsToTheLeft = StovepipeBase.FindIfGunEjectsToTheLeft(slide);
-                stovepipeProb = StovepipeScriptManager.stovepipeHandgunProb.Value;
+                stovepipeProb = FailureScriptManager.stovepipeHandgunProb.Value;
             }
             else if (bolt != null)
             {
                 ejectsToTheLeft = StovepipeBase.FindIfGunEjectsToTheLeft(bolt);
-                stovepipeProb = StovepipeScriptManager.stovepipeRifleProb.Value;
+                stovepipeProb = FailureScriptManager.stovepipeRifleProb.Value;
             }
         }
     }

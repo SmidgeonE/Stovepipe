@@ -1,14 +1,10 @@
-﻿using System;
-using System.Data.Common;
+﻿using FistVR;
 using HarmonyLib;
 using UnityEngine;
-using BepInEx;
-using FistVR;
-using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
 
-namespace Stovepipe
+namespace Stovepipe.StovepipePatches
 {
     public class HandgunPatches : StovepipeBase
     {
@@ -108,7 +104,7 @@ namespace Stovepipe
 
             if (!slideData.hasBulletBeenStovepiped)
             {
-                StartStovepipe(slideData);
+                SetBulletToNonInteracting(slideData);
                 slideData.randomPosAndRot = GenerateRandomHandgunNoise();
             }
             
@@ -153,7 +149,7 @@ namespace Stovepipe
 
             if (slideData.IsStovepiping == false) return;
             if (slideData.timeSinceStovepiping < TimeUntilCanPhysicsSlideUnStovepipe) return;
-            if (___m_slideZ_current < ___m_slideZ_forward - 0.01f) UnStovepipe(slideData, true, __instance.Handgun.RootRigidbody);
+            if (___m_slideZ_current < ___m_slideZ_forward - 0.01f) SetBulletToInteracting(slideData, true, __instance.Handgun.RootRigidbody);
         }
         
         [HarmonyPatch(typeof(HandgunSlide), "SlideEvent_ExtractRoundFromMag")]
@@ -181,7 +177,7 @@ namespace Stovepipe
             if (slideData == null) return;
             if (!slideData.IsStovepiping) return;
             
-            UnStovepipe(slideData, true, __instance.Handgun.RootRigidbody);
+            SetBulletToInteracting(slideData, true, __instance.Handgun.RootRigidbody);
         }
     }
 }

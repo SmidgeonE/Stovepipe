@@ -89,10 +89,10 @@ namespace Stovepipe
         
         public static void WriteNewAdjustment(string nameOfGun, StovepipeAdjustment adjustments)
         {
-            if (StovepipeScriptManager.isWriteToDefault.Value)
-                WriteOrReplaceInDict(nameOfGun, adjustments, StovepipeScriptManager.Defaults, StovepipeScriptManager.defaultsDir);
+            if (FailureScriptManager.isWriteToDefault.Value)
+                WriteOrReplaceInDict(nameOfGun, adjustments, FailureScriptManager.Defaults, FailureScriptManager.defaultsDir);
             else
-                WriteOrReplaceInDict(nameOfGun, adjustments, StovepipeScriptManager.UserDefs, StovepipeScriptManager.userDefsDir);
+                WriteOrReplaceInDict(nameOfGun, adjustments, FailureScriptManager.UserDefs, FailureScriptManager.userDefsDir);
         }
 
         private static void WriteOrReplaceInDict(string nameOfGun, StovepipeAdjustment adjustment,

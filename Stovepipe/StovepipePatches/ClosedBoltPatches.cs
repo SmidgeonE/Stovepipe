@@ -1,10 +1,8 @@
-﻿using System.Diagnostics;
-using FistVR;
+﻿using FistVR;
 using HarmonyLib;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
-namespace Stovepipe
+namespace Stovepipe.StovepipePatches
 {
     public class ClosedBoltPatches : StovepipeBase
     {
@@ -101,9 +99,9 @@ namespace Stovepipe
 
             if (!data.hasBulletBeenStovepiped)
             {
-                StartStovepipe(data, true);
+                SetBulletToNonInteracting(data, true);
                 data.randomPosAndRot = GenerateRandomRifleNoise();
-                data.Adjustments = StovepipeScriptManager.ReadAdjustment(__instance.Weapon.name);
+                data.Adjustments = FailureScriptManager.ReadAdjustment(__instance.Weapon.name);
                 if (data.Adjustments != null) data.hasFoundAdjustments = true;
             }
             
@@ -222,7 +220,7 @@ namespace Stovepipe
                 !CouldBulletFallOutGunHorizontally(__instance.Weapon.RootRigidbody, data.ejectedRound.transform.forward)) return;
 
 
-            UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
+            SetBulletToInteracting(data, true, __instance.Weapon.RootRigidbody);
         }
         
         [HarmonyPatch(typeof(ClosedBolt), "UpdateInteraction")]
@@ -237,7 +235,7 @@ namespace Stovepipe
             if (!DoesBulletAimAtFloor(data.ejectedRound) && 
                 !CouldBulletFallOutGunHorizontally(__instance.Weapon.RootRigidbody, data.ejectedRound.transform.forward)) return;
 
-            UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
+            SetBulletToInteracting(data, true, __instance.Weapon.RootRigidbody);
         }
 
 
@@ -254,7 +252,7 @@ namespace Stovepipe
             if (!DoesBulletAimAtFloor(data.ejectedRound) && 
                 !CouldBulletFallOutGunHorizontally(__instance.Weapon.RootRigidbody, data.ejectedRound.transform.forward)) return;
 
-            UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
+            SetBulletToInteracting(data, true, __instance.Weapon.RootRigidbody);
         }
         
         [HarmonyPatch(typeof(ClosedBoltHandle), "UpdateHandle")]
@@ -270,7 +268,7 @@ namespace Stovepipe
             if (!DoesBulletAimAtFloor(data.ejectedRound) && 
                 !CouldBulletFallOutGunHorizontally(__instance.Weapon.RootRigidbody, data.ejectedRound.transform.forward)) return;
 
-            UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
+            SetBulletToInteracting(data, true, __instance.Weapon.RootRigidbody);
         }
     }
 }
