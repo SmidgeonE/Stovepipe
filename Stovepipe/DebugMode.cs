@@ -126,7 +126,7 @@ namespace Stovepipe
         }
         
         [HarmonyPatch(typeof(ClosedBolt), "UpdateBolt")]
-        [HarmonyPostfix]
+        [HarmonyPrefix]
         private static void BoltForwardBeginPatch(ClosedBolt __instance,
             ref float ___m_boltZ_forward, ref float ___m_boltZ_current, ref float ___m_curBoltSpeed)
         {

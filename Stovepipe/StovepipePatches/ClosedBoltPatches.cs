@@ -81,12 +81,20 @@ namespace Stovepipe.StovepipePatches
                 as StovepipeData;
 
             if (data is null) return;
-            
+
             if (!data.hasCollectedWeaponCharacteristics)
             {
                 data.defaultFrontPosition = ___m_boltZ_forward;
                 data.hasCollectedWeaponCharacteristics = true;
             }
+            
+            var doubleFeedData = __instance.gameObject.GetComponent<DoubleFeedData>();
+            if (doubleFeedData != null && doubleFeedData.IsDoubleFeeding)
+            {
+                Debug.Log("double feeding, not putting to default position");
+                return;
+            }
+            Debug.Log("asdasd");
             
             if (!data.IsStovepiping)
             {
