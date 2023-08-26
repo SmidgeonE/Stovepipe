@@ -14,7 +14,7 @@ using Object = UnityEngine.Object;
 
 namespace Stovepipe
 {
-    [BepInPlugin("dll.smidgeon.failuretoeject", "Failure To Eject", "2.2.2")]
+    [BepInPlugin("dll.smidgeon.failuretoeject", "Failure To Eject", "2.2.3")]
     [BepInProcess("h3vr.exe")]
     public class StovepipeScriptManager : BaseUnityPlugin
     {
@@ -92,10 +92,7 @@ namespace Stovepipe
         {
             stovepipeHandgunProb = Config.Bind("Probability - Stovepipe", "Handgun Probability", 0.012f, "");
             stovepipeRifleProb = Config.Bind("Probability - Stovepipe", "Rifle Probability", 0.01f, "");
-            isDebug = Config.Bind("Debug Mode", "isActive", false, "This debug mode allows, " +
-                                                                   "once both triggers are pressed upwards, " +
-                                                                   "spawns a debug object that allows for manually changing the position / rotation of the bullet when its stovepiped. " +
-                                                                   "Once you leave the debug mode, it will save this position and rotation so you can use it again in future.");
+            isDebug = Config.Bind("Debug Mode", "isActive", false, "This enables debug mode. This requires a restart to take effect. Check the thunderstore page for an explanation + a video");
             isWriteToDefault = Config.Bind("Debug Mode", "writeToDefault", false,
                 "Do not use this, this is for developing. " +
                 "If you do, it will overwrite the defaults, which will just be overwritten when the mod is updated.");

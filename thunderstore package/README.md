@@ -49,6 +49,8 @@ If you have any issues / ideas / need help with modding, I am always available o
 
 # Changelog
 
+2.2.3 - Fixed bug where slide moves forward after ungrabbing in debug mode.
+
 2.2.2 - New default positions created with debug tool. Adjusted default probabilities slightly higher.
 
 2.2.1 - Fixed description + small bug.
