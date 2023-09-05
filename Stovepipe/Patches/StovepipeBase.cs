@@ -2,6 +2,7 @@
 using FistVR;
 using HarmonyLib;
 using UnityEngine;
+using Valve.VR.InteractionSystem;
 using Random = UnityEngine.Random;
 
 namespace Stovepipe
@@ -142,6 +143,14 @@ namespace Stovepipe
             if (!data.IsStovepiping) return;
             
             UnStovepipe(data, true, null);
+ 
+            // Playing sound after bullet is unstovepiped.
+            
+            var handgun = data.GetComponent<Handgun>();
+            if (handgun != null)
+                handgun.PlayAudioEvent(FirearmAudioEventType.BoltSlideForward, 1f);
+            else
+                data.GetComponent<ClosedBoltWeapon>().PlayAudioEvent(FirearmAudioEventType.BoltSlideForward, 1f);
         }
 
         protected static bool DoesBulletAimAtFloor(FVRFireArmRound round)
