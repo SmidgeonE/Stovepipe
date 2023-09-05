@@ -89,12 +89,7 @@ namespace Stovepipe.StovepipePatches
             }
             
             var doubleFeedData = __instance.gameObject.GetComponent<DoubleFeedData>();
-            if (doubleFeedData != null && doubleFeedData.IsDoubleFeeding)
-            {
-                Debug.Log("double feeding, not putting to default position");
-                return;
-            }
-            Debug.Log("asdasd");
+            if (doubleFeedData != null && doubleFeedData.IsDoubleFeeding) return;
             
             if (!data.IsStovepiping)
             {
@@ -109,6 +104,7 @@ namespace Stovepipe.StovepipePatches
             {
                 SetBulletToNonInteracting(data, true);
                 data.randomPosAndRot = GenerateRandomRifleNoise();
+                Debug.Log("aname of waepon: " + __instance.Weapon.name);
                 data.Adjustments = FailureScriptManager.ReadAdjustment(__instance.Weapon.name);
                 if (data.Adjustments != null) data.hasFoundAdjustments = true;
             }

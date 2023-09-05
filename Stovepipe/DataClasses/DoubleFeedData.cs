@@ -7,18 +7,30 @@ namespace Stovepipe
     {
         public bool IsDoubleFeeding;
         public float DoubleFeedChance;
-        public bool DoesProxyExist;
+        public bool IsRifle;
 
-        public CapsuleCollider mainBulletCol;
+        public CapsuleCollider upperBulletCol;
+        public FVRFireArmRound upperBullet;
+        public FVRFireArmRound lowerBullet;
 
-        public FVRFireArmRound firstRound;
-        public FVRFireArmRound secondRound;
+        public bool hasUpperBulletBeenRemoved;
+        public bool hasLowerBulletBeenRemoved;
 
-        public bool hasFirstBulletBeenRemoved;
-        public bool hasSecondBulletBeenRemoved;
+        public bool hasFinishedEjectingDoubleFeedRounds;
+
+        // Probabilities that are randomised on every jam
+        public bool slideRackUnjamsUpperBullet;
+        public bool slideRackUnjamsLowerBullet;
+        public bool slideRackAndJiggleUnjamsUpperBullet;
+        public bool slideRackAndJiggleUnjamsLowerBullet;
+        public bool slideRackUnjamsLowerButRackAndJiggleUnjamsUpper;
+        
+
 
         public void SetProbability(bool weaponIsRifle)
         {
+            IsRifle = weaponIsRifle;
+            
             if (weaponIsRifle)
             {
                 DoubleFeedChance = FailureScriptManager.doubleFeedRifleProb.Value;

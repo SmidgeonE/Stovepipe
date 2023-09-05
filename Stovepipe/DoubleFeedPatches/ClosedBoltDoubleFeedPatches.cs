@@ -15,11 +15,7 @@ namespace Stovepipe.DoubleFeedPatches
             if (__instance.Weapon.Handle != null && __instance.Weapon.Handle.IsHeld) return;
             if (__instance.Weapon.Magazine == null) return;
             if (__instance.Weapon.Magazine.m_numRounds < 2) return;
-            if (__instance.Weapon.Chamber.GetRound() != null)
-            {
-                Debug.Log("chamber round is null");
-                return;
-            }
+            if (__instance.Weapon.Chamber.GetRound() != null) return;
 
             var stoveData = __instance.Weapon.GetComponent<StovepipeData>();
 
@@ -31,64 +27,45 @@ namespace Stovepipe.DoubleFeedPatches
 
             if (data.IsDoubleFeeding) return;
             
-            data.hasFirstBulletBeenRemoved = false;
-            data.hasSecondBulletBeenRemoved = false;
+            data.hasUpperBulletBeenRemoved = false;
+            data.hasLowerBulletBeenRemoved = false;
 
-            /*if (!data.DoesProxyExist)
-            {
-                Debug.Log("proxy doesn't exist, returning");
-                return;
-            }*/
-
-
-            Debug.Log(data.DoubleFeedChance);
-            
             data.IsDoubleFeeding = UnityEngine.Random.Range(0f, 1f) < data.DoubleFeedChance;
 
-            if (!data.IsDoubleFeeding)
-            {
-                Debug.Log("not double feeding, returnign");
-                return;
-            }
-            
+            if (!data.IsDoubleFeeding) return;
+
             // Double Feed
 
+            data.hasFinishedEjectingDoubleFeedRounds = false;
+
             __instance.Weapon.ChamberRound();
-            data.firstRound = __instance.Weapon.Chamber.EjectRound(__instance.Weapon.RoundPos_Ejection.position,
+            data.upperBullet = __instance.Weapon.Chamber.EjectRound(__instance.Weapon.RoundPos_Ejection.position,
                 Vector3.zero, Vector3.zero, false);
-            Debug.Log("Grabbing first round");
-            
+
             __instance.Weapon.BeginChamberingRound();
             __instance.Weapon.ChamberRound();
             
-            data.secondRound = __instance.Weapon.Chamber.EjectRound(__instance.Weapon.RoundPos_Ejection.position - Vector3.down * 0.1f,
+            data.lowerBullet = __instance.Weapon.Chamber.EjectRound(__instance.Weapon.RoundPos_Ejection.position - Vector3.down * 0.1f,
                 Vector3.zero, Vector3.zero, false);
-            Debug.Log("Grabbing second round");
+            
+            data.hasFinishedEjectingDoubleFeedRounds = true;
 
-            data.mainBulletCol = data.firstRound.gameObject.GetComponent<CapsuleCollider>();
-            Debug.Log("Grabbing coolider");
+            data.upperBulletCol = data.upperBullet.gameObject.GetComponent<CapsuleCollider>();
 
-            var firstRoundData = data.firstRound.GetComponent<BulletDoubleFeedData>() ??
-                                 data.firstRound.gameObject.AddComponent<BulletDoubleFeedData>();
-            var secondRoundData = data.secondRound.GetComponent<BulletDoubleFeedData>() ??
-                                 data.secondRound.gameObject.AddComponent<BulletDoubleFeedData>();
+            var firstRoundData = data.upperBullet.GetComponent<BulletDoubleFeedData>() ??
+                                 data.upperBullet.gameObject.AddComponent<BulletDoubleFeedData>();
+            var secondRoundData = data.lowerBullet.GetComponent<BulletDoubleFeedData>() ??
+                                 data.lowerBullet.gameObject.AddComponent<BulletDoubleFeedData>();
 
             firstRoundData.gunData = data;
             secondRoundData.gunData = data;
 
-            SetBulletToNonInteracting(data.firstRound, data, true, __instance.Weapon.transform);
-            SetBulletToNonInteracting(data.secondRound, data, true, __instance.Weapon.transform);
-            Debug.Log("Set Bullets to non interacting");
-        }
+            SetBulletToNonInteracting(data.upperBullet, data, true, __instance.Weapon.transform);
+            SetBulletToNonInteracting(data.lowerBullet, data, true, __instance.Weapon.transform);
 
-        [HarmonyPatch(typeof(ClosedBoltWeapon), "UpdateComponents")]
-        [HarmonyPostfix]
-        private static void GetIfProxyExists(ClosedBolt __instance, ref FVRFirearmMovingProxyRound ___m_proxy)
-        {
-            var data = __instance.GetComponent<DoubleFeedData>();
-            if (data is null) return;
-
-            data.DoesProxyExist = ___m_proxy != null;
+            // Generating Probs
+            
+            GenerateUnJammingProbs(data);
         }
 
         [HarmonyPatch(typeof(ClosedBolt), "UpdateBolt")]
@@ -100,80 +77,46 @@ namespace Stovepipe.DoubleFeedPatches
 
             if (data is null || !data.IsDoubleFeeding) return;
             
-            var bulletOffset = data.mainBulletCol.height / 3f;
+            var bulletOffset = data.upperBulletCol.height / 2f;
 
-            var newFrontPos = data.firstRound.transform.localPosition.z - bulletOffset;
+            var newFrontPos = data.upperBullet.transform.localPosition.z - bulletOffset;
             ___m_boltZ_forward = newFrontPos;
-            
-            Debug.Log("current forward value : " + ___m_boltZ_forward);
-            Debug.Log("currnet val : " + ___m_boltZ_current);
-
-
-            /*if (__instance.Weapon.Handle != null)
-            {
-                Debug.Log("handle is not null");
-                ___m_boltZ_forward = -bulletOffset;
-                Debug.Log(-bulletOffset);
-            }
-            else
-            {
-                Debug.Log("handle is null");
-                var newFrontPos = data.firstRound.transform.localPosition.z - bulletOffset;
-                ___m_boltZ_forward = newFrontPos;
-                Debug.Log(newFrontPos);
-            }*/
-
         }
         
         [HarmonyPatch(typeof(FVRFireArmMagazine), "UpdateBulletDisplay")]
         [HarmonyPostfix]
         private static void HideTopBulletIfDoubleFeeding(FVRFireArmMagazine __instance)
         {
-            if (__instance.FireArm is null)
-            {
-                Debug.Log("firearm is null, retruning");
-                return;
-            }
-
+            if (__instance.FireArm is null) return;
+            
             var data = __instance.FireArm.GetComponent<DoubleFeedData>();
-
             if (data is null || !data.IsDoubleFeeding) return;
-
-            Debug.Log("making top mag proxy invisibile");
+            
             __instance.DisplayRenderers[0].enabled = false;
         }
 
-        /*[HarmonyPatch(typeof(ClosedBolt), "UpdateBolt")]
+        [HarmonyPatch(typeof(ClosedBolt), "UpdateBolt")]
         [HarmonyPostfix]
-        private static void UnBlockBulletsSometimesIfRackingSlideAndShaking(ClosedBolt __instance)
+        private static void UnBlockBulletsSometimesIfRackingSlideAndJiggling(ClosedBolt __instance)
         {
-            var data = __instance.GetComponent<DoubleFeedData>();
+            var data = __instance.Weapon.GetComponent<DoubleFeedData>();
 
-            if (__instance.CurPos != ClosedBolt.BoltPos.LockedToRear && __instance.CurPos != ClosedBolt.BoltPos.Rear)
-                return;
-
+            if (__instance.CurPos != ClosedBolt.BoltPos.LockedToRear && __instance.CurPos != ClosedBolt.BoltPos.Rear) return;
             if (data is null || !data.IsDoubleFeeding) return;
+            if (__instance.Weapon.Magazine != null) return;
+            if (!IsGunShaking(__instance.Weapon.RootRigidbody)) return;
 
-            if (!IsGunShaking(__instance.Weapon.RootRigidbody))
-            {
-                return;
-            }
+            if (data.slideRackAndJiggleUnjamsLowerBullet && !data.hasLowerBulletBeenRemoved)
+                SetBulletToInteracting(data.lowerBullet, data, true, __instance.Weapon.RootRigidbody);
             
-            Debug.Log("gun is shaking ");
-
-            if (Random.Range(0f, 1f) < FailureScriptManager.lowerBulletShakeyProb.Value)
-            {
-                SetBulletToInteracting(data.secondRound, data, true, __instance.Weapon.RootRigidbody);
-                Debug.Log("dejamming second round ");
-            }
-            else return;
-
-            if (Random.Range(0f, 1f) < FailureScriptManager.upperBulletShakeyProb.Value)
-            {
-                SetBulletToInteracting(data.firstRound, data, true, __instance.Weapon.RootRigidbody);
-                Debug.Log("dejamming first round ");
-            }
-        }*/
+            if (data.slideRackAndJiggleUnjamsUpperBullet && !data.hasUpperBulletBeenRemoved)
+                SetBulletToInteracting(data.upperBullet, data, true, __instance.Weapon.RootRigidbody);
+            
+            // Special Case: lower bullet falls out just by opening bolt, but the top one needs cajoling.
+            
+            if (data.hasLowerBulletBeenRemoved && data.slideRackUnjamsLowerButRackAndJiggleUnjamsUpper)
+                SetBulletToInteracting(data.upperBullet, data, true, __instance.Weapon.RootRigidbody);
+        }
         
         [HarmonyPatch(typeof(ClosedBolt), "BoltEvent_SmackRear")]
         [HarmonyPostfix]
@@ -181,20 +124,13 @@ namespace Stovepipe.DoubleFeedPatches
         {
             var data = __instance.Weapon.GetComponent<DoubleFeedData>();
 
-            if (data is null || !data.IsDoubleFeeding) return;
+            if (data is null || !data.IsDoubleFeeding || __instance.Weapon.Magazine != null) return;
 
-            if (Random.Range(0f, 1f) < FailureScriptManager.lowerBulletDropoutProb.Value)
-            {
-                SetBulletToInteracting(data.secondRound, data, true, __instance.Weapon.RootRigidbody);
-                Debug.Log("dejamming second round ");
-            }
-            else return;
-
-            if (Random.Range(0f, 1f) < FailureScriptManager.upperBulletDropoutProb.Value)
-            {
-                SetBulletToInteracting(data.firstRound, data, true, __instance.Weapon.RootRigidbody);
-                Debug.Log("dejamming first round ");
-            }
+            if (data.slideRackUnjamsLowerBullet && !data.hasLowerBulletBeenRemoved)
+                SetBulletToInteracting(data.lowerBullet, data, true, __instance.Weapon.RootRigidbody);
+            
+            if (data.slideRackUnjamsUpperBullet && !data.hasUpperBulletBeenRemoved)
+                SetBulletToInteracting(data.upperBullet, data, true, __instance.Weapon.RootRigidbody);
         }
 
         [HarmonyPatch(typeof(FVRFireArmRound), "BeginInteraction")]
@@ -204,20 +140,50 @@ namespace Stovepipe.DoubleFeedPatches
             var bulletData = __instance.GetComponent<BulletDoubleFeedData>();
 
             if (bulletData is null || !bulletData.gunData.IsDoubleFeeding) return true;
-            if (__instance == bulletData.gunData.firstRound && bulletData.gunData.hasFirstBulletBeenRemoved) return true;
-            if (__instance == bulletData.gunData.secondRound && bulletData.gunData.hasSecondBulletBeenRemoved) return true;
-            
-            Debug.Log("interaction with double fed bullet");
             
             SetBulletToInteracting(__instance, bulletData.gunData, true, 
                 bulletData.gunData.gameObject.GetComponent<Rigidbody>());
             return false;
         }
 
+        [HarmonyPatch(typeof(ClosedBolt), "UpdateBolt")]
+        [HarmonyPostfix]
+        private static void ChangeBulletInteractability(ClosedBolt __instance)
+        {
+            var data = __instance.Weapon.GetComponent<DoubleFeedData>();
+            if (data is null) return;
+            if (!data.IsDoubleFeeding) return;
+
+            var uninteractableLayer = LayerMask.NameToLayer("Water");
+            var normalLayer = LayerMask.NameToLayer("Interactable");
+            
+            if (__instance.Weapon.Magazine != null)
+            {
+                data.lowerBullet.gameObject.layer = uninteractableLayer;
+                data.upperBullet.gameObject.layer = uninteractableLayer;
+            }
+            else
+            {
+                data.lowerBullet.gameObject.layer = normalLayer;
+                if (data.hasLowerBulletBeenRemoved) data.upperBullet.gameObject.layer = normalLayer;
+            }
+        }
+
+        [HarmonyPatch(typeof(ClosedBoltWeapon), "BeginChamberingRound")]
+        [HarmonyPrefix]
+        private static bool DontChamberRoundIfDoubleFeeding(ClosedBoltWeapon __instance)
+        {
+            var data = __instance.GetComponent<DoubleFeedData>();
+
+            if (data is null) return true;
+
+            return !data.IsDoubleFeeding || !data.hasFinishedEjectingDoubleFeedRounds;
+        }
+
         private static bool IsGunShaking(Rigidbody gunRb)
         {
             return (gunRb.velocity - GM.CurrentPlayerBody.Hitboxes[1].GetComponent<Rigidbody>().velocity).magnitude >
-                   3f;
+                   2f;
         }
         
         private static void SetBulletToNonInteracting(FVRFireArmRound round, DoubleFeedData data, bool setParentToWeapon = false, Transform weaponTransform = null)
@@ -227,7 +193,7 @@ namespace Stovepipe.DoubleFeedPatches
             round.RootRigidbody.maxAngularVelocity = 0;
             round.RootRigidbody.useGravity = false;
             round.RootRigidbody.detectCollisions = false;
-            data.mainBulletCol.isTrigger = false;
+            data.upperBulletCol.isTrigger = false;
             
             round.StoreAndDestroyRigidbody();
 
@@ -242,18 +208,45 @@ namespace Stovepipe.DoubleFeedPatches
             round.RootRigidbody.useGravity = true;
             round.RootRigidbody.maxAngularVelocity = 1000f;
             round.RootRigidbody.detectCollisions = true;
-            data.mainBulletCol.isTrigger = true;
+            data.upperBulletCol.isTrigger = true;
 
-            if (round == data.firstRound) data.hasFirstBulletBeenRemoved = true;
-            if (round == data.secondRound) data.hasSecondBulletBeenRemoved = true;
+            if (round == data.upperBullet) data.hasUpperBulletBeenRemoved = true;
+            if (round == data.lowerBullet) data.hasLowerBulletBeenRemoved = true;
 
-            if (data.hasFirstBulletBeenRemoved && data.hasSecondBulletBeenRemoved) data.IsDoubleFeeding = false;
+            if (data.hasUpperBulletBeenRemoved && data.hasLowerBulletBeenRemoved) data.IsDoubleFeeding = false;
             
             if (breakParentage) round.SetParentage(null);
             if (weaponRb == null) return;
             
             round.RootRigidbody.velocity = weaponRb.velocity;
             round.RootRigidbody.angularVelocity = weaponRb.angularVelocity;
+        }
+
+        private static void GenerateUnJammingProbs(DoubleFeedData data)
+        {
+            // Obviously, if you cant use one of the methods to unjam the lower bullet, then you necessarily cant use it
+            // for the upper bullet
+            
+            data.slideRackUnjamsLowerBullet = Random.Range(0f, 1f) < FailureScriptManager.lowerBulletDropoutProb.Value;
+
+            if (data.slideRackUnjamsLowerBullet)
+                data.slideRackUnjamsUpperBullet =
+                    Random.Range(0f, 1f) < FailureScriptManager.upperBulletDropoutProb.Value;
+            else
+                data.slideRackUnjamsUpperBullet = false;
+            
+            data.slideRackAndJiggleUnjamsLowerBullet = Random.Range(0f, 1f) < FailureScriptManager.lowerBulletShakeyProb.Value;
+
+            if (data.slideRackAndJiggleUnjamsLowerBullet)
+                data.slideRackAndJiggleUnjamsUpperBullet =
+                    Random.Range(0f, 1f) < FailureScriptManager.upperBulletShakeyProb.Value;
+            else 
+                data.slideRackAndJiggleUnjamsUpperBullet = false;
+            
+            
+            // Special case probability where the lower bullet falls out, but the upper bullet needs cajoling
+            data.slideRackUnjamsLowerButRackAndJiggleUnjamsUpper =
+                Random.Range(0f, 1f) < FailureScriptManager.upperBulletShakeyProb.Value;
         }
     }
 }
