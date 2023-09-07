@@ -88,8 +88,12 @@ namespace Stovepipe.StovepipePatches
                 data.hasCollectedWeaponCharacteristics = true;
             }
             
-            var doubleFeedData = __instance.gameObject.GetComponent<DoubleFeedData>();
-            if (doubleFeedData != null && doubleFeedData.IsDoubleFeeding) return;
+            var doubleFeedData = __instance.Weapon.GetComponent<DoubleFeedData>();
+            if (doubleFeedData != null && doubleFeedData.IsDoubleFeeding)
+            {
+                Debug.Log("it is double feeding, not checking stovepipe bolt action");
+                return;
+            }
             
             if (!data.IsStovepiping)
             {
@@ -104,7 +108,6 @@ namespace Stovepipe.StovepipePatches
             {
                 SetBulletToNonInteracting(data, true);
                 data.randomPosAndRot = GenerateRandomRifleNoise();
-                Debug.Log("aname of waepon: " + __instance.Weapon.name);
                 data.Adjustments = FailureScriptManager.ReadAdjustment(__instance.Weapon.name);
                 if (data.Adjustments != null) data.hasFoundAdjustments = true;
             }
@@ -128,7 +131,7 @@ namespace Stovepipe.StovepipePatches
                 return;
             }
             
-            // If we couldn't find an adjustment set by the user, we just use the default positioning:
+            // If we couldn't find an adjustment set by the user, we just use a procedural positioning:
 
             var gunTransform = __instance.Weapon.transform;
             var velDirec = (gunTransform.right * weapon.EjectionSpeed.x +

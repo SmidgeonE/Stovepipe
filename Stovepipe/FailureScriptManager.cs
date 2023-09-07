@@ -98,6 +98,7 @@ namespace Stovepipe
             if (isDoubleFeedEnabled.Value)
             {
                 Harmony.CreateAndPatchAll(typeof(ClosedBoltDoubleFeedPatches));
+                Harmony.CreateAndPatchAll(typeof(DoubleFeedBase));
             }
 
             if (isDebug.Value) 

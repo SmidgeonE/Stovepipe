@@ -7,7 +7,8 @@ namespace Stovepipe
     {
         public bool IsDoubleFeeding;
         public float DoubleFeedChance;
-        public bool IsRifle;
+        public float bulletHeight;
+        public float bulletRadius;
 
         public CapsuleCollider upperBulletCol;
         public FVRFireArmRound upperBullet;
@@ -24,13 +25,13 @@ namespace Stovepipe
         public bool slideRackAndJiggleUnjamsUpperBullet;
         public bool slideRackAndJiggleUnjamsLowerBullet;
         public bool slideRackUnjamsLowerButRackAndJiggleUnjamsUpper;
+
+        public float[,] BulletRandomness;
         
 
 
         public void SetProbability(bool weaponIsRifle)
         {
-            IsRifle = weaponIsRifle;
-            
             if (weaponIsRifle)
             {
                 DoubleFeedChance = FailureScriptManager.doubleFeedRifleProb.Value;
