@@ -1,14 +1,10 @@
-﻿using System;
-using System.Data.Common;
+﻿using FistVR;
 using HarmonyLib;
 using UnityEngine;
-using BepInEx;
-using FistVR;
-using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
 
-namespace Stovepipe
+namespace Stovepipe.StovepipePatches
 {
     public class HandgunPatches : StovepipeBase
     {

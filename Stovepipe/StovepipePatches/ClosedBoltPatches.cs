@@ -1,10 +1,8 @@
-﻿using System.Diagnostics;
-using FistVR;
+﻿using FistVR;
 using HarmonyLib;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
-namespace Stovepipe
+namespace Stovepipe.StovepipePatches
 {
     public class ClosedBoltPatches : StovepipeBase
     {
@@ -83,13 +81,16 @@ namespace Stovepipe
                 as StovepipeData;
 
             if (data is null) return;
-            
+
             if (!data.hasCollectedWeaponCharacteristics)
             {
                 data.defaultFrontPosition = ___m_boltZ_forward;
                 data.hasCollectedWeaponCharacteristics = true;
             }
             
+            var doubleFeedData = __instance.Weapon.GetComponent<DoubleFeedData>();
+            if (doubleFeedData != null && doubleFeedData.IsDoubleFeeding) return;
+
             if (!data.IsStovepiping)
             {
                 if (!DebugMode.isDebuggingWeapon) ___m_boltZ_forward = data.defaultFrontPosition;
@@ -103,7 +104,7 @@ namespace Stovepipe
             {
                 StartStovepipe(data, true);
                 data.randomPosAndRot = GenerateRandomRifleNoise();
-                data.Adjustments = StovepipeScriptManager.ReadAdjustment(__instance.Weapon.name);
+                data.Adjustments = FailureScriptManager.ReadAdjustment(__instance.Weapon.name);
                 if (data.Adjustments != null) data.hasFoundAdjustments = true;
             }
             
@@ -126,7 +127,7 @@ namespace Stovepipe
                 return;
             }
             
-            // If we couldn't find an adjustment set by the user, we just use the default positioning:
+            // If we couldn't find an adjustment set by the user, we just use a procedural positioning:
 
             var gunTransform = __instance.Weapon.transform;
             var velDirec = (gunTransform.right * weapon.EjectionSpeed.x +

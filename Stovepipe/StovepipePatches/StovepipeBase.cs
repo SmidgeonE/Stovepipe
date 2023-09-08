@@ -1,11 +1,10 @@
-﻿using System;
-using FistVR;
+﻿using FistVR;
 using HarmonyLib;
 using UnityEngine;
 using Valve.VR.InteractionSystem;
 using Random = UnityEngine.Random;
 
-namespace Stovepipe
+namespace Stovepipe.StovepipePatches
 {
     public class StovepipeBase
     {
