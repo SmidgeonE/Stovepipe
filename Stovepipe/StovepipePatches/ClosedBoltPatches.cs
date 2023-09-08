@@ -102,7 +102,7 @@ namespace Stovepipe.StovepipePatches
 
             if (!data.hasBulletBeenStovepiped)
             {
-                SetBulletToNonInteracting(data, true);
+                StartStovepipe(data, true);
                 data.randomPosAndRot = GenerateRandomRifleNoise();
                 data.Adjustments = FailureScriptManager.ReadAdjustment(__instance.Weapon.name);
                 if (data.Adjustments != null) data.hasFoundAdjustments = true;
@@ -223,7 +223,7 @@ namespace Stovepipe.StovepipePatches
                 !CouldBulletFallOutGunHorizontally(__instance.Weapon.RootRigidbody, data.ejectedRound.transform.forward)) return;
 
 
-            SetBulletToInteracting(data, true, __instance.Weapon.RootRigidbody);
+            UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
         }
         
         [HarmonyPatch(typeof(ClosedBolt), "UpdateInteraction")]
@@ -238,7 +238,7 @@ namespace Stovepipe.StovepipePatches
             if (!DoesBulletAimAtFloor(data.ejectedRound) && 
                 !CouldBulletFallOutGunHorizontally(__instance.Weapon.RootRigidbody, data.ejectedRound.transform.forward)) return;
 
-            SetBulletToInteracting(data, true, __instance.Weapon.RootRigidbody);
+            UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
         }
 
 
@@ -255,7 +255,7 @@ namespace Stovepipe.StovepipePatches
             if (!DoesBulletAimAtFloor(data.ejectedRound) && 
                 !CouldBulletFallOutGunHorizontally(__instance.Weapon.RootRigidbody, data.ejectedRound.transform.forward)) return;
 
-            SetBulletToInteracting(data, true, __instance.Weapon.RootRigidbody);
+            UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
         }
         
         [HarmonyPatch(typeof(ClosedBoltHandle), "UpdateHandle")]
@@ -271,7 +271,7 @@ namespace Stovepipe.StovepipePatches
             if (!DoesBulletAimAtFloor(data.ejectedRound) && 
                 !CouldBulletFallOutGunHorizontally(__instance.Weapon.RootRigidbody, data.ejectedRound.transform.forward)) return;
 
-            SetBulletToInteracting(data, true, __instance.Weapon.RootRigidbody);
+            UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
         }
     }
 }

@@ -104,7 +104,7 @@ namespace Stovepipe.StovepipePatches
 
             if (!slideData.hasBulletBeenStovepiped)
             {
-                SetBulletToNonInteracting(slideData);
+                StartStovepipe(slideData);
                 slideData.randomPosAndRot = GenerateRandomHandgunNoise();
             }
             
@@ -149,7 +149,7 @@ namespace Stovepipe.StovepipePatches
 
             if (slideData.IsStovepiping == false) return;
             if (slideData.timeSinceStovepiping < TimeUntilCanPhysicsSlideUnStovepipe) return;
-            if (___m_slideZ_current < ___m_slideZ_forward - 0.01f) SetBulletToInteracting(slideData, true, __instance.Handgun.RootRigidbody);
+            if (___m_slideZ_current < ___m_slideZ_forward - 0.01f) UnStovepipe(slideData, true, __instance.Handgun.RootRigidbody);
         }
         
         [HarmonyPatch(typeof(HandgunSlide), "SlideEvent_ExtractRoundFromMag")]
@@ -177,7 +177,7 @@ namespace Stovepipe.StovepipePatches
             if (slideData == null) return;
             if (!slideData.IsStovepiping) return;
             
-            SetBulletToInteracting(slideData, true, __instance.Handgun.RootRigidbody);
+            UnStovepipe(slideData, true, __instance.Handgun.RootRigidbody);
         }
     }
 }

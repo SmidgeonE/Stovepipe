@@ -5,7 +5,6 @@ using FistVR;
 using HarmonyLib;
 using Newtonsoft.Json;
 using UnityEngine;
-using Object = System.Object;
 
 namespace Stovepipe
 {
