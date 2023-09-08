@@ -1,4 +1,5 @@
-﻿using FistVR;
+﻿using System.Data.Common;
+using FistVR;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngineInternal;
@@ -17,46 +18,48 @@ namespace Stovepipe.DoubleFeedPatches
             if (__instance.Weapon.Magazine.m_numRounds < 2) return;
             if (__instance.Weapon.Chamber.GetRound() != null) return;
 
-            var stoveData = __instance.Weapon.GetComponent<StovepipeData>();
-
+            var stoveData = __instance.Weapon.Bolt.GetComponent<StovepipeData>();
             if (stoveData != null && stoveData.IsStovepiping) return;
-
+            
             var data = __instance.Weapon.gameObject.GetComponent<DoubleFeedData>() ?? __instance.Weapon.gameObject.AddComponent<DoubleFeedData>();
-
             data.SetProbability(true);
-
+            
             if (data.IsDoubleFeeding) return;
             
             data.hasUpperBulletBeenRemoved = false;
             data.hasLowerBulletBeenRemoved = false;
-
+            
             data.IsDoubleFeeding = UnityEngine.Random.Range(0f, 1f) < data.DoubleFeedChance;
-
             if (!data.IsDoubleFeeding) return;
 
             // Double Feed
 
             data.BulletRandomness = GenerateRandomOffsets();
             GenerateUnJammingProbs(data);
-
             data.hasFinishedEjectingDoubleFeedRounds = false;
 
-            __instance.Weapon.ChamberRound();
+            var managedToChamber = __instance.Weapon.ChamberRound();
+            if (!managedToChamber)
+            {
+                __instance.Weapon.BeginChamberingRound();
+                __instance.Weapon.ChamberRound();
+            }
+
             data.upperBullet = __instance.Weapon.Chamber.EjectRound(__instance.Weapon.RoundPos_Ejection.position,
                 Vector3.zero, Vector3.zero, false);
-
+            
+            
             __instance.Weapon.BeginChamberingRound();
             __instance.Weapon.ChamberRound();
-            
             data.lowerBullet = __instance.Weapon.Chamber.EjectRound(__instance.Weapon.RoundPos_Ejection.position + Vector3.down * 0.3f,
                 Vector3.zero, Vector3.zero, false);
-            
+
             data.hasFinishedEjectingDoubleFeedRounds = true;
 
             data.upperBulletCol = data.upperBullet.gameObject.GetComponent<CapsuleCollider>();
             data.bulletHeight = data.upperBulletCol.height;
             data.bulletRadius = data.upperBulletCol.radius;
-
+            
             var upperBulletData = data.upperBullet.GetComponent<BulletDoubleFeedData>() ??
                                  data.upperBullet.gameObject.AddComponent<BulletDoubleFeedData>();
             var lowerBulletData = data.lowerBullet.GetComponent<BulletDoubleFeedData>() ??
@@ -67,13 +70,12 @@ namespace Stovepipe.DoubleFeedPatches
 
             SetBulletToNonInteracting(data.upperBullet, data, true, __instance.Weapon.transform);
             SetBulletToNonInteracting(data.lowerBullet, data, true, __instance.Weapon.transform);
-            
-            
+
             // Applying procedural positioning
 
             var upperBulletTransform = data.upperBullet.transform;
             var chamberProxyRoundPos = __instance.Weapon.Chamber.ProxyRound.position;
-            
+
             upperBulletTransform.position = chamberProxyRoundPos 
                                             + __instance.Weapon.transform.up * data.bulletRadius
                                             - upperBulletTransform.forward * data.bulletHeight * 1.05f
@@ -112,8 +114,9 @@ namespace Stovepipe.DoubleFeedPatches
         private static void UnBlockBulletsSometimesIfRackingSlideAndJiggling(ClosedBolt __instance)
         {
             var data = __instance.Weapon.GetComponent<DoubleFeedData>();
-
-            if (__instance.CurPos != ClosedBolt.BoltPos.LockedToRear && __instance.CurPos != ClosedBolt.BoltPos.Rear) return;
+            if (__instance.CurPos != ClosedBolt.BoltPos.LockedToRear
+                && __instance.CurPos != ClosedBolt.BoltPos.Rear
+                && __instance.CurPos != ClosedBolt.BoltPos.Locked) return;
             if (data is null || !data.IsDoubleFeeding) return;
             if (__instance.Weapon.Magazine != null) return;
             if (!IsGunShaking(__instance.Weapon.RootRigidbody)) return;
@@ -156,6 +159,9 @@ namespace Stovepipe.DoubleFeedPatches
             var uninteractableLayer = LayerMask.NameToLayer("Water");
             var normalLayer = LayerMask.NameToLayer("Interactable");
             
+            if (data.upperBullet is null) Debug.Log("upper bullet is null");
+            if (data.lowerBullet is null) Debug.Log("lower bullet is null");
+            
             if (__instance.Weapon.Magazine != null)
             {
                 data.lowerBullet.gameObject.layer = uninteractableLayer;
@@ -164,11 +170,7 @@ namespace Stovepipe.DoubleFeedPatches
             else
             {
                 data.lowerBullet.gameObject.layer = normalLayer;
-                if (data.hasLowerBulletBeenRemoved)
-                {
-                    Debug.Log("making upper bulelt touchable");
-                    data.upperBullet.gameObject.layer = normalLayer;
-                }
+                if (data.hasLowerBulletBeenRemoved) data.upperBullet.gameObject.layer = normalLayer;
                 else data.upperBullet.gameObject.layer = uninteractableLayer;
             }
         }

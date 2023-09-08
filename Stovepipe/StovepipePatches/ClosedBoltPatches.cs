@@ -89,12 +89,8 @@ namespace Stovepipe.StovepipePatches
             }
             
             var doubleFeedData = __instance.Weapon.GetComponent<DoubleFeedData>();
-            if (doubleFeedData != null && doubleFeedData.IsDoubleFeeding)
-            {
-                Debug.Log("it is double feeding, not checking stovepipe bolt action");
-                return;
-            }
-            
+            if (doubleFeedData != null && doubleFeedData.IsDoubleFeeding) return;
+
             if (!data.IsStovepiping)
             {
                 if (!DebugMode.isDebuggingWeapon) ___m_boltZ_forward = data.defaultFrontPosition;
