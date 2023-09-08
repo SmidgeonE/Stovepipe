@@ -1,7 +1,7 @@
 {
 	"name": "Stovepipe",
-	"version_number": "2.2.3",
-	"description": "Great new default stovepipe positions for 150+ guns thanks to @drummerdude2003 in the h3vr discord! New debug tool added for further user customisation. Check description for more. Implements graphical stovepipe failures to weapons.",
+	"version_number": "3.0.0",
+	"description": "Now featuring double-feed failures for ARs/BRs/SMGs! Watch video on Thunderstore for a showcase. Implements graphical stovepipe and double-feed failures to weapons.",
 	"website_url": "https://github.com/SmidgeonE/Stovepipe",
 	"dependencies": []
 }

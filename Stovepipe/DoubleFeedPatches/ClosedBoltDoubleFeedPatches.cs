@@ -99,14 +99,25 @@ namespace Stovepipe.DoubleFeedPatches
         [HarmonyPatch(typeof(ClosedBolt), "UpdateBolt")]
         [HarmonyPrefix]
         private static void SetBoltForwardsLocation(ClosedBolt __instance,
-            ref float ___m_boltZ_forward, ref float ___m_boltZ_current)
+            ref float ___m_boltZ_forward)
         {
+            var stovepipeData = __instance.Weapon.Bolt.GetComponent<StovepipeData>();
+            if (stovepipeData != null && stovepipeData.IsStovepiping)
+            {
+                return;
+            }
+            
             var data = __instance.Weapon.GetComponent<DoubleFeedData>();
 
-            if (data is null || !data.IsDoubleFeeding) return;
-            
-            var newFrontPos = __instance.Point_Bolt_Forward.localPosition.z - data.upperBulletCol.height * 1.2f;
-            ___m_boltZ_forward = newFrontPos;
+            if (data is null || !data.IsDoubleFeeding)
+            {
+                ___m_boltZ_forward = __instance.Weapon.Bolt.Point_Bolt_Forward.localPosition.z;
+            }
+            else
+            {
+                var newFrontPos = __instance.Point_Bolt_Forward.localPosition.z - data.upperBulletCol.height * 1.2f;
+                ___m_boltZ_forward = newFrontPos;
+            }
         }
 
         [HarmonyPatch(typeof(ClosedBolt), "UpdateBolt")]

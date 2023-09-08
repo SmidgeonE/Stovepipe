@@ -16,7 +16,7 @@ using Object = UnityEngine.Object;
 
 namespace Stovepipe
 {
-    [BepInPlugin("dll.smidgeon.failuretoeject", "Failure To Eject", "2.2.2")]
+    [BepInPlugin("dll.smidgeon.failuretoeject", "Failure To Eject", "3.0.0")]
     [BepInProcess("h3vr.exe")]
     public class FailureScriptManager : BaseUnityPlugin
     {
@@ -50,6 +50,7 @@ namespace Stovepipe
         {
             GrabPreviousUserValue();
             GenerateConfigBinds();
+            RemoveOldProbabilityFromConfig();
             
             if (_configIsFirstType)
             {
@@ -121,7 +122,7 @@ namespace Stovepipe
             stovepipeHandgunProb = Config.Bind("Probability - Stovepipe", "Handgun Probability", 0.012f, "");
             stovepipeRifleProb = Config.Bind("Probability - Stovepipe", "Rifle Probability", 0.01f, "");
             doubleFeedHandgunProb = Config.Bind("Probability - Double Feed", "Handgun Probability", 0.012f, "");
-            doubleFeedRifleProb = Config.Bind("Probability - Double Feed", "Rifle Probability", 0.8f, "");
+            doubleFeedRifleProb = Config.Bind("Probability - Double Feed", "Rifle Probability", 0.003f, "");
             lowerBulletDropoutProb = Config.Bind("Probability - Double Feed", "lowerBulletDropoutProbability", 0.5f, "This is the probability that, when the bolt is held back, the bullet falls out on its own accord and doesn't need the user to shake / remove the bullet manually.");
             upperBulletDropoutProb = Config.Bind("Probability - Double Feed", "upperBulletDropoutProbability", 0.5f, "This is the probability that, when the bolt is held back, the bullet falls out on its own accord and doesn't need the user to shake / remove the bullet manually. " +
                 "Note this is the probability after the lower bullet has fallen out, so the true probability of this happening is (this probability x the other probability)");
@@ -194,6 +195,28 @@ namespace Stovepipe
                 _previousUserProbability = float.Parse(data[7].Substring(13));
                 _configIsFirstType = true;
             }
+        }
+
+        private void RemoveOldProbabilityFromConfig()
+        {
+            var dir = Config.ConfigFilePath;
+
+            if (!File.Exists(dir)) return;
+
+            var data = File.ReadAllLines(dir);
+
+            for (var i = 0; i < data.Length; i++)
+            {
+                if (data[i].Length < 14) continue;
+
+                if (data[i].Substring(0, 14) == "Probability = ")
+                {
+                    data[i] = "";
+                    break;
+                }
+            }
+            
+            File.WriteAllLines(dir, data);
         }
     }
 }

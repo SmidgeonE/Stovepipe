@@ -145,11 +145,11 @@ namespace Stovepipe.StovepipePatches
  
             // Playing sound after bullet is unstovepiped.
             
-            var handgun = data.GetComponent<Handgun>();
-            if (handgun != null)
-                handgun.PlayAudioEvent(FirearmAudioEventType.BoltSlideForward, 1f);
+            var slide = data.GetComponent<HandgunSlide>();
+            if (slide != null)
+                slide.Handgun.PlayAudioEvent(FirearmAudioEventType.BoltSlideForward, 1f);
             else
-                data.GetComponent<ClosedBoltWeapon>().PlayAudioEvent(FirearmAudioEventType.BoltSlideForward, 1f);
+                data.GetComponent<ClosedBolt>().Weapon.PlayAudioEvent(FirearmAudioEventType.BoltSlideForward, 1f);
         }
 
         protected static bool DoesBulletAimAtFloor(FVRFireArmRound round)

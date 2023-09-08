@@ -28,8 +28,7 @@ namespace Stovepipe.DoubleFeedPatches
 
             var data = __instance.FireArm.GetComponent<DoubleFeedData>();
             if (data is null || !data.IsDoubleFeeding) return;
-
-            Debug.Log("setting upper bullet to non visilbe");
+            
             __instance.DisplayRenderers[0].enabled = false;
 
             if (__instance.m_numRounds == 1) __instance.DisplayRenderers[1].enabled = true;
@@ -44,7 +43,6 @@ namespace Stovepipe.DoubleFeedPatches
             var data = __instance.FireArm.GetComponent<DoubleFeedData>();
             if (data is null || !data.IsDoubleFeeding) return;
             
-            Debug.Log("setting upper bullet to visible");
             __instance.DisplayRenderers[0].enabled = true;
 
             if (__instance.m_numRounds == 1) __instance.DisplayRenderers[1].enabled = false;

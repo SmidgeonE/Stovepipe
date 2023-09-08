@@ -1,10 +1,34 @@
-# Details
+# Double Feeds
+
+https://youtu.be/pm3irC9ZwD8 - Video of Double Feeds.
+
+Newly added double feeds function for all closed bolt weapons, ARs/BRs/SMGs. The position is procedural, so may not be perfect in places. There are multiple steps to remedying a double feed failure:
+
+1. Remove the magazine.
+
+2. Rack the bolt back, to see if the bullets fall out on their own. It is possible only the lower bullet / none of the bullets will fall out.
+
+3. If this doesn't work, you can rack the bolt + shake the firearm, this may also only do the lower bullet, or none at all.
+
+4. Finally, if all else fails, you can manually remove the bullets my interacting with them.
+
+
+All of these steps have probabilities associated with them, which may be edited in the config file, namely smidgeon.failuretoeject.cfg.
+
+I do plan on adding this to handguns as well in future.
+
+# Note on Double Feeds
+
+If you think the process of removing the bullets manually is too much effort, you can simply put the probabilities in the config file to 1, so you'll never have to remove them by hand.
+
+
+
+# Stovepipes
 
 https://www.youtube.com/watch?v=VNYMUrb8CqU - New debug mode.
-https://youtu.be/OUB9Hz1-eLw - New manipulations.
+https://youtu.be/OUB9Hz1-eLw - New stovepipe manipulations.
 
 New default positions were added thanks to @drummerdude2003, for 160+ guns in the vanilla game!
-
 
 You can now grab the stovepiped round with your hand, as well as get rid of it using inertia.
 
@@ -20,6 +44,7 @@ As far as I know, there is no compatibility issue with Meatyceiver.
 Some of the bullet poses are slighlty odd (may clip through weapon slightly), because parts of this mod are very hacky :)
 
 
+
 # Debug mode
 
 There is now a debug mode, this allows you to update the position / rotation of the bullet as well as allowing you to change the point where the slide stops. To access this, you need to change the failuretoeject.cfg in the config folder in thunderstore, specifically where it says "isDebug" to true.
@@ -33,11 +58,13 @@ To save this, simply press down on the right joystick again and it will save it 
 Currently the debug tool only works for ClosedBolt weapons. If you want this added to pistols, I can, but I think the positions for them are fine as is.
 
 
+
 # Note with Debug mode
 
 If you let go of the bullet while its in debug mode, you won't be able to move it again, due to limitations of the physics logic. If you mess up the position, simply restart the debug with joystick right + down.
 
 I will likely add to the defaults.json file, which will improve the default positions over time.
+
 
 
 # Contact
@@ -47,7 +74,10 @@ If you wish to support me, my kofi is https://ko-fi.com/smidgeon
 If you have any issues / ideas / need help with modding, I am always available on discord in the homebrew server under the name Smidgeon, tag ප bir𝛿 ꧁꧂#9320 (not sure if thunderstoreeven supports those characters).
 
 
+
 # Changelog
+
+3.0.0 - Added double-feed failures to closed bolt weapons. Added sound effect for manually removed stovepipe rounds.
 
 2.2.3 - Fixed bug where slide moves forward after ungrabbing in debug mode.
 

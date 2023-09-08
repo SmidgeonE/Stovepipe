@@ -88,9 +88,6 @@ namespace Stovepipe.StovepipePatches
                 data.hasCollectedWeaponCharacteristics = true;
             }
             
-            var doubleFeedData = __instance.Weapon.GetComponent<DoubleFeedData>();
-            if (doubleFeedData != null && doubleFeedData.IsDoubleFeeding) return;
-
             if (!data.IsStovepiping)
             {
                 if (!DebugMode.isDebuggingWeapon) ___m_boltZ_forward = data.defaultFrontPosition;
