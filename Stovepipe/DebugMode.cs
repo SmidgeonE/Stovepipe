@@ -130,10 +130,7 @@ namespace Stovepipe
         private static void BoltForwardBeginPatch(ClosedBolt __instance,
             ref float ___m_boltZ_forward, ref float ___m_boltZ_current, ref float ___m_curBoltSpeed)
         {
-            if (!isDebuggingWeapon)
-            {
-                return;
-            }
+            if (!isDebuggingWeapon) return;
             if (__instance.Weapon != _currentDebugWeapon) return;
 
             if (__instance.IsHeld || (__instance.Weapon.Handle != null && __instance.Weapon.Handle.IsHeld))
@@ -145,7 +142,6 @@ namespace Stovepipe
             {
                 if (!_hasSetFrontBoltPos) _currentBoltForward = ___m_boltZ_current;
                 
-
                 ___m_boltZ_forward = _currentBoltForward;
 
                 _hasSetFrontBoltPos = true;

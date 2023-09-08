@@ -1,9 +1,11 @@
-﻿using FistVR;
+﻿using System;
+using FistVR;
 using HarmonyLib;
 using UnityEngine;
+using Valve.VR.InteractionSystem;
 using Random = UnityEngine.Random;
 
-namespace Stovepipe.StovepipePatches
+namespace Stovepipe
 {
     public class StovepipeBase
     {
@@ -24,7 +26,7 @@ namespace Stovepipe.StovepipePatches
             return new[] { Random.Range(0.005f, 0.011f), Random.Range(0, -20f), Random.Range(0, 15f) };
         }
 
-        public static void SetBulletToNonInteracting(StovepipeData data, bool setParentToWeapon = false)
+        protected static void StartStovepipe(StovepipeData data, bool setParentToWeapon = false)
         {
             data.ejectedRound.RootRigidbody.velocity = Vector3.zero;
             data.ejectedRound.RootRigidbody.angularVelocity = Vector3.zero;
@@ -57,7 +59,7 @@ namespace Stovepipe.StovepipePatches
             else cube.transform.parent = data.transform;*/
         }
         
-        public static void SetBulletToInteracting(StovepipeData data, bool breakParentage, Rigidbody weaponRb)
+        public static void UnStovepipe(StovepipeData data, bool breakParentage, Rigidbody weaponRb)
         {
             data.ejectedRound.RecoverRigidbody();
             data.ejectedRoundCollider.isTrigger = true;
@@ -140,7 +142,15 @@ namespace Stovepipe.StovepipePatches
 
             if (!data.IsStovepiping) return;
             
-            SetBulletToInteracting(data, true, null);
+            UnStovepipe(data, true, null);
+ 
+            // Playing sound after bullet is unstovepiped.
+            
+            var handgun = data.GetComponent<Handgun>();
+            if (handgun != null)
+                handgun.PlayAudioEvent(FirearmAudioEventType.BoltSlideForward, 1f);
+            else
+                data.GetComponent<ClosedBoltWeapon>().PlayAudioEvent(FirearmAudioEventType.BoltSlideForward, 1f);
         }
 
         protected static bool DoesBulletAimAtFloor(FVRFireArmRound round)
