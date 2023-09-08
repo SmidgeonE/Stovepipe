@@ -159,9 +159,6 @@ namespace Stovepipe.DoubleFeedPatches
             var uninteractableLayer = LayerMask.NameToLayer("Water");
             var normalLayer = LayerMask.NameToLayer("Interactable");
             
-            if (data.upperBullet is null) Debug.Log("upper bullet is null");
-            if (data.lowerBullet is null) Debug.Log("lower bullet is null");
-            
             if (__instance.Weapon.Magazine != null)
             {
                 data.lowerBullet.gameObject.layer = uninteractableLayer;

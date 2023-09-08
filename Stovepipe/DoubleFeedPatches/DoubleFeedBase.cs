@@ -20,19 +20,35 @@ namespace Stovepipe.DoubleFeedPatches
             };
         }
 
-        /*
-        [HarmonyPatch(typeof(FVRFireArmMagazine), "UpdateBulletDisplay")]
+        [HarmonyPatch(typeof(FVRFireArmMagazine), "FVRUpdate")]
         [HarmonyPostfix]
         private static void HideTopBulletIfDoubleFeeding(FVRFireArmMagazine __instance)
+        {
+            if (__instance.FireArm is null) return;
+
+            var data = __instance.FireArm.GetComponent<DoubleFeedData>();
+            if (data is null || !data.IsDoubleFeeding) return;
+
+            Debug.Log("setting upper bullet to non visilbe");
+            __instance.DisplayRenderers[0].enabled = false;
+
+            if (__instance.m_numRounds == 1) __instance.DisplayRenderers[1].enabled = true;
+        }
+
+        [HarmonyPatch(typeof(FVRFireArmMagazine), "Release")]
+        [HarmonyPrefix]
+        private static void RevealTopBulletIfRemovedFromDoubleFeedingWeapon(FVRFireArmMagazine __instance)
         {
             if (__instance.FireArm is null) return;
             
             var data = __instance.FireArm.GetComponent<DoubleFeedData>();
             if (data is null || !data.IsDoubleFeeding) return;
             
-            Debug.Log("setting upper bullet to non visilbe");
-            __instance.DisplayRenderers[0].enabled = false;
-        }*/
+            Debug.Log("setting upper bullet to visible");
+            __instance.DisplayRenderers[0].enabled = true;
+
+            if (__instance.m_numRounds == 1) __instance.DisplayRenderers[1].enabled = false;
+        }
 
         [HarmonyPatch(typeof(FVRFireArmRound), "BeginInteraction")]
         [HarmonyPrefix]
@@ -43,8 +59,7 @@ namespace Stovepipe.DoubleFeedPatches
             var bulletData = __instance.GetComponent<BulletDoubleFeedData>();
 
             if (bulletData is null || !bulletData.gunData.IsDoubleFeeding) return;
-
-            Debug.Log("interaction unstovepipes");
+            
             SetBulletToInteracting(__instance, bulletData.gunData, false, null);
         }
 
@@ -79,22 +94,13 @@ namespace Stovepipe.DoubleFeedPatches
             data.upperBulletCol.isTrigger = true;
 
             if (round == data.upperBullet)
-            {
-                Debug.Log("upper bullet eremoved");
                 data.hasUpperBulletBeenRemoved = true;
-            }
-
-            else if (round == data.lowerBullet)
-            {
-                Debug.Log("lower bullet remvoed");
+            else if (round == data.lowerBullet) 
                 data.hasLowerBulletBeenRemoved = true;
-            }
 
             if (data.hasUpperBulletBeenRemoved && data.hasLowerBulletBeenRemoved)
-            {
-                Debug.Log("no longer double feeding");
                 data.IsDoubleFeeding = false;
-            }
+            
             
             if (breakParentage) round.SetParentage(null);
             if (weaponRb == null) return;
