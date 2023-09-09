@@ -47,13 +47,12 @@ namespace Stovepipe.DoubleFeedPatches
 
             data.upperBullet = __instance.Weapon.Chamber.EjectRound(__instance.Weapon.RoundPos_Ejection.position,
                 Vector3.zero, Vector3.zero, false);
-            
-            
+
             __instance.Weapon.BeginChamberingRound();
             __instance.Weapon.ChamberRound();
             data.lowerBullet = __instance.Weapon.Chamber.EjectRound(__instance.Weapon.RoundPos_Ejection.position + Vector3.down * 0.3f,
                 Vector3.zero, Vector3.zero, false);
-
+            
             data.hasFinishedEjectingDoubleFeedRounds = true;
 
             data.upperBulletCol = data.upperBullet.gameObject.GetComponent<CapsuleCollider>();
@@ -169,17 +168,26 @@ namespace Stovepipe.DoubleFeedPatches
 
             var uninteractableLayer = LayerMask.NameToLayer("Water");
             var normalLayer = LayerMask.NameToLayer("Interactable");
-            
+            var lowerBulletExists = !data.hasLowerBulletBeenRemoved;
+            var upperBulletExists = !data.hasUpperBulletBeenRemoved;
+
             if (__instance.Weapon.Magazine != null)
             {
-                data.lowerBullet.gameObject.layer = uninteractableLayer;
-                data.upperBullet.gameObject.layer = uninteractableLayer;
+                if (lowerBulletExists) data.lowerBullet.gameObject.layer = uninteractableLayer;
+                if (upperBulletExists) data.upperBullet.gameObject.layer = uninteractableLayer;
             }
             else
             {
-                data.lowerBullet.gameObject.layer = normalLayer;
-                if (data.hasLowerBulletBeenRemoved) data.upperBullet.gameObject.layer = normalLayer;
-                else data.upperBullet.gameObject.layer = uninteractableLayer;
+                if (lowerBulletExists) data.lowerBullet.gameObject.layer = normalLayer;
+                
+                if (upperBulletExists && lowerBulletExists)
+                {
+                    data.upperBullet.gameObject.layer = uninteractableLayer;
+                }
+                else if (upperBulletExists && !lowerBulletExists)
+                {
+                    data.upperBullet.gameObject.layer = normalLayer;
+                }
             }
         }
 

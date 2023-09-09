@@ -77,6 +77,8 @@ If you have any issues / ideas / need help with modding, I am always available o
 
 # Changelog
 
+3.0.1 - Fixed issue with lower bullet falling back into magazine, causing an error.
+
 3.0.0 - Added double-feed failures to closed bolt weapons. Added sound effect for manually removed stovepipe rounds.
 
 2.2.3 - Fixed bug where slide moves forward after ungrabbing in debug mode.

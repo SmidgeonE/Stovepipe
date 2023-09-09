@@ -1,6 +1,6 @@
 {
 	"name": "Stovepipe",
-	"version_number": "3.0.0",
+	"version_number": "3.0.1",
 	"description": "Now featuring double-feed failures for ARs/BRs/SMGs! Watch video on Thunderstore for a showcase. Implements graphical stovepipe and double-feed failures to weapons.",
 	"website_url": "https://github.com/SmidgeonE/Stovepipe",
 	"dependencies": []

@@ -1,7 +1,10 @@
-﻿using System.Runtime.Remoting.Messaging;
+﻿using System;
+using System.Data.Common;
+using System.Runtime.Remoting.Messaging;
 using FistVR;
 using HarmonyLib;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Stovepipe.DoubleFeedPatches
 {
@@ -48,6 +51,19 @@ namespace Stovepipe.DoubleFeedPatches
             if (__instance.m_numRounds == 1) __instance.DisplayRenderers[1].enabled = false;
         }
 
+        [HarmonyPatch(typeof(FVRFireArmRound), "Chamber")]
+        [HarmonyPrefix]
+        private static bool StopBulletFromBeingChamberedIfDoubleFeeding(FVRFireArmRound __instance)
+        {
+            var data = __instance.GetComponent<BulletDoubleFeedData>();
+
+            if (data == null) return true;
+            if (__instance != data.gunData.upperBullet && __instance != data.gunData.lowerBullet) return true;
+
+            return false;
+        }
+
+
         [HarmonyPatch(typeof(FVRFireArmRound), "BeginInteraction")]
         [HarmonyPrefix]
         private static void UnDoubleFeedIfHeld(FVRFireArmRound __instance)
@@ -75,6 +91,7 @@ namespace Stovepipe.DoubleFeedPatches
             round.RootRigidbody.useGravity = false;
             round.RootRigidbody.detectCollisions = false;
             data.upperBulletCol.isTrigger = false;
+            round.isMagazineLoadable = false;
             
             round.StoreAndDestroyRigidbody();
 
@@ -90,11 +107,18 @@ namespace Stovepipe.DoubleFeedPatches
             round.RootRigidbody.maxAngularVelocity = 1000f;
             round.RootRigidbody.detectCollisions = true;
             data.upperBulletCol.isTrigger = true;
+            round.isMagazineLoadable = true;
 
             if (round == data.upperBullet)
+            {
                 data.hasUpperBulletBeenRemoved = true;
-            else if (round == data.lowerBullet) 
+                data.upperBullet = null;
+            }
+            else if (round == data.lowerBullet)
+            {
                 data.hasLowerBulletBeenRemoved = true;
+                data.lowerBullet = null;
+            }
 
             if (data.hasUpperBulletBeenRemoved && data.hasLowerBulletBeenRemoved)
                 data.IsDoubleFeeding = false;
