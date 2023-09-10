@@ -35,7 +35,7 @@ namespace Stovepipe.DoubleFeedPatches
             // Double Feed
 
             data.BulletRandomness = GenerateRandomOffsets();
-            GenerateUnJammingProbs(data);
+            GenerateUnJammingProbs(data, true);
             data.hasFinishedEjectingDoubleFeedRounds = false;
 
             var managedToChamber = __instance.Weapon.ChamberRound();

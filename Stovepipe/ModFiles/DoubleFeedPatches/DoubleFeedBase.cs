@@ -92,8 +92,11 @@ namespace Stovepipe.DoubleFeedPatches
             round.RootRigidbody.detectCollisions = false;
             data.upperBulletCol.isTrigger = false;
             round.isMagazineLoadable = false;
+            round.isManuallyChamberable = false;
             
             round.StoreAndDestroyRigidbody();
+
+            round.GetComponent<BulletDoubleFeedData>().isThisBulletDoubleFeeding = true;
 
             if (!setParentToWeapon) return;
             
@@ -108,6 +111,9 @@ namespace Stovepipe.DoubleFeedPatches
             round.RootRigidbody.detectCollisions = true;
             data.upperBulletCol.isTrigger = true;
             round.isMagazineLoadable = true;
+            
+
+            round.GetComponent<BulletDoubleFeedData>().isThisBulletDoubleFeeding = false;
 
             if (round == data.upperBullet)
             {
@@ -131,10 +137,16 @@ namespace Stovepipe.DoubleFeedPatches
             round.RootRigidbody.angularVelocity = weaponRb.angularVelocity;
         }
 
-        protected static void GenerateUnJammingProbs(DoubleFeedData data)
+        protected static void GenerateUnJammingProbs(DoubleFeedData data, bool isRifle)
         {
             // Obviously, if you cant use one of the methods to unjam the lower bullet, then you necessarily cant use it
             // for the upper bullet
+
+            if (!isRifle)
+            {
+                GenerateUnJammingProbsForPistols(data);
+                return;
+            }
             
             data.slideRackUnjamsLowerBullet = Random.Range(0f, 1f) < FailureScriptManager.lowerBulletDropoutProb.Value;
 
@@ -156,6 +168,13 @@ namespace Stovepipe.DoubleFeedPatches
             // Special case probability where the lower bullet falls out, but the upper bullet needs cajoling
             data.slideRackUnjamsLowerButRackAndJiggleUnjamsUpper =
                 Random.Range(0f, 1f) < FailureScriptManager.upperBulletShakeyProb.Value;
+        }
+
+        private static void GenerateUnJammingProbsForPistols(DoubleFeedData data)
+        {
+            data.slideRackUnjamsLowerBullet = Random.Range(0f, 1f) < FailureScriptManager.lowerBulletDropoutProb.Value;
+            data.slideRackUnjamsUpperBullet = true;
+            data.slideRackAndJiggleUnjamsLowerBullet = Random.Range(0f, 1f) < FailureScriptManager.lowerBulletShakeyProb.Value;
         }
     }
 }

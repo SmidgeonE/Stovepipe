@@ -93,18 +93,20 @@ namespace Stovepipe
 
         private static void ApplyPatches()
         {
+
             if (isStovepipeEnabled.Value)
             {
-                Harmony.CreateAndPatchAll(typeof(HandgunPatches));
+                Harmony.CreateAndPatchAll(typeof(HandgunStovepipePatches));
                 Harmony.CreateAndPatchAll(typeof(StovepipeBase));
-                Harmony.CreateAndPatchAll(typeof(ClosedBoltPatches));
-                Harmony.CreateAndPatchAll(typeof(FailureScriptManager));
+                Harmony.CreateAndPatchAll(typeof(ClosedBoltStovepipePatches));
+                Harmony.CreateAndPatchAll(typeof(TubeFedShotgun));
             }
 
             if (isDoubleFeedEnabled.Value)
             {
                 Harmony.CreateAndPatchAll(typeof(ClosedBoltDoubleFeedPatches));
                 Harmony.CreateAndPatchAll(typeof(DoubleFeedBase));
+                Harmony.CreateAndPatchAll(typeof(HandgunDoubleFeedPatches));
             }
 
             if (isDebug.Value)
@@ -154,41 +156,6 @@ namespace Stovepipe
                 "Keep this to true if you want stovepipes to be simulated");
             isDoubleFeedEnabled = Config.Bind("Activation","enableDoubleFeed", true,
                 "Keep this to true if you want double feeds to be simulated");
-        }
-
-        private void Start()
-        {
-            foreach (var o in FindObjectsOfType(typeof(Handgun)))
-            {
-                var handgun = (Handgun)o;
-                if (handgun is null) continue;
-
-                handgun.Slide.gameObject.AddComponent<StovepipeData>();
-            }
-            foreach (var o in FindObjectsOfType(typeof(ClosedBoltWeapon)))
-            {
-                var cb = (ClosedBolt)o;
-                if (cb is null) continue;
-
-                cb.Weapon.gameObject.AddComponent<StovepipeData>();
-            }
-        }
-
-
-        [HarmonyPatch(typeof(Object), "Instantiate", 
-            typeof(Object) )]
-        [HarmonyPatch(typeof(Object), "Instantiate", 
-            typeof(Object), typeof(Vector3), typeof(Quaternion))]
-        [HarmonyPostfix]
-        private static void AddScriptToWeaponsPatch(Object __result)
-        {
-            var handgun = ((GameObject)__result).GetComponent<Handgun>();
-            if (handgun != null)
-                handgun.Slide.gameObject.AddComponent<StovepipeData>();
-            
-            var cb = ((GameObject)__result).GetComponent<ClosedBoltWeapon>();
-            if (cb != null)
-                cb.Bolt.gameObject.AddComponent<StovepipeData>();
         }
 
         private void GrabPreviousUserValue()

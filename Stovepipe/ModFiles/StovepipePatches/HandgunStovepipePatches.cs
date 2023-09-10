@@ -6,7 +6,7 @@ using Random = UnityEngine.Random;
 
 namespace Stovepipe.StovepipePatches
 {
-    public class HandgunPatches : StovepipeBase
+    public class HandgunStovepipePatches : StovepipeBase
     {
 
         [HarmonyPatch(typeof(Handgun), "EjectExtractedRound")]

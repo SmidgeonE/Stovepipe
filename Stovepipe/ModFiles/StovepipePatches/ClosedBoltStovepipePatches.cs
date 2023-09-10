@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Stovepipe.StovepipePatches
 {
-    public class ClosedBoltPatches : StovepipeBase
+    public class ClosedBoltStovepipePatches : StovepipeBase
     {
         
         [HarmonyPatch(typeof(ClosedBoltWeapon), "EjectExtractedRound")]
