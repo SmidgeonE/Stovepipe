@@ -1,5 +1,6 @@
 ﻿using FistVR;
 using HarmonyLib;
+using Stovepipe.Debug;
 using UnityEngine;
 
 namespace Stovepipe.StovepipePatches
@@ -90,7 +91,7 @@ namespace Stovepipe.StovepipePatches
             
             if (!data.IsStovepiping)
             {
-                if (!DebugMode.isDebuggingWeapon) ___m_boltZ_forward = data.defaultFrontPosition;
+                if (!DebugMode.IsDebuggingWeapon) ___m_boltZ_forward = data.defaultFrontPosition;
                 return;
             }
             

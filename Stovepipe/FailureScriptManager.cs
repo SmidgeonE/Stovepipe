@@ -9,6 +9,7 @@ using BepInEx.Configuration;
 using FistVR;
 using HarmonyLib;
 using Newtonsoft.Json;
+using Stovepipe.Debug;
 using Stovepipe.DoubleFeedPatches;
 using Stovepipe.StovepipePatches;
 using UnityEngine;
@@ -59,7 +60,11 @@ namespace Stovepipe
             }
 
             ApplyPatches();
+            GrabStovepipeAdjustments();
+        }
 
+        private static void GrabStovepipeAdjustments()
+        {
             var userDefsRoot = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/StovepipeData/";
 
             userDefsDir = userDefsRoot + "userdefinitions.json";
@@ -102,8 +107,12 @@ namespace Stovepipe
                 Harmony.CreateAndPatchAll(typeof(DoubleFeedBase));
             }
 
-            if (isDebug.Value) 
+            if (isDebug.Value)
+            {
                 Harmony.CreateAndPatchAll(typeof(DebugMode));
+                Harmony.CreateAndPatchAll(typeof(ClosedBoltDebug));
+                Harmony.CreateAndPatchAll(typeof(HandgunDebug));
+            }
         }
         
         public static StovepipeAdjustment ReadAdjustment(string rawNameOfGun)
