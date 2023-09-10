@@ -55,8 +55,12 @@ This will spawn a debug bullet, you can move this around, you may also manipulat
 
 To save this, simply press down on the right joystick again and it will save it to User/./AppData/Roaming/StovepipeData/userdefinitions.json.
 
-Currently the debug tool only works for ClosedBolt weapons. If you want this added to pistols, I can, but I think the positions for them are fine as is.
+Currently works for:
 
+(Stovepipes)
+1. Closed Bolt Weapons
+2. Handguns
+3. Tube Fed Shotguns
 
 
 # Note with Debug mode
@@ -76,6 +80,8 @@ If you have any issues / ideas / need help with modding, I am always available o
 
 
 # Changelog
+
+3.1.0 - Added Double Feeds to Handguns. Added Stovepipes to Tube Fed Shotguns. Added Handgun Debug Mode. Added Tube Fed Shotgun Debug Mode.
 
 3.0.1 - Fixed issue with lower bullet falling back into magazine, causing an error.
 
