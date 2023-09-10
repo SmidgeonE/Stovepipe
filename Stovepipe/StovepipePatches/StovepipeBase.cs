@@ -25,7 +25,7 @@ namespace Stovepipe.StovepipePatches
             return new[] { Random.Range(0.005f, 0.011f), Random.Range(0, -20f), Random.Range(0, 15f) };
         }
 
-        protected static void StartStovepipe(StovepipeData data, bool setParentToWeapon = false)
+        protected static void StartStovepipe(StovepipeData data, bool isRifle)
         {
             data.ejectedRound.RootRigidbody.velocity = Vector3.zero;
             data.ejectedRound.RootRigidbody.angularVelocity = Vector3.zero;
@@ -38,15 +38,16 @@ namespace Stovepipe.StovepipePatches
             data.ejectedRound.StoreAndDestroyRigidbody();
             data.ejectedRoundCollider.isTrigger = false;
 
-            if (setParentToWeapon)
-            {
-                data.ejectedRound.SetParentage(data.GetComponent<ClosedBolt>().Weapon.transform);
-                return;
-            }
-            
+            data.ejectedRound.SetParentage(isRifle
+                ? data.GetComponent<ClosedBolt>().Weapon.transform
+                : data.GetComponent<HandgunSlide>().Handgun.transform);
+
+
+            /*
             if (data.transform.parent != null)
                 data.ejectedRound.SetParentage(data.transform);
             else data.ejectedRound.SetParentage(data.transform.parent);
+            */
 
             // DEBUG CUUUUUUUUUBE
             /*var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);

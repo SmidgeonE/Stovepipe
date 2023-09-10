@@ -104,8 +104,12 @@ namespace Stovepipe.StovepipePatches
 
             if (!slideData.hasBulletBeenStovepiped)
             {
-                StartStovepipe(slideData);
+                StartStovepipe(slideData, false);
                 slideData.randomPosAndRot = GenerateRandomHandgunNoise();
+                slideData.Adjustments = FailureScriptManager.ReadAdjustment(__instance.Handgun.name);
+                slideData.timeSinceStovepiping += Time.deltaTime;
+                
+                if (slideData.Adjustments != null) slideData.hasFoundAdjustments = true;
             }
             
             /* Now setting the position and rotation while the bullet is stovepiping */
@@ -113,25 +117,40 @@ namespace Stovepipe.StovepipePatches
 
             if (slideData.ejectedRound is null) return;
             if (__instance.Handgun.Chamber.ProxyRound == null) return;
+
+            var bulletTransform = slideData.ejectedRound.transform;
             
-            slideData.ejectedRound.transform.position =
+            
+            // If we found a user made adjustment, we apply it 
+            
+            if (slideData.hasFoundAdjustments)
+            {
+                // ReSharper disable once PossibleNullReferenceException
+                bulletTransform.localPosition = slideData.Adjustments.BulletLocalPos;
+                bulletTransform.localRotation = slideData.Adjustments.BulletDir;
+                ___m_slideZ_forward = slideData.Adjustments.BoltZ;
+                return;
+            }
+
+            
+            bulletTransform.position =
                 __instance.Handgun.Chamber.ProxyRound.position
                 - slideTransform.forward * 0.5f * slideData.ejectedRoundHeight
                 - slideTransform.forward * 1f * slideData.ejectedRoundRadius
                 + slideTransform.up * slideData.randomPosAndRot[0];
             
-            slideData.ejectedRound.transform.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
-            slideData.ejectedRound.transform.Rotate(slideData.ejectedRound.transform.right, slideData.randomPosAndRot[2], Space.World);
+            bulletTransform.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
+            bulletTransform.Rotate(bulletTransform.right, slideData.randomPosAndRot[2], Space.World);
             
             if (slideData.ejectsToTheLeft)
             {
-                slideData.ejectedRound.transform.Rotate(slideTransform.forward, -slideData.randomPosAndRot[1], Space.World);
-                slideData.ejectedRound.transform.position -= 2 * slideData.ejectedRoundRadius * slideTransform.right * Mathf.Abs(Mathf.Sin(slideData.randomPosAndRot[1]));
+                bulletTransform.Rotate(slideTransform.forward, -slideData.randomPosAndRot[1], Space.World);
+                bulletTransform.position -= 2 * slideData.ejectedRoundRadius * slideTransform.right * Mathf.Abs(Mathf.Sin(slideData.randomPosAndRot[1]));
             }
             else
             {
-                slideData.ejectedRound.transform.Rotate(slideTransform.forward, slideData.randomPosAndRot[1], Space.World);
-                slideData.ejectedRound.transform.position += 2 * slideData.ejectedRoundRadius * slideTransform.right * Mathf.Abs(Mathf.Sin(slideData.randomPosAndRot[1]));
+                bulletTransform.Rotate(slideTransform.forward, slideData.randomPosAndRot[1], Space.World);
+                bulletTransform.position += 2 * slideData.ejectedRoundRadius * slideTransform.right * Mathf.Abs(Mathf.Sin(slideData.randomPosAndRot[1]));
             }
             
             slideData.timeSinceStovepiping += Time.deltaTime;

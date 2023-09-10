@@ -122,6 +122,7 @@ namespace Stovepipe.StovepipePatches
                 bulletTransform.localPosition = data.Adjustments.BulletLocalPos;
                 bulletTransform.localRotation = data.Adjustments.BulletDir;
                 ___m_boltZ_forward = data.Adjustments.BoltZ;
+                data.timeSinceStovepiping += Time.deltaTime;
                 return;
             }
             

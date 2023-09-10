@@ -56,7 +56,7 @@ namespace Stovepipe.Debug
             if (CurrentDebugWeapon is Handgun handgun)
             {
                 bulletObj =
-                    AM.GetRoundSelfPrefab(handgun.Chamber.RoundType, AM.GetDefaultRoundClass(handgun.Chamber.RoundType));
+                    AM.GetRoundSelfPrefab(handgun.RoundType, AM.GetDefaultRoundClass(handgun.RoundType));
                 _currentDebugRound = UnityEngine.Object.Instantiate(bulletObj.GetGameObject(),
                     handgun.RoundPos_Ejection.position,
                     Quaternion.Euler(CurrentDebugWeapon.transform.right)) as GameObject;
@@ -64,7 +64,7 @@ namespace Stovepipe.Debug
             else if (CurrentDebugWeapon is ClosedBoltWeapon closedBoltWeapon)
             {
                 bulletObj =
-                    AM.GetRoundSelfPrefab(closedBoltWeapon.Chamber.RoundType, AM.GetDefaultRoundClass(closedBoltWeapon.Chamber.RoundType));
+                    AM.GetRoundSelfPrefab(closedBoltWeapon.RoundType, AM.GetDefaultRoundClass(closedBoltWeapon.RoundType));
                 _currentDebugRound = UnityEngine.Object.Instantiate(bulletObj.GetGameObject(),
                     closedBoltWeapon.RoundPos_Ejection.position,
                     Quaternion.Euler(CurrentDebugWeapon.transform.right)) as GameObject;
