@@ -20,8 +20,8 @@ namespace Stovepipe.StovepipePatches
 
             if (slideData is null)
             {
-                __instance.Slide.gameObject.AddComponent(typeof(StovepipeData));
-                return true;
+                slideData = __instance.Slide.gameObject.AddComponent(typeof(StovepipeData)) as StovepipeData;
+                slideData.SetWeaponType(WeaponType.Handgun);
             }
 
             slideData.ejectedRound = __instance.Chamber.EjectRound(__instance.RoundPos_Ejection.position, 
@@ -104,7 +104,7 @@ namespace Stovepipe.StovepipePatches
 
             if (!slideData.hasBulletBeenStovepiped)
             {
-                StartStovepipe(slideData, false);
+                StartStovepipe(slideData);
                 slideData.randomPosAndRot = GenerateRandomHandgunNoise();
                 slideData.Adjustments = FailureScriptManager.ReadAdjustment(__instance.Handgun.name);
                 slideData.timeSinceStovepiping += Time.deltaTime;

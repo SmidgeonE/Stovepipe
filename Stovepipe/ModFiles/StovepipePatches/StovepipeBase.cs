@@ -1,5 +1,7 @@
-﻿using FistVR;
+﻿using System;
+using FistVR;
 using HarmonyLib;
+using Stovepipe.Debug;
 using UnityEngine;
 using Valve.VR.InteractionSystem;
 using Random = UnityEngine.Random;
@@ -25,7 +27,7 @@ namespace Stovepipe.StovepipePatches
             return new[] { Random.Range(0.005f, 0.011f), Random.Range(0, -20f), Random.Range(0, 15f) };
         }
 
-        protected static void StartStovepipe(StovepipeData data, bool isRifle)
+        protected static void StartStovepipe(StovepipeData data)
         {
             data.ejectedRound.RootRigidbody.velocity = Vector3.zero;
             data.ejectedRound.RootRigidbody.angularVelocity = Vector3.zero;
@@ -38,9 +40,18 @@ namespace Stovepipe.StovepipePatches
             data.ejectedRound.StoreAndDestroyRigidbody();
             data.ejectedRoundCollider.isTrigger = false;
 
-            data.ejectedRound.SetParentage(isRifle
-                ? data.GetComponent<ClosedBolt>().Weapon.transform
-                : data.GetComponent<HandgunSlide>().Handgun.transform);
+            switch (data.WeaponType)
+            {
+                case WeaponType.Handgun:
+                    data.ejectedRound.SetParentage(data.GetComponent<HandgunSlide>().Handgun.transform);
+                    break;
+                case WeaponType.Rifle:
+                    data.ejectedRound.SetParentage(data.GetComponent<ClosedBolt>().Weapon.transform);
+                    break;
+                case WeaponType.TubeFedShotgun:
+                    data.ejectedRound.SetParentage(data.GetComponent<TubeFedShotgunBolt>().Shotgun.transform);
+                    break;
+            }
 
 
             /*
@@ -96,6 +107,15 @@ namespace Stovepipe.StovepipePatches
 
             return ejectionDir.normalized;
         }
+        
+        protected static Vector3 GetVectorThatPointsOutOfEjectionPort(TubeFedShotgunBolt bolt)
+        {
+            var ejectionDir = bolt.Shotgun.RoundPos_Ejection.position - bolt.transform.position;
+            var componentAlongSlide = Vector3.Dot(bolt.transform.forward, ejectionDir);
+            ejectionDir -= componentAlongSlide * bolt.transform.forward;
+
+            return ejectionDir.normalized;
+        }
 
         public static bool FindIfGunEjectsToTheLeft(HandgunSlide slide)
         {
@@ -108,6 +128,16 @@ namespace Stovepipe.StovepipePatches
         }
 
         public static bool FindIfGunEjectsToTheLeft(ClosedBolt bolt)
+        {
+            // returns true if left, false if not.
+
+            var dirOutOfEjectionPort = GetVectorThatPointsOutOfEjectionPort(bolt);
+            var componentToTheRight = Vector3.Dot(dirOutOfEjectionPort, bolt.transform.right);
+
+            return componentToTheRight < -0.005f;
+        }
+        
+        public static bool FindIfGunEjectsToTheLeft(TubeFedShotgunBolt bolt)
         {
             // returns true if left, false if not.
 
@@ -143,14 +173,21 @@ namespace Stovepipe.StovepipePatches
             if (!data.IsStovepiping) return;
             
             UnStovepipe(data, true, null);
- 
-            // Playing sound after bullet is unstovepiped.
-            
-            var slide = data.GetComponent<HandgunSlide>();
-            if (slide != null)
-                slide.Handgun.PlayAudioEvent(FirearmAudioEventType.BoltSlideForward, 1f);
-            else
-                data.GetComponent<ClosedBolt>().Weapon.PlayAudioEvent(FirearmAudioEventType.BoltSlideForward, 1f);
+
+            switch (data.WeaponType)
+            {
+                case WeaponType.Handgun:
+                    data.GetComponent<HandgunSlide>().Handgun.PlayAudioEvent(FirearmAudioEventType.BoltSlideForward, 1f);
+                    break;
+                case WeaponType.Rifle:
+                    data.GetComponent<ClosedBolt>().Weapon.PlayAudioEvent(FirearmAudioEventType.BoltSlideForward, 1f);
+                    break;
+                case WeaponType.TubeFedShotgun:
+                    data.GetComponent<TubeFedShotgunBolt>().Shotgun.PlayAudioEvent(FirearmAudioEventType.BoltSlideForward, 1f);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         protected static bool DoesBulletAimAtFloor(FVRFireArmRound round)
@@ -158,12 +195,12 @@ namespace Stovepipe.StovepipePatches
             return Vector3.Dot(round.transform.forward, Vector3.down) > 0;
         }
 
-        protected static bool IsRifleThatEjectsUpwards(Transform ejectionPos, ClosedBolt bolt, FVRFireArmRound round)
+        protected static bool IsRifleThatEjectsUpwards(Transform ejectionPos, Transform boltTransform, FVRFireArmRound round)
         {
-            return Vector3.Dot(ejectionPos.position - bolt.transform.position, bolt.transform.up) > 0.017f
+            return Vector3.Dot(ejectionPos.position - boltTransform.transform.position, boltTransform.transform.up) > 0.017f
                    && round.RoundType != FireArmRoundType.a9_19_Parabellum && round.RoundType != FireArmRoundType.a10mmAuto;
         }
-
+        
         protected static bool CouldBulletFallOutGunHorizontally(Rigidbody weaponRb,
             Vector3 bulletDirection)
         {

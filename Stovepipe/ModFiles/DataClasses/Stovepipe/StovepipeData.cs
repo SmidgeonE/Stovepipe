@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using FistVR;
 using Stovepipe.StovepipePatches;
 using UnityEngine;
@@ -23,6 +24,7 @@ namespace Stovepipe
         public bool ejectsUpwards;
         public StovepipeAdjustment Adjustments;
         public bool hasFoundAdjustments;
+        public WeaponType WeaponType;
 
         public StovepipeData()
         {
@@ -34,10 +36,34 @@ namespace Stovepipe
                 ejectsToTheLeft = StovepipeBase.FindIfGunEjectsToTheLeft(slide);
                 stovepipeProb = FailureScriptManager.stovepipeHandgunProb.Value;
             }
-            else if (bolt != null)
+            else
             {
-                ejectsToTheLeft = StovepipeBase.FindIfGunEjectsToTheLeft(bolt);
+                if (bolt != null) ejectsToTheLeft = StovepipeBase.FindIfGunEjectsToTheLeft(bolt);
                 stovepipeProb = FailureScriptManager.stovepipeRifleProb.Value;
+            }
+        }
+
+        public void SetWeaponType(WeaponType type)
+        {
+            WeaponType = type;
+            
+            switch (type)
+            {
+                case WeaponType.Handgun:
+                    ejectsToTheLeft = StovepipeBase.FindIfGunEjectsToTheLeft(gameObject.GetComponent<HandgunSlide>());
+                    stovepipeProb = FailureScriptManager.stovepipeHandgunProb.Value;
+                    break;
+                case WeaponType.Rifle:
+                    ejectsToTheLeft = StovepipeBase.FindIfGunEjectsToTheLeft(gameObject.GetComponent<ClosedBolt>());
+                    stovepipeProb = FailureScriptManager.stovepipeRifleProb.Value;
+                    break;
+                case WeaponType.TubeFedShotgun:
+                    ejectsToTheLeft = StovepipeBase.FindIfGunEjectsToTheLeft(gameObject.GetComponent<TubeFedShotgunBolt>());
+                    stovepipeProb = FailureScriptManager.stovepipeTubeFedProb.Value;
+                    break;
+                default:
+                    stovepipeProb = FailureScriptManager.stovepipeRifleProb.Value;
+                    break;
             }
         }
     }

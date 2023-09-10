@@ -4,6 +4,7 @@ using FistVR;
 using HarmonyLib;
 using Newtonsoft.Json;
 using UnityEngine;
+using Valve.VR.InteractionSystem;
 
 namespace Stovepipe.Debug
 {
@@ -32,8 +33,20 @@ namespace Stovepipe.Debug
             if (!hasUserPressed) return;
             if (__instance.CurrentInteractable == null) return;
 
-            CurrentDebugWeapon = __instance.CurrentInteractable.GetComponent<ClosedBoltWeapon>();
-            if (CurrentDebugWeapon == null) CurrentDebugWeapon = __instance.CurrentInteractable.GetComponent<Handgun>();
+            var currentInteractable = __instance.CurrentInteractable;
+
+            switch (currentInteractable)
+            {
+                case ClosedBoltWeapon cbw:
+                    CurrentDebugWeapon = cbw;
+                    break;
+                case Handgun h:
+                    CurrentDebugWeapon = h;
+                    break;
+                case TubeFedShotgun s:
+                    CurrentDebugWeapon = s;
+                    break;
+            }
 
             if (CurrentDebugWeapon == null) return;
 
@@ -53,23 +66,33 @@ namespace Stovepipe.Debug
         {
             FVRObject bulletObj;
 
-            if (CurrentDebugWeapon is Handgun handgun)
+            switch (CurrentDebugWeapon)
             {
-                bulletObj =
-                    AM.GetRoundSelfPrefab(handgun.RoundType, AM.GetDefaultRoundClass(handgun.RoundType));
-                _currentDebugRound = UnityEngine.Object.Instantiate(bulletObj.GetGameObject(),
-                    handgun.RoundPos_Ejection.position,
-                    Quaternion.Euler(CurrentDebugWeapon.transform.right)) as GameObject;
+                case Handgun handgun:
+                    bulletObj =
+                        AM.GetRoundSelfPrefab(handgun.RoundType, AM.GetDefaultRoundClass(handgun.RoundType));
+                    _currentDebugRound = UnityEngine.Object.Instantiate(bulletObj.GetGameObject(),
+                        handgun.RoundPos_Ejection.position,
+                        Quaternion.Euler(CurrentDebugWeapon.transform.right)) as GameObject;
+                    break;
+                
+                case ClosedBoltWeapon closedBoltWeapon:
+                    bulletObj =
+                        AM.GetRoundSelfPrefab(closedBoltWeapon.RoundType, AM.GetDefaultRoundClass(closedBoltWeapon.RoundType));
+                    _currentDebugRound = UnityEngine.Object.Instantiate(bulletObj.GetGameObject(),
+                        closedBoltWeapon.RoundPos_Ejection.position,
+                        Quaternion.Euler(CurrentDebugWeapon.transform.right)) as GameObject;
+                    break;
+                
+                case TubeFedShotgun tubeFedShotgun:
+                    bulletObj =
+                        AM.GetRoundSelfPrefab(tubeFedShotgun.RoundType, AM.GetDefaultRoundClass(tubeFedShotgun.RoundType));
+                    _currentDebugRound = UnityEngine.Object.Instantiate(bulletObj.GetGameObject(),
+                        tubeFedShotgun.RoundPos_Ejection.position,
+                        Quaternion.Euler(CurrentDebugWeapon.transform.right)) as GameObject;
+                    break;
             }
-            else if (CurrentDebugWeapon is ClosedBoltWeapon closedBoltWeapon)
-            {
-                bulletObj =
-                    AM.GetRoundSelfPrefab(closedBoltWeapon.RoundType, AM.GetDefaultRoundClass(closedBoltWeapon.RoundType));
-                _currentDebugRound = UnityEngine.Object.Instantiate(bulletObj.GetGameObject(),
-                    closedBoltWeapon.RoundPos_Ejection.position,
-                    Quaternion.Euler(CurrentDebugWeapon.transform.right)) as GameObject;
-            }
-            
+
             if (_currentDebugRound == null) return;
 
 

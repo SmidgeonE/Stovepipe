@@ -29,6 +29,7 @@ namespace Stovepipe
         
         public static ConfigEntry<float> stovepipeHandgunProb;
         public static ConfigEntry<float> stovepipeRifleProb;
+        public static ConfigEntry<float> stovepipeTubeFedProb;
         
         public static ConfigEntry<float> doubleFeedHandgunProb;
         public static ConfigEntry<float> doubleFeedRifleProb;
@@ -99,7 +100,7 @@ namespace Stovepipe
                 Harmony.CreateAndPatchAll(typeof(HandgunStovepipePatches));
                 Harmony.CreateAndPatchAll(typeof(StovepipeBase));
                 Harmony.CreateAndPatchAll(typeof(ClosedBoltStovepipePatches));
-                Harmony.CreateAndPatchAll(typeof(TubeFedShotgun));
+                Harmony.CreateAndPatchAll(typeof(TubeFedStovepipePatches));
             }
 
             if (isDoubleFeedEnabled.Value)
@@ -114,6 +115,7 @@ namespace Stovepipe
                 Harmony.CreateAndPatchAll(typeof(DebugMode));
                 Harmony.CreateAndPatchAll(typeof(ClosedBoltDebug));
                 Harmony.CreateAndPatchAll(typeof(HandgunDebug));
+                Harmony.CreateAndPatchAll(typeof(TubeFedShotgunDebug));
             }
         }
         
@@ -132,8 +134,11 @@ namespace Stovepipe
         {
             stovepipeHandgunProb = Config.Bind("Probability - Stovepipe", "Handgun Probability", 0.012f, "");
             stovepipeRifleProb = Config.Bind("Probability - Stovepipe", "Rifle Probability", 0.01f, "");
+            stovepipeTubeFedProb = Config.Bind("Probability - Stovepipe", "Tube Fed Shotgun Probability", 0.01f, "");
+            
             doubleFeedHandgunProb = Config.Bind("Probability - Double Feed", "Handgun Probability", 0.012f, "");
             doubleFeedRifleProb = Config.Bind("Probability - Double Feed", "Rifle Probability", 0.003f, "");
+            
             lowerBulletDropoutProb = Config.Bind("Probability - Double Feed", "lowerBulletDropoutProbability", 0.5f, "This is the probability that, when the bolt is held back, the bullet falls out on its own accord and doesn't need the user to shake / remove the bullet manually.");
             upperBulletDropoutProb = Config.Bind("Probability - Double Feed", "upperBulletDropoutProbability", 0.5f, "This is the probability that, when the bolt is held back, the bullet falls out on its own accord and doesn't need the user to shake / remove the bullet manually. " +
                 "Note this is the probability after the lower bullet has fallen out, so the true probability of this happening is (this probability x the other probability)");
@@ -194,5 +199,12 @@ namespace Stovepipe
             
             File.WriteAllLines(dir, data);
         }
+    }
+
+    public enum WeaponType
+    {
+        Handgun,
+        Rifle,
+        TubeFedShotgun
     }
 }
