@@ -154,7 +154,7 @@ namespace Stovepipe.StovepipePatches
             bulletTransform.Rotate(bulletTransform.right, data.randomPosAndRot[2], Space.World);
 
             bulletTransform.position = weapon.Chamber.ProxyRound.position
-                                       - gunTransformForward * data.ejectedRoundRadius * 2.5f
+                                       - gunTransformForward * data.ejectedRoundRadius * 3.5f
                                        + bulletTransform.forward * data.ejectedRoundHeight * 0.3f
                                        + bulletTransform.forward * data.randomPosAndRot[0];
 

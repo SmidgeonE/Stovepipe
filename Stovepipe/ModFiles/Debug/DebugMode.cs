@@ -11,7 +11,7 @@ namespace Stovepipe.Debug
     public class DebugMode
     {
         public static bool IsDebuggingWeapon;
-        public static FVRInteractiveObject CurrentDebugWeapon;
+        public static FVRFireArm CurrentDebugWeapon;
 
         private static GameObject _currentDebugRound;
         private static FVRFireArmRound _currentDebugRoundScript;
@@ -45,6 +45,9 @@ namespace Stovepipe.Debug
                     break;
                 case TubeFedShotgun s:
                     CurrentDebugWeapon = s;
+                    break;
+                case OpenBoltReceiver o:
+                    CurrentDebugWeapon = o;
                     break;
             }
 
@@ -89,6 +92,14 @@ namespace Stovepipe.Debug
                         AM.GetRoundSelfPrefab(tubeFedShotgun.RoundType, AM.GetDefaultRoundClass(tubeFedShotgun.RoundType));
                     _currentDebugRound = UnityEngine.Object.Instantiate(bulletObj.GetGameObject(),
                         tubeFedShotgun.RoundPos_Ejection.position,
+                        Quaternion.Euler(CurrentDebugWeapon.transform.right)) as GameObject;
+                    break;
+                
+                case OpenBoltReceiver openBolt:
+                    bulletObj =
+                        AM.GetRoundSelfPrefab(openBolt.RoundType, AM.GetDefaultRoundClass(openBolt.RoundType));
+                    _currentDebugRound = UnityEngine.Object.Instantiate(bulletObj.GetGameObject(),
+                        openBolt.RoundPos_Ejection.position,
                         Quaternion.Euler(CurrentDebugWeapon.transform.right)) as GameObject;
                     break;
             }

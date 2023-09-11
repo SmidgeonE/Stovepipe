@@ -118,6 +118,7 @@ namespace Stovepipe
                 Harmony.CreateAndPatchAll(typeof(ClosedBoltDebug));
                 Harmony.CreateAndPatchAll(typeof(HandgunDebug));
                 Harmony.CreateAndPatchAll(typeof(TubeFedShotgunDebug));
+                Harmony.CreateAndPatchAll(typeof(OpenBoltDebug));
             }
         }
         
