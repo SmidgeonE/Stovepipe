@@ -111,7 +111,7 @@ namespace Stovepipe.DoubleFeedPatches
             }
             else
             {
-                var newFrontPos = __instance.Point_Slide_Forward.localPosition.z - data.upperBulletCol.height * 1.2f;
+                var newFrontPos = __instance.Point_Slide_Forward.localPosition.z - data.upperBulletCol.height * 1.1f;
                 ___m_slideZ_forward = newFrontPos;
             }
         }
@@ -162,6 +162,8 @@ namespace Stovepipe.DoubleFeedPatches
             var data = __instance.Handgun.GetComponent<DoubleFeedData>();
             if (data is null) return;
             if (!data.IsDoubleFeeding) return;
+            if (__instance.Handgun.MagazineType == FireArmMagazineType.mag_InternalGeneric) return;
+
 
             var uninteractableLayer = LayerMask.NameToLayer("Water");
             var normalLayer = LayerMask.NameToLayer("Interactable");
@@ -187,5 +189,33 @@ namespace Stovepipe.DoubleFeedPatches
 
             return !data.IsDoubleFeeding || !data.hasFinishedEjectingDoubleFeedRounds;
         }
+        
+        // This patch is necessary due to luger toggle actions not working due to our manipulation of the private
+        // field m_boltZ_current in our code.
+
+        [HarmonyPatch(typeof(LugerToggleAction), "Update")]
+        [HarmonyPrefix]
+        private static bool DontChamberRoundIfDoubleFeeding(LugerToggleAction __instance)
+        {
+            var slide = __instance.Slide;
+            var slideZRear = slide.Point_Slide_Rear.localPosition.z;
+            var slideZForward = slide.Point_Slide_Forward.localPosition.z;
+            var slideZCurrent = __instance.Slide.transform.localPosition.z;
+            var t = 1f - Mathf.InverseLerp(slideZRear, slideZForward, slideZCurrent);
+            
+            __instance.BarrelSlide.localPosition = Vector3.Lerp(__instance.BarrelSlideForward.localPosition, __instance.BarrelSlideLockPoint.localPosition, t);
+            var x = Mathf.Lerp(__instance.RotSet1.x, __instance.RotSet1.y, t);
+            var x2 = Mathf.Lerp(__instance.RotSet2.x, __instance.RotSet2.y, t);
+            var z = Mathf.Lerp(__instance.PosSet1.x, __instance.PosSet1.y, t);
+            var localEulerAngles = new Vector3(x, 0f, 0f);
+            __instance.TogglePiece1.localEulerAngles = localEulerAngles;
+            var localEulerAngles2 = new Vector3(x2, 0f, 0f);
+            __instance.TogglePiece2.localEulerAngles = localEulerAngles2;
+            var localPosition = new Vector3(0f, __instance.Height, z);
+            __instance.TogglePiece3.localPosition = localPosition;
+
+            return false;
+        }
+        
     }
 }

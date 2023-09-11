@@ -30,7 +30,8 @@ namespace Stovepipe
         public static ConfigEntry<float> stovepipeHandgunProb;
         public static ConfigEntry<float> stovepipeRifleProb;
         public static ConfigEntry<float> stovepipeTubeFedProb;
-        
+        public static ConfigEntry<float> stovepipeOpenBoltProb;
+
         public static ConfigEntry<float> doubleFeedHandgunProb;
         public static ConfigEntry<float> doubleFeedRifleProb;
         public static ConfigEntry<float> lowerBulletDropoutProb;
@@ -101,6 +102,7 @@ namespace Stovepipe
                 Harmony.CreateAndPatchAll(typeof(StovepipeBase));
                 Harmony.CreateAndPatchAll(typeof(ClosedBoltStovepipePatches));
                 Harmony.CreateAndPatchAll(typeof(TubeFedStovepipePatches));
+                Harmony.CreateAndPatchAll(typeof(OpenBoltStovepipePatches));
             }
 
             if (isDoubleFeedEnabled.Value)
@@ -135,8 +137,9 @@ namespace Stovepipe
             stovepipeHandgunProb = Config.Bind("Probability - Stovepipe", "Handgun Probability", 0.012f, "");
             stovepipeRifleProb = Config.Bind("Probability - Stovepipe", "Rifle Probability", 0.01f, "");
             stovepipeTubeFedProb = Config.Bind("Probability - Stovepipe", "Tube Fed Shotgun Probability", 0.01f, "");
+            stovepipeOpenBoltProb = Config.Bind("Probability - Stovepipe", "Open Bolt Probability", 0.01f, "");
             
-            doubleFeedHandgunProb = Config.Bind("Probability - Double Feed", "Handgun Probability", 0.012f, "");
+            doubleFeedHandgunProb = Config.Bind("Probability - Double Feed", "Handgun Probability", 0.008f, "");
             doubleFeedRifleProb = Config.Bind("Probability - Double Feed", "Rifle Probability", 0.003f, "");
             
             lowerBulletDropoutProb = Config.Bind("Probability - Double Feed", "lowerBulletDropoutProbability", 0.5f, "This is the probability that, when the bolt is held back, the bullet falls out on its own accord and doesn't need the user to shake / remove the bullet manually.");
@@ -205,6 +208,7 @@ namespace Stovepipe
     {
         Handgun,
         Rifle,
-        TubeFedShotgun
+        TubeFedShotgun,
+        OpenBolt
     }
 }

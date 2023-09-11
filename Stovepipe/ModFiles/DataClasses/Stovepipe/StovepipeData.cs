@@ -61,6 +61,10 @@ namespace Stovepipe
                     ejectsToTheLeft = StovepipeBase.FindIfGunEjectsToTheLeft(gameObject.GetComponent<TubeFedShotgunBolt>());
                     stovepipeProb = FailureScriptManager.stovepipeTubeFedProb.Value;
                     break;
+                case WeaponType.OpenBolt:
+                    ejectsToTheLeft = StovepipeBase.FindIfGunEjectsToTheLeft(gameObject.GetComponent<OpenBoltReceiverBolt>());
+                    stovepipeProb = FailureScriptManager.stovepipeOpenBoltProb.Value;
+                    break;
                 default:
                     stovepipeProb = FailureScriptManager.stovepipeRifleProb.Value;
                     break;

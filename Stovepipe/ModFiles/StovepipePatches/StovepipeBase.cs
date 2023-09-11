@@ -51,6 +51,9 @@ namespace Stovepipe.StovepipePatches
                 case WeaponType.TubeFedShotgun:
                     data.ejectedRound.SetParentage(data.GetComponent<TubeFedShotgunBolt>().Shotgun.transform);
                     break;
+                case WeaponType.OpenBolt:
+                    data.ejectedRound.SetParentage(data.GetComponent<OpenBoltReceiverBolt>().Receiver.transform);
+                    break;
             }
 
 
@@ -116,6 +119,16 @@ namespace Stovepipe.StovepipePatches
 
             return ejectionDir.normalized;
         }
+        
+        protected static Vector3 GetVectorThatPointsOutOfEjectionPort(OpenBoltReceiverBolt bolt)
+        {
+            var ejectionDir = bolt.Receiver.RoundPos_Ejection.position - bolt.transform.position;
+            var componentAlongSlide = Vector3.Dot(bolt.transform.forward, ejectionDir);
+            ejectionDir -= componentAlongSlide * bolt.transform.forward;
+
+            return ejectionDir.normalized;
+        }
+
 
         public static bool FindIfGunEjectsToTheLeft(HandgunSlide slide)
         {
@@ -138,6 +151,16 @@ namespace Stovepipe.StovepipePatches
         }
         
         public static bool FindIfGunEjectsToTheLeft(TubeFedShotgunBolt bolt)
+        {
+            // returns true if left, false if not.
+
+            var dirOutOfEjectionPort = GetVectorThatPointsOutOfEjectionPort(bolt);
+            var componentToTheRight = Vector3.Dot(dirOutOfEjectionPort, bolt.transform.right);
+
+            return componentToTheRight < -0.005f;
+        }
+        
+        public static bool FindIfGunEjectsToTheLeft(OpenBoltReceiverBolt bolt)
         {
             // returns true if left, false if not.
 
@@ -185,8 +208,11 @@ namespace Stovepipe.StovepipePatches
                 case WeaponType.TubeFedShotgun:
                     data.GetComponent<TubeFedShotgunBolt>().Shotgun.PlayAudioEvent(FirearmAudioEventType.BoltSlideForward, 1f);
                     break;
+                case WeaponType.OpenBolt:
+                    data.GetComponent<OpenBoltReceiverBolt>().Receiver.PlayAudioEvent(FirearmAudioEventType.BoltSlideForward, 1f);
+                    break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new Exception("Sound for bullet grab not found!");
             }
         }
 

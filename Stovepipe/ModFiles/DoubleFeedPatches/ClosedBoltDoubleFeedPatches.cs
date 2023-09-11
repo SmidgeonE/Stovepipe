@@ -165,6 +165,7 @@ namespace Stovepipe.DoubleFeedPatches
             var data = __instance.Weapon.GetComponent<DoubleFeedData>();
             if (data is null) return;
             if (!data.IsDoubleFeeding) return;
+            if (__instance.Weapon.MagazineType == FireArmMagazineType.mag_InternalGeneric) return;
 
             var uninteractableLayer = LayerMask.NameToLayer("Water");
             var normalLayer = LayerMask.NameToLayer("Interactable");
