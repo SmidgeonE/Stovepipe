@@ -61,6 +61,7 @@ Currently works for:
 1. Closed Bolt Weapons
 2. Handguns
 3. Tube Fed Shotguns
+4. Open Bolt Weapons
 
 
 # Note with Debug mode
@@ -80,6 +81,8 @@ If you have any issues / ideas / need help with modding, I am always available o
 
 
 # Changelog
+
+3.1.1 - Added stovepipes to open bolt weapons (with debug). Fixed issue with double-feeding on integrated magazine weapons. Lots of new high-quality default positions for handguns, and shotguns thanks to @drummerdude2003.
 
 3.1.0 - Added Double Feeds to Handguns. Added Stovepipes to Tube Fed Shotguns. Added Handgun Debug Mode. Added Tube Fed Shotgun Debug Mode.
 

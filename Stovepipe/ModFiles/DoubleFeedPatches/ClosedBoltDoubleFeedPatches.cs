@@ -98,7 +98,7 @@ namespace Stovepipe.DoubleFeedPatches
         [HarmonyPatch(typeof(ClosedBolt), "UpdateBolt")]
         [HarmonyPrefix]
         private static void SetBoltForwardsLocation(ClosedBolt __instance,
-            ref float ___m_boltZ_forward)
+            ref float ___m_boltZ_forward, float ___m_boltZ_rear)
         {
             var stovepipeData = __instance.Weapon.Bolt.GetComponent<StovepipeData>();
             if (stovepipeData != null && stovepipeData.IsStovepiping)
@@ -115,6 +115,8 @@ namespace Stovepipe.DoubleFeedPatches
             else
             {
                 var newFrontPos = __instance.Point_Bolt_Forward.localPosition.z - data.upperBulletCol.height * 1.2f;
+                if (newFrontPos < ___m_boltZ_rear) newFrontPos = ___m_boltZ_rear;
+                
                 ___m_boltZ_forward = newFrontPos;
             }
         }
@@ -165,7 +167,6 @@ namespace Stovepipe.DoubleFeedPatches
             var data = __instance.Weapon.GetComponent<DoubleFeedData>();
             if (data is null) return;
             if (!data.IsDoubleFeeding) return;
-            if (__instance.Weapon.MagazineType == FireArmMagazineType.mag_InternalGeneric) return;
 
             var uninteractableLayer = LayerMask.NameToLayer("Water");
             var normalLayer = LayerMask.NameToLayer("Interactable");
@@ -174,6 +175,13 @@ namespace Stovepipe.DoubleFeedPatches
 
             if (__instance.Weapon.Magazine != null)
             {
+                if (__instance.Weapon.Magazine.IsIntegrated || __instance.Weapon.Magazine.IsEnBloc)
+                {
+                    data.lowerBullet.gameObject.layer = normalLayer;
+                    data.upperBullet.gameObject.layer = normalLayer;
+                    return;
+                }
+                
                 if (lowerBulletExists) data.lowerBullet.gameObject.layer = uninteractableLayer;
                 if (upperBulletExists) data.upperBullet.gameObject.layer = uninteractableLayer;
             }
