@@ -1,52 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Security.AccessControl;
-using System.Security.Principal;
 using BepInEx;
-using BepInEx.Configuration;
-using FistVR;
 using HarmonyLib;
 using Newtonsoft.Json;
 using Stovepipe.Debug;
 using Stovepipe.DoubleFeedPatches;
 using Stovepipe.StovepipePatches;
-using UnityEngine;
-using Object = UnityEngine.Object;
 
-namespace Stovepipe
+namespace Stovepipe.ModFiles
 {
     [BepInPlugin("dll.smidgeon.failuretoeject", "Failure To Eject", "3.0.0")]
     [BepInProcess("h3vr.exe")]
     public class FailureScriptManager : BaseUnityPlugin
     {
-        public static ConfigEntry<bool> isDebug;
-        public static ConfigEntry<bool> isWriteToDefault;
-
-        public static ConfigEntry<bool> isStovepipeEnabled;
-        public static ConfigEntry<bool> isDoubleFeedEnabled;
-        
-        public static ConfigEntry<float> stovepipeHandgunProb;
-        public static ConfigEntry<float> stovepipeRifleProb;
-        public static ConfigEntry<float> stovepipeTubeFedProb;
-        public static ConfigEntry<float> stovepipeOpenBoltProb;
-
-        public static ConfigEntry<float> doubleFeedHandgunProb;
-        public static ConfigEntry<float> doubleFeedRifleProb;
-        public static ConfigEntry<float> lowerBulletDropoutProb;
-        public static ConfigEntry<float> upperBulletDropoutProb;
-        public static ConfigEntry<float> lowerBulletShakeyProb;
-        public static ConfigEntry<float> upperBulletShakeyProb;
-
-        public static Dictionary<string, StovepipeAdjustment> Defaults;
-        public static Dictionary<string, StovepipeAdjustment> UserDefs;
-
-        public static string defaultsDir;
-        public static string userDefsDir;
+        public static string DefaultsDir;
+        public static string UserDefsDir;
 
         // This is the value if they are upgrading from 1.x.x
         private static float _previousUserProbability;
+        
         private static bool _configIsFirstType;
 
         private void Awake()
@@ -57,8 +30,8 @@ namespace Stovepipe
             
             if (_configIsFirstType)
             {
-                stovepipeRifleProb.Value = _previousUserProbability;
-                stovepipeHandgunProb.Value = _previousUserProbability;  
+                UserConfig.StovepipeRifleProb.Value = _previousUserProbability;
+                UserConfig.StovepipeHandgunProb.Value = _previousUserProbability;  
             }
 
             ApplyPatches();
@@ -69,34 +42,34 @@ namespace Stovepipe
         {
             var userDefsRoot = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/StovepipeData/";
 
-            userDefsDir = userDefsRoot + "userdefinitions.json";
-            defaultsDir = Paths.PluginPath + "/Smidgeon-Stovepipe/defaults.json";
+            UserDefsDir = userDefsRoot + "userdefinitions.json";
+            DefaultsDir = Paths.PluginPath + "/Smidgeon-Stovepipe/defaults.json";
 
-            if (!File.Exists(userDefsDir))
+            if (!File.Exists(UserDefsDir))
             {
                 Directory.CreateDirectory(userDefsRoot);
-                File.Create(userDefsDir).Dispose();
+                File.Create(UserDefsDir).Dispose();
             }
-            if (!File.Exists(defaultsDir))
+            if (!File.Exists(DefaultsDir))
             {
-                File.Create(defaultsDir).Dispose();
+                File.Create(DefaultsDir).Dispose();
             }
 
-            Defaults =
-                JsonConvert.DeserializeObject<Dictionary<string, StovepipeAdjustment>>(File.ReadAllText(defaultsDir));
-            UserDefs =
-                JsonConvert.DeserializeObject<Dictionary<string, StovepipeAdjustment>>(File.ReadAllText(userDefsDir));
+            UserConfig.Defaults =
+                JsonConvert.DeserializeObject<Dictionary<string, StovepipeAdjustment>>(File.ReadAllText(DefaultsDir));
+            UserConfig.UserDefs =
+                JsonConvert.DeserializeObject<Dictionary<string, StovepipeAdjustment>>(File.ReadAllText(UserDefsDir));
 
-            if (Defaults is null)
-                Defaults = new Dictionary<string, StovepipeAdjustment>();
-            if (UserDefs is null)
-                UserDefs = new Dictionary<string, StovepipeAdjustment>();
+            if (UserConfig.Defaults is null)
+                UserConfig.Defaults = new Dictionary<string, StovepipeAdjustment>();
+            if (UserConfig.UserDefs is null)
+                UserConfig.UserDefs = new Dictionary<string, StovepipeAdjustment>();
         }
 
         private static void ApplyPatches()
         {
 
-            if (isStovepipeEnabled.Value)
+            if (UserConfig.IsStovepipeEnabled.Value)
             {
                 Harmony.CreateAndPatchAll(typeof(HandgunStovepipePatches));
                 Harmony.CreateAndPatchAll(typeof(StovepipeBase));
@@ -105,14 +78,14 @@ namespace Stovepipe
                 Harmony.CreateAndPatchAll(typeof(OpenBoltStovepipePatches));
             }
 
-            if (isDoubleFeedEnabled.Value)
+            if (UserConfig.IsDoubleFeedEnabled.Value)
             {
                 Harmony.CreateAndPatchAll(typeof(ClosedBoltDoubleFeedPatches));
                 Harmony.CreateAndPatchAll(typeof(DoubleFeedBase));
                 Harmony.CreateAndPatchAll(typeof(HandgunDoubleFeedPatches));
             }
 
-            if (isDebug.Value)
+            if (UserConfig.IsDebug.Value)
             {
                 Harmony.CreateAndPatchAll(typeof(DebugMode));
                 Harmony.CreateAndPatchAll(typeof(ClosedBoltDebug));
@@ -126,45 +99,54 @@ namespace Stovepipe
         {
             var cleanedName = rawNameOfGun.Remove(rawNameOfGun.Length - 7);
 
-            if (UserDefs.TryGetValue(cleanedName, out var adjustment)) return adjustment;
+            if (UserConfig.UserDefs.TryGetValue(cleanedName, out var adjustment)) return adjustment;
 
-            Defaults.TryGetValue(cleanedName, out adjustment);
+            UserConfig.Defaults.TryGetValue(cleanedName, out adjustment);
 
             return adjustment;
         }
 
         private void GenerateConfigBinds()
         {
-            stovepipeHandgunProb = Config.Bind("Probability - Stovepipe", "Handgun Probability", 0.012f, "");
-            stovepipeRifleProb = Config.Bind("Probability - Stovepipe", "Rifle Probability", 0.01f, "");
-            stovepipeTubeFedProb = Config.Bind("Probability - Stovepipe", "Tube Fed Shotgun Probability", 0.01f, "");
-            stovepipeOpenBoltProb = Config.Bind("Probability - Stovepipe", "Open Bolt Probability", 0.01f, "");
+            UserConfig.StovepipeHandgunProb = Config.Bind("Probability - Stovepipe", "Handgun Probability", 0.012f, "");
+            UserConfig.StovepipeRifleProb = Config.Bind("Probability - Stovepipe", "Rifle Probability", 0.01f, "");
+            UserConfig.StovepipeTubeFedProb = Config.Bind("Probability - Stovepipe", "Tube Fed Shotgun Probability", 0.01f, "");
+            UserConfig.StovepipeOpenBoltProb = Config.Bind("Probability - Stovepipe", "Open Bolt Probability", 0.01f, "");
             
-            doubleFeedHandgunProb = Config.Bind("Probability - Double Feed", "Handgun Probability", 0.008f, "");
-            doubleFeedRifleProb = Config.Bind("Probability - Double Feed", "Rifle Probability", 0.003f, "");
+            UserConfig.DoubleFeedHandgunProb = Config.Bind("Probability - Double Feed", "Handgun Probability", 0.008f, "");
+            UserConfig.DoubleFeedRifleProb = Config.Bind("Probability - Double Feed", "Rifle Probability", 0.003f, "");
             
-            lowerBulletDropoutProb = Config.Bind("Probability - Double Feed", "lowerBulletDropoutProbability", 0.5f, "This is the probability that, when the bolt is held back, the bullet falls out on its own accord and doesn't need the user to shake / remove the bullet manually.");
-            upperBulletDropoutProb = Config.Bind("Probability - Double Feed", "upperBulletDropoutProbability", 0.5f, "This is the probability that, when the bolt is held back, the bullet falls out on its own accord and doesn't need the user to shake / remove the bullet manually. " +
+            UserConfig.LowerBulletDropoutProb = Config.Bind("Probability - Double Feed", "lowerBulletDropoutProbability", 0.5f, "This is the probability that, when the bolt is held back, the bullet falls out on its own accord and doesn't need the user to shake / remove the bullet manually.");
+            UserConfig.UpperBulletDropoutProb = Config.Bind("Probability - Double Feed", "upperBulletDropoutProbability", 0.5f, "This is the probability that, when the bolt is held back, the bullet falls out on its own accord and doesn't need the user to shake / remove the bullet manually. " +
                 "Note this is the probability after the lower bullet has fallen out, so the true probability of this happening is (this probability x the other probability)");
-            lowerBulletShakeyProb = Config.Bind("Probability - Double Feed", "lowerBulletShakeyProbability", 0.5f, "This is the probability that, when the bolt is held back, the bullet falls out while the user is shaking the gun.");
-            upperBulletShakeyProb = Config.Bind("Probability - Double Feed", "upperBulletShakeyProbabilityy", 0.5f, "This is the probability that, when the bolt is held back, the bullet falls out while the user is shaking the gun. " +
+            UserConfig.LowerBulletShakeyProb = Config.Bind("Probability - Double Feed", "lowerBulletShakeyProbability", 0.5f, "This is the probability that, when the bolt is held back, the bullet falls out while the user is shaking the gun.");
+            UserConfig.UpperBulletShakeyProb = Config.Bind("Probability - Double Feed", "upperBulletShakeyProbabilityy", 0.5f, "This is the probability that, when the bolt is held back, the bullet falls out while the user is shaking the gun. " +
                 "Note this is the probability after the lower bullet has fallen out, so the true probability of this happening is (this probability x the other probability)");
 
             
             
-            isDebug = Config.Bind("Debug Mode", "isActive", false, "This debug mode allows, " +
-                                                                   "once both triggers are pressed upwards, " +
-                                                                   "spawns a debug object that allows for manually changing the position / rotation of the bullet when its stovepiped. " +
-                                                                   "Once you leave the debug mode, it will save this position and rotation so you can use it again in future.");
-            isWriteToDefault = Config.Bind("Debug Mode", "writeToDefault", false,
+            UserConfig.IsDebug = Config.Bind("Debug Mode", "isActive", false, "This debug mode allows, " +
+                                                                              "once both triggers are pressed upwards, " +
+                                                                              "spawns a debug object that allows for manually changing the position / rotation of the bullet when its stovepiped. " +
+                                                                              "Once you leave the debug mode, it will save this position and rotation so you can use it again in future.");
+            UserConfig.IsWriteToDefault = Config.Bind("Debug Mode", "writeToDefault", false,
                 "Do not use this, this is for developing. " +
                 "If you do, it will overwrite the defaults, which will just be overwritten when the mod is updated.");
             
 
-            isStovepipeEnabled = Config.Bind("Activation","enableStovepipe", true,
+            UserConfig.IsStovepipeEnabled = Config.Bind("Activation","enableStovepipe", true,
                 "Keep this to true if you want stovepipes to be simulated");
-            isDoubleFeedEnabled = Config.Bind("Activation","enableDoubleFeed", true,
+            UserConfig.IsDoubleFeedEnabled = Config.Bind("Activation","enableDoubleFeed", true,
                 "Keep this to true if you want double feeds to be simulated");
+            
+            UserConfig.UseProbabilityCreep = Config.Bind("Quality Of Life","Use Probability Creep", true,
+                "Sometimes, it feels like you get too many stovepipes at one time. This, set to true, should remedy this feeling.");
+            UserConfig.MinRoundBeforeNextJam = Config.Bind("Quality Of Life","Minimum Rounds Before Next Jam", 5,
+                "If you find the bullets seem to jam to frequently together, this can be tuned to reduce frustration.");
+            UserConfig.ProbabilityCreepNumRounds = Config.Bind("Quality Of Life","Number Of Rounds Before Probability Is ˜Fully Charged˜", 30,
+                "This number changes how many bullets before the probability of a jam returns back to normal. " +
+                "Note it will slowly increase throughout this range. This should make it much more unlikely that you will get a jam right after another jam. " +
+                "Requires 'Use Probability Creep' to be set to true.");
         }
 
         private void GrabPreviousUserValue()

@@ -1,6 +1,8 @@
-﻿using FistVR;
+﻿using BepInEx.Configuration;
+using FistVR;
 using HarmonyLib;
 using Stovepipe.Debug;
+using Stovepipe.ModFiles;
 using UnityEngine;
 
 namespace Stovepipe.StovepipePatches
@@ -14,7 +16,7 @@ namespace Stovepipe.StovepipePatches
         {
             if (!__instance.Chamber.IsFull) return false;
 
-            var data = __instance.Bolt.GetComponent(typeof(StovepipeData)) as StovepipeData;
+            var data = __instance.Bolt.GetComponent<StovepipeData>();
 
             if (data is null)
             {
@@ -32,9 +34,11 @@ namespace Stovepipe.StovepipePatches
                 __instance.RoundPos_Ejection.position, 
                 __instance.RoundPos_Ejection.rotation, 
                 false);
-
+            
             if (data.ejectedRound is null) return false;
 
+            data.numOfRoundsSinceLastJam++;
+            data.CheckAndIncreaseProbability();
             var bulletDataHolder = data.ejectedRound.gameObject.AddComponent<BulletStovepipeData>();
             bulletDataHolder.data = data;
 
@@ -60,6 +64,7 @@ namespace Stovepipe.StovepipePatches
             
             var weapon = __instance.Weapon;
 
+            if (data.numOfRoundsSinceLastJam < UserConfig.MinRoundBeforeNextJam.Value) return;
             if (!weapon.Chamber.IsFull) return;
             if (!weapon.Chamber.IsSpent) return;
             if (weapon.Chamber.GetRound().IsCaseless) return;

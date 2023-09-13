@@ -2,6 +2,7 @@
 using FistVR;
 using HarmonyLib;
 using Stovepipe.Debug;
+using Stovepipe.ModFiles;
 using UnityEngine;
 using Valve.VR.InteractionSystem;
 using Random = UnityEngine.Random;
@@ -36,11 +37,13 @@ namespace Stovepipe.StovepipePatches
             data.ejectedRound.RootRigidbody.detectCollisions = false;
             data.hasBulletBeenStovepiped = true;
             data.timeSinceStovepiping = 0f;
+            data.numOfRoundsSinceLastJam = 0;
+            data.stovepipeProb = data.stovepipeMaxProb / UserConfig.ProbabilityCreepNumRounds.Value;
             
             data.ejectedRound.StoreAndDestroyRigidbody();
             data.ejectedRoundCollider.isTrigger = false;
 
-            switch (data.WeaponType)
+            switch (data.weaponType)
             {
                 case WeaponType.Handgun:
                     data.ejectedRound.SetParentage(data.GetComponent<HandgunSlide>().Handgun.transform);
@@ -197,7 +200,7 @@ namespace Stovepipe.StovepipePatches
             
             UnStovepipe(data, true, null);
 
-            switch (data.WeaponType)
+            switch (data.weaponType)
             {
                 case WeaponType.Handgun:
                     data.GetComponent<HandgunSlide>().Handgun.PlayAudioEvent(FirearmAudioEventType.BoltSlideForward, 1f);

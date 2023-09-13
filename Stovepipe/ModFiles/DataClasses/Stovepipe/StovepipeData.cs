@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using FistVR;
+using Stovepipe.ModFiles;
 using Stovepipe.StovepipePatches;
 using UnityEngine;
 
@@ -9,64 +10,93 @@ namespace Stovepipe
     public class StovepipeData : MonoBehaviour
     {
         public bool IsStovepiping { get; set; }
+        
         public FVRFireArmRound ejectedRound;
         public float ejectedRoundRadius;
         public float ejectedRoundHeight;
+        public CapsuleCollider ejectedRoundCollider;
+        
         public float defaultFrontPosition;
         public float[] randomPosAndRot;
-        public float stovepipeProb;
         public bool hasBulletBeenStovepiped;
         public bool hasCollectedWeaponCharacteristics;
-        public CapsuleCollider ejectedRoundCollider;
         public float timeSinceStovepiping;
         public bool ejectsToTheLeft;
         public bool hasFoundIfItEjectsUpwards;
         public bool ejectsUpwards;
         public StovepipeAdjustment Adjustments;
         public bool hasFoundAdjustments;
-        public WeaponType WeaponType;
+        public WeaponType weaponType;
+        public int numOfRoundsSinceLastJam;
+        
+        
+        public float stovepipeProb;
+        public float stovepipeMaxProb;
 
         public StovepipeData()
         {
-            var slide = gameObject.GetComponent<HandgunSlide>();
-            var bolt = gameObject.GetComponent<ClosedBolt>();
-            
-            if (slide != null)
+            numOfRoundsSinceLastJam = UserConfig.MinRoundBeforeNextJam.Value;
+        }
+
+        public void CheckAndIncreaseProbability()
+        {
+            if (!UserConfig.UseProbabilityCreep.Value) return;
+            if (UserConfig.ProbabilityCreepNumRounds.Value == 0) return;
+
+            if (stovepipeProb < stovepipeMaxProb)
+                stovepipeProb += stovepipeMaxProb / UserConfig.ProbabilityCreepNumRounds.Value;
+
+            CheckAndIncreaseDoubleFeedProbability();
+        }
+
+        public void CheckAndIncreaseDoubleFeedProbability()
+        {
+            switch (weaponType)
             {
-                ejectsToTheLeft = StovepipeBase.FindIfGunEjectsToTheLeft(slide);
-                stovepipeProb = FailureScriptManager.stovepipeHandgunProb.Value;
-            }
-            else
-            {
-                if (bolt != null) ejectsToTheLeft = StovepipeBase.FindIfGunEjectsToTheLeft(bolt);
-                stovepipeProb = FailureScriptManager.stovepipeRifleProb.Value;
+                case WeaponType.Handgun:
+                    var handgunData = gameObject.GetComponent<HandgunSlide>().Handgun.GetComponent<DoubleFeedData>();
+                    if (handgunData.doubleFeedChance < handgunData.doubleFeedMaxChance)
+                        handgunData.doubleFeedChance += handgunData.doubleFeedMaxChance /
+                                                        UserConfig.ProbabilityCreepNumRounds.Value;
+                    break;
+                
+                case WeaponType.Rifle:
+                    var rifleData = gameObject.GetComponent<ClosedBolt>().Weapon.GetComponent<DoubleFeedData>();
+                    if (rifleData.doubleFeedChance < rifleData.doubleFeedMaxChance)
+                        rifleData.doubleFeedChance += rifleData.doubleFeedMaxChance /
+                                                      UserConfig.ProbabilityCreepNumRounds.Value; 
+                    break;
             }
         }
 
         public void SetWeaponType(WeaponType type)
         {
-            WeaponType = type;
+            weaponType = type;
             
             switch (type)
             {
                 case WeaponType.Handgun:
                     ejectsToTheLeft = StovepipeBase.FindIfGunEjectsToTheLeft(gameObject.GetComponent<HandgunSlide>());
-                    stovepipeProb = FailureScriptManager.stovepipeHandgunProb.Value;
+                    stovepipeMaxProb = UserConfig.StovepipeHandgunProb.Value;
+                    stovepipeProb = stovepipeMaxProb;
                     break;
+                
                 case WeaponType.Rifle:
                     ejectsToTheLeft = StovepipeBase.FindIfGunEjectsToTheLeft(gameObject.GetComponent<ClosedBolt>());
-                    stovepipeProb = FailureScriptManager.stovepipeRifleProb.Value;
+                    stovepipeMaxProb = UserConfig.StovepipeRifleProb.Value;
+                    stovepipeProb = stovepipeMaxProb;
                     break;
+                
                 case WeaponType.TubeFedShotgun:
                     ejectsToTheLeft = StovepipeBase.FindIfGunEjectsToTheLeft(gameObject.GetComponent<TubeFedShotgunBolt>());
-                    stovepipeProb = FailureScriptManager.stovepipeTubeFedProb.Value;
+                    stovepipeMaxProb = UserConfig.StovepipeTubeFedProb.Value;
+                    stovepipeProb = stovepipeMaxProb;
                     break;
+                
                 case WeaponType.OpenBolt:
                     ejectsToTheLeft = StovepipeBase.FindIfGunEjectsToTheLeft(gameObject.GetComponent<OpenBoltReceiverBolt>());
-                    stovepipeProb = FailureScriptManager.stovepipeOpenBoltProb.Value;
-                    break;
-                default:
-                    stovepipeProb = FailureScriptManager.stovepipeRifleProb.Value;
+                    stovepipeMaxProb = UserConfig.StovepipeOpenBoltProb.Value;
+                    stovepipeProb = stovepipeMaxProb;
                     break;
             }
         }

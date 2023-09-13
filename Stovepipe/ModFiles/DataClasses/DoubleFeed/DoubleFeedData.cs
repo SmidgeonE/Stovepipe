@@ -5,10 +5,12 @@ namespace Stovepipe
 {
     public class DoubleFeedData : MonoBehaviour
     {
-        public bool IsDoubleFeeding;
-        public float DoubleFeedChance;
+        public bool isDoubleFeeding;
         public float bulletHeight;
         public float bulletRadius;
+        
+        public float doubleFeedChance;
+        public float doubleFeedMaxChance;
 
         public CapsuleCollider upperBulletCol;
         public FVRFireArmRound upperBullet;
@@ -26,19 +28,21 @@ namespace Stovepipe
         public bool slideRackAndJiggleUnjamsLowerBullet;
         public bool slideRackUnjamsLowerButRackAndJiggleUnjamsUpper;
 
-        public float[,] BulletRandomness;
-        
+        public StovepipeData thisWeaponsStovepipeData;
 
+        public float[,] BulletRandomness;
 
         public void SetProbability(bool weaponIsRifle)
         {
             if (weaponIsRifle)
             {
-                DoubleFeedChance = FailureScriptManager.doubleFeedRifleProb.Value;
+                doubleFeedChance = UserConfig.DoubleFeedRifleProb.Value;
+                doubleFeedMaxChance = doubleFeedChance;
                 return;
             }
 
-            DoubleFeedChance = FailureScriptManager.doubleFeedHandgunProb.Value;
+            doubleFeedChance = UserConfig.DoubleFeedHandgunProb.Value;
+            doubleFeedMaxChance = doubleFeedChance;
         }
     }
 }

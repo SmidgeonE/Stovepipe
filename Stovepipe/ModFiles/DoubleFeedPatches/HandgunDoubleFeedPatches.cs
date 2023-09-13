@@ -16,18 +16,21 @@ namespace Stovepipe.DoubleFeedPatches
             if (__instance.Handgun.Chamber.GetRound() != null) return;
 
             var stoveData = __instance.Handgun.Slide.GetComponent<StovepipeData>();
-            if (stoveData != null && stoveData.IsStovepiping) return;
+            
+            if (stoveData != null &&
+                (stoveData.IsStovepiping || stoveData.numOfRoundsSinceLastJam < UserConfig.MinRoundBeforeNextJam.Value)) return;
             
             var data = __instance.Handgun.gameObject.GetComponent<DoubleFeedData>() ?? __instance.Handgun.gameObject.AddComponent<DoubleFeedData>();
             data.SetProbability(false);
+            data.thisWeaponsStovepipeData = stoveData;
             
-            if (data.IsDoubleFeeding) return;
+            if (data.isDoubleFeeding) return;
             
             data.hasUpperBulletBeenRemoved = false;
             data.hasLowerBulletBeenRemoved = false;
             
-            data.IsDoubleFeeding = UnityEngine.Random.Range(0f, 1f) < data.DoubleFeedChance;
-            if (!data.IsDoubleFeeding) return;
+            data.isDoubleFeeding = UnityEngine.Random.Range(0f, 1f) < data.doubleFeedChance;
+            if (!data.isDoubleFeeding) return;
 
             // Double Feed
 
@@ -105,7 +108,7 @@ namespace Stovepipe.DoubleFeedPatches
             
             var data = __instance.Handgun.GetComponent<DoubleFeedData>();
 
-            if (data is null || !data.IsDoubleFeeding)
+            if (data is null || !data.isDoubleFeeding)
             {
                 ___m_slideZ_forward = __instance.Point_Slide_Forward.localPosition.z;
             }
@@ -124,7 +127,7 @@ namespace Stovepipe.DoubleFeedPatches
             if (__instance.CurPos != HandgunSlide.SlidePos.LockedToRear
                 && __instance.CurPos != HandgunSlide.SlidePos.Rear
                 && __instance.CurPos != HandgunSlide.SlidePos.Locked) return;
-            if (data is null || !data.IsDoubleFeeding) return;
+            if (data is null || !data.isDoubleFeeding) return;
             if (__instance.Handgun.Magazine != null) return;
             if (!IsGunShaking(__instance.Handgun.RootRigidbody)) return;
 
@@ -146,7 +149,7 @@ namespace Stovepipe.DoubleFeedPatches
         {
             var data = __instance.Handgun.GetComponent<DoubleFeedData>();
 
-            if (data is null || !data.IsDoubleFeeding || __instance.Handgun.Magazine != null) return;
+            if (data is null || !data.isDoubleFeeding || __instance.Handgun.Magazine != null) return;
 
             if (data.slideRackUnjamsLowerBullet && !data.hasLowerBulletBeenRemoved)
                 SetBulletToInteracting(data.lowerBullet, data, true, __instance.Handgun.RootRigidbody);
@@ -161,7 +164,7 @@ namespace Stovepipe.DoubleFeedPatches
         {
             var data = __instance.Handgun.GetComponent<DoubleFeedData>();
             if (data is null) return;
-            if (!data.IsDoubleFeeding) return;
+            if (!data.isDoubleFeeding) return;
             if (__instance.Handgun.MagazineType == FireArmMagazineType.mag_InternalGeneric) return;
 
 
@@ -187,7 +190,7 @@ namespace Stovepipe.DoubleFeedPatches
 
             if (data is null) return true;
 
-            return !data.IsDoubleFeeding || !data.hasFinishedEjectingDoubleFeedRounds;
+            return !data.isDoubleFeeding || !data.hasFinishedEjectingDoubleFeedRounds;
         }
         
         // This patch is necessary due to luger toggle actions not working due to our manipulation of the private

@@ -1,6 +1,7 @@
 ﻿using FistVR;
 using HarmonyLib;
 using Stovepipe.Debug;
+using Stovepipe.ModFiles;
 using UnityEngine;
 
 namespace Stovepipe.StovepipePatches
@@ -33,7 +34,9 @@ namespace Stovepipe.StovepipePatches
                 false);
 
             if (data.ejectedRound is null) return false;
-
+            
+            data.numOfRoundsSinceLastJam++;           
+            data.CheckAndIncreaseProbability();
             var bulletDataHolder = data.ejectedRound.gameObject.AddComponent<BulletStovepipeData>();
             bulletDataHolder.data = data;
 
@@ -59,6 +62,7 @@ namespace Stovepipe.StovepipePatches
             
             var weapon = __instance.Receiver;
 
+            if (data.numOfRoundsSinceLastJam < UserConfig.MinRoundBeforeNextJam.Value) return;
             if (!weapon.Chamber.IsFull) return;
             if (!weapon.Chamber.IsSpent) return;
             if (weapon.Chamber.GetRound().IsCaseless) return;

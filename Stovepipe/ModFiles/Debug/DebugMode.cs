@@ -3,6 +3,7 @@ using System.IO;
 using FistVR;
 using HarmonyLib;
 using Newtonsoft.Json;
+using Stovepipe.ModFiles;
 using UnityEngine;
 using Valve.VR.InteractionSystem;
 
@@ -136,10 +137,10 @@ namespace Stovepipe.Debug
         
         public static void WriteNewAdjustment(string nameOfGun, StovepipeAdjustment adjustments)
         {
-            if (FailureScriptManager.isWriteToDefault.Value)
-                WriteOrReplaceInDict(nameOfGun, adjustments, FailureScriptManager.Defaults, FailureScriptManager.defaultsDir);
+            if (UserConfig.IsWriteToDefault.Value)
+                WriteOrReplaceInDict(nameOfGun, adjustments, UserConfig.Defaults, FailureScriptManager.DefaultsDir);
             else
-                WriteOrReplaceInDict(nameOfGun, adjustments, FailureScriptManager.UserDefs, FailureScriptManager.userDefsDir);
+                WriteOrReplaceInDict(nameOfGun, adjustments, UserConfig.UserDefs, FailureScriptManager.UserDefsDir);
         }
 
         private static void WriteOrReplaceInDict(string nameOfGun, StovepipeAdjustment adjustment,

@@ -30,7 +30,7 @@ namespace Stovepipe.DoubleFeedPatches
             if (__instance.FireArm is null) return;
 
             var data = __instance.FireArm.GetComponent<DoubleFeedData>();
-            if (data is null || !data.IsDoubleFeeding) return;
+            if (data is null || !data.isDoubleFeeding) return;
             
             __instance.DisplayRenderers[0].enabled = false;
 
@@ -44,7 +44,7 @@ namespace Stovepipe.DoubleFeedPatches
             if (__instance.FireArm is null) return;
             
             var data = __instance.FireArm.GetComponent<DoubleFeedData>();
-            if (data is null || !data.IsDoubleFeeding) return;
+            if (data is null || !data.isDoubleFeeding) return;
             
             __instance.DisplayRenderers[0].enabled = true;
 
@@ -72,7 +72,7 @@ namespace Stovepipe.DoubleFeedPatches
             
             var bulletData = __instance.GetComponent<BulletDoubleFeedData>();
 
-            if (bulletData is null || !bulletData.gunData.IsDoubleFeeding) return;
+            if (bulletData is null || !bulletData.gunData.isDoubleFeeding) return;
             
             SetBulletToInteracting(__instance, bulletData.gunData, false, null);
         }
@@ -93,6 +93,9 @@ namespace Stovepipe.DoubleFeedPatches
             data.upperBulletCol.isTrigger = false;
             round.isMagazineLoadable = false;
             round.isManuallyChamberable = false;
+            if (data.thisWeaponsStovepipeData != null) data.thisWeaponsStovepipeData.numOfRoundsSinceLastJam = 0;
+            data.doubleFeedChance = data.doubleFeedMaxChance / UserConfig.ProbabilityCreepNumRounds.Value;
+
             
             round.StoreAndDestroyRigidbody();
 
@@ -127,7 +130,7 @@ namespace Stovepipe.DoubleFeedPatches
             }
 
             if (data.hasUpperBulletBeenRemoved && data.hasLowerBulletBeenRemoved)
-                data.IsDoubleFeeding = false;
+                data.isDoubleFeeding = false;
             
             
             if (breakParentage) round.SetParentage(null);
@@ -148,33 +151,33 @@ namespace Stovepipe.DoubleFeedPatches
                 return;
             }
             
-            data.slideRackUnjamsLowerBullet = Random.Range(0f, 1f) < FailureScriptManager.lowerBulletDropoutProb.Value;
+            data.slideRackUnjamsLowerBullet = Random.Range(0f, 1f) < UserConfig.LowerBulletDropoutProb.Value;
 
             if (data.slideRackUnjamsLowerBullet)
                 data.slideRackUnjamsUpperBullet =
-                    Random.Range(0f, 1f) < FailureScriptManager.upperBulletDropoutProb.Value;
+                    Random.Range(0f, 1f) < UserConfig.UpperBulletDropoutProb.Value;
             else
                 data.slideRackUnjamsUpperBullet = false;
             
-            data.slideRackAndJiggleUnjamsLowerBullet = Random.Range(0f, 1f) < FailureScriptManager.lowerBulletShakeyProb.Value;
+            data.slideRackAndJiggleUnjamsLowerBullet = Random.Range(0f, 1f) < UserConfig.LowerBulletShakeyProb.Value;
 
             if (data.slideRackAndJiggleUnjamsLowerBullet)
                 data.slideRackAndJiggleUnjamsUpperBullet =
-                    Random.Range(0f, 1f) < FailureScriptManager.upperBulletShakeyProb.Value;
+                    Random.Range(0f, 1f) < UserConfig.UpperBulletShakeyProb.Value;
             else 
                 data.slideRackAndJiggleUnjamsUpperBullet = false;
             
             
             // Special case probability where the lower bullet falls out, but the upper bullet needs cajoling
             data.slideRackUnjamsLowerButRackAndJiggleUnjamsUpper =
-                Random.Range(0f, 1f) < FailureScriptManager.upperBulletShakeyProb.Value;
+                Random.Range(0f, 1f) < UserConfig.UpperBulletShakeyProb.Value;
         }
 
         private static void GenerateUnJammingProbsForPistols(DoubleFeedData data)
         {
-            data.slideRackUnjamsLowerBullet = Random.Range(0f, 1f) < FailureScriptManager.lowerBulletDropoutProb.Value;
+            data.slideRackUnjamsLowerBullet = Random.Range(0f, 1f) < UserConfig.LowerBulletDropoutProb.Value;
             data.slideRackUnjamsUpperBullet = true;
-            data.slideRackAndJiggleUnjamsLowerBullet = Random.Range(0f, 1f) < FailureScriptManager.lowerBulletShakeyProb.Value;
+            data.slideRackAndJiggleUnjamsLowerBullet = Random.Range(0f, 1f) < UserConfig.LowerBulletShakeyProb.Value;
         }
     }
 }
