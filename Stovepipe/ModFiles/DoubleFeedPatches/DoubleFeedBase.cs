@@ -93,12 +93,14 @@ namespace Stovepipe.DoubleFeedPatches
             data.upperBulletCol.isTrigger = false;
             round.isMagazineLoadable = false;
             round.isManuallyChamberable = false;
-            if (data.thisWeaponsStovepipeData != null) data.thisWeaponsStovepipeData.numOfRoundsSinceLastJam = 0;
-            data.doubleFeedChance = data.doubleFeedMaxChance / UserConfig.ProbabilityCreepNumRounds.Value;
-
+            if (data.thisWeaponsStovepipeData != null)
+            {
+                data.thisWeaponsStovepipeData.numOfRoundsSinceLastJam = 0;
+                data.thisWeaponsStovepipeData.SetStoveProbToMin();
+            }
             
+            data.SetDoubleFeedProbToMin();
             round.StoreAndDestroyRigidbody();
-
             round.GetComponent<BulletDoubleFeedData>().isThisBulletDoubleFeeding = true;
 
             if (!setParentToWeapon) return;

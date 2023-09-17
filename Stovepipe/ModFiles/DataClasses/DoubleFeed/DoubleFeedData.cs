@@ -44,5 +44,10 @@ namespace Stovepipe
             doubleFeedChance = UserConfig.DoubleFeedHandgunProb.Value;
             doubleFeedMaxChance = doubleFeedChance;
         }
+
+        public void SetDoubleFeedProbToMin()
+        {
+            doubleFeedChance = doubleFeedMaxChance / UserConfig.ProbabilityCreepNumRounds.Value;
+        }
     }
 }

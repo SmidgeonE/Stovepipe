@@ -10,7 +10,7 @@ using Stovepipe.StovepipePatches;
 
 namespace Stovepipe.ModFiles
 {
-    [BepInPlugin("dll.smidgeon.failuretoeject", "Failure To Eject", "3.0.0")]
+    [BepInPlugin("dll.smidgeon.failuretoeject", "Failure To Eject", "3.1.2")]
     [BepInProcess("h3vr.exe")]
     public class FailureScriptManager : BaseUnityPlugin
     {
@@ -138,11 +138,11 @@ namespace Stovepipe.ModFiles
                 "Keep this to true if you want stovepipes to be simulated");
             UserConfig.IsDoubleFeedEnabled = Config.Bind("Activation","enableDoubleFeed", true,
                 "Keep this to true if you want double feeds to be simulated");
-            
-            UserConfig.UseProbabilityCreep = Config.Bind("Quality Of Life","Use Probability Creep", true,
-                "Sometimes, it feels like you get too many stovepipes at one time. This, set to true, should remedy this feeling.");
+
             UserConfig.MinRoundBeforeNextJam = Config.Bind("Quality Of Life","Minimum Rounds Before Next Jam", 5,
                 "If you find the bullets seem to jam to frequently together, this can be tuned to reduce frustration.");
+            UserConfig.UseProbabilityCreep = Config.Bind("Quality Of Life","Use Probability Creep", true,
+                "Sometimes, it feels like you get too many stovepipes at one time. This, set to true, should remedy this feeling.");
             UserConfig.ProbabilityCreepNumRounds = Config.Bind("Quality Of Life","Number Of Rounds Before Probability Is ˜Fully Charged˜", 30,
                 "This number changes how many bullets before the probability of a jam returns back to normal. " +
                 "Note it will slowly increase throughout this range. This should make it much more unlikely that you will get a jam right after another jam. " +

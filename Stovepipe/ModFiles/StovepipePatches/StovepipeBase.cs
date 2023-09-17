@@ -38,8 +38,10 @@ namespace Stovepipe.StovepipePatches
             data.hasBulletBeenStovepiped = true;
             data.timeSinceStovepiping = 0f;
             data.numOfRoundsSinceLastJam = 0;
-            data.stovepipeProb = data.stovepipeMaxProb / UserConfig.ProbabilityCreepNumRounds.Value;
+            data.SetStoveProbToMin();
             
+            if (data.thisDoubleFeedData != null) data.thisDoubleFeedData.SetDoubleFeedProbToMin();
+
             data.ejectedRound.StoreAndDestroyRigidbody();
             data.ejectedRoundCollider.isTrigger = false;
 
@@ -75,7 +77,7 @@ namespace Stovepipe.StovepipePatches
                 cube.transform.parent = data.transform.parent;
             else cube.transform.parent = data.transform;*/
         }
-        
+
         public static void UnStovepipe(StovepipeData data, bool breakParentage, Rigidbody weaponRb)
         {
             data.ejectedRound.RecoverRigidbody();

@@ -82,6 +82,8 @@ If you have any issues / ideas / need help with modding, I am always available o
 
 # Changelog
 
+3.1.2 - Added probability creep, this modifies the probability so its less likely to jam again right after another jam, this can be adjusted in the config, as well as a flat-out stopping of any jams after a certain number of shots after it has already jammed.
+
 3.1.1 - Added stovepipes to open bolt weapons (with debug). Fixed issue with double-feeding on integrated magazine weapons. Lots of new high-quality default positions for handguns, and shotguns thanks to @drummerdude2003.
 
 3.1.0 - Added Double Feeds to Handguns. Added Stovepipes to Tube Fed Shotguns. Added Handgun Debug Mode. Added Tube Fed Shotgun Debug Mode.

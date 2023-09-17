@@ -30,8 +30,10 @@ namespace Stovepipe.Debug
         {
             var hasUserPressed = __instance.Input.TouchpadDown &&
                               Vector2.Angle(__instance.Input.TouchpadAxes, Vector2.right) < 45f;
+            var hasUserPressedDelete = __instance.Input.TouchpadDown &&
+                                 Vector2.Angle(__instance.Input.TouchpadAxes, Vector2.right) > -45f;
 
-            if (!hasUserPressed) return;
+            if (!hasUserPressed && !hasUserPressedDelete) return;
             if (__instance.CurrentInteractable == null) return;
 
             var currentInteractable = __instance.CurrentInteractable;
@@ -54,10 +56,15 @@ namespace Stovepipe.Debug
 
             if (CurrentDebugWeapon == null) return;
 
-            if (IsDebuggingWeapon)
+            if (IsDebuggingWeapon && hasUserPressedDelete)
             {
                 IsDebuggingWeapon = false;
-                DestroyDebugRoundAndSaveValues();
+                DestroyDebugRoundAndSaveValues(false);
+            }
+            else if (IsDebuggingWeapon)
+            {
+                IsDebuggingWeapon = false;
+                DestroyDebugRoundAndSaveValues(true);
             }
             else
             {
@@ -117,9 +124,12 @@ namespace Stovepipe.Debug
             _currentDebugRound.GetComponent<CapsuleCollider>().isTrigger = false;
             _currentDebugRoundScript.StoreAndDestroyRigidbody();
             _currentDebugRound.transform.parent = CurrentDebugWeapon.transform;
+            
+            
+            
         }
 
-        private static void DestroyDebugRoundAndSaveValues()
+        private static void DestroyDebugRoundAndSaveValues(bool writeAdjustment)
         {
             var name = CurrentDebugWeapon.gameObject.name;
             name = name.Remove(name.Length - 7);
@@ -131,7 +141,7 @@ namespace Stovepipe.Debug
                     BoltZ = CurrentBoltForward
             };
             
-            WriteNewAdjustment(name, adjustment);
+            if (writeAdjustment) WriteNewAdjustment(name, adjustment);
             UnityEngine.Object.Destroy(_currentDebugRound);
         }
         

@@ -33,6 +33,8 @@ namespace Stovepipe
         public float stovepipeProb;
         public float stovepipeMaxProb;
 
+        public DoubleFeedData thisDoubleFeedData;
+
         public StovepipeData()
         {
             numOfRoundsSinceLastJam = UserConfig.MinRoundBeforeNextJam.Value;
@@ -45,7 +47,7 @@ namespace Stovepipe
 
             if (stovepipeProb < stovepipeMaxProb)
                 stovepipeProb += stovepipeMaxProb / UserConfig.ProbabilityCreepNumRounds.Value;
-
+            
             CheckAndIncreaseDoubleFeedProbability();
         }
 
@@ -54,19 +56,33 @@ namespace Stovepipe
             switch (weaponType)
             {
                 case WeaponType.Handgun:
-                    var handgunData = gameObject.GetComponent<HandgunSlide>().Handgun.GetComponent<DoubleFeedData>();
+                    var slide = gameObject.GetComponent<HandgunSlide>();
+                    if (slide is null) return;
+                    var handgunData = slide.Handgun.GetComponent<DoubleFeedData>();
+                    if (handgunData is null) return;
+                    
+                    thisDoubleFeedData = handgunData;
                     if (handgunData.doubleFeedChance < handgunData.doubleFeedMaxChance)
                         handgunData.doubleFeedChance += handgunData.doubleFeedMaxChance /
                                                         UserConfig.ProbabilityCreepNumRounds.Value;
                     break;
                 
                 case WeaponType.Rifle:
-                    var rifleData = gameObject.GetComponent<ClosedBolt>().Weapon.GetComponent<DoubleFeedData>();
+                    var bolt = gameObject.GetComponent<ClosedBolt>();
+                    if (bolt == null) return;
+                    var rifleData = bolt.GetComponent<DoubleFeedData>();
+                    if (rifleData is null) return;
+                    thisDoubleFeedData = rifleData;
                     if (rifleData.doubleFeedChance < rifleData.doubleFeedMaxChance)
                         rifleData.doubleFeedChance += rifleData.doubleFeedMaxChance /
-                                                      UserConfig.ProbabilityCreepNumRounds.Value; 
+                                                      UserConfig.ProbabilityCreepNumRounds.Value;
                     break;
             }
+        }
+
+        public void SetStoveProbToMin()
+        {
+            stovepipeProb = stovepipeMaxProb / UserConfig.ProbabilityCreepNumRounds.Value;
         }
 
         public void SetWeaponType(WeaponType type)
