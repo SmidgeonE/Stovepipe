@@ -82,6 +82,10 @@ If you have any issues / ideas / need help with modding, I am always available o
 
 # Changelog
 
+3.1.5 - Fixed yet another bug.
+
+3.1.4 - Fixed another bug.
+
 3.1.3 - Fixed multiple bugs. Can now discard changes in debug mode by pressing upwards.
 
 3.1.2 - Added probability creep, this modifies the probability so its less likely to jam again right after another jam, this can be adjusted in the config, as well as a flat-out stopping of any jams after a certain number of shots after it has already jammed.

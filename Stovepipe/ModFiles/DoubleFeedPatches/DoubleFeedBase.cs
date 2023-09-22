@@ -90,7 +90,7 @@ namespace Stovepipe.DoubleFeedPatches
             round.RootRigidbody.maxAngularVelocity = 0;
             round.RootRigidbody.useGravity = false;
             round.RootRigidbody.detectCollisions = false;
-            data.upperBulletCol.isTrigger = false;
+            
             round.isMagazineLoadable = false;
             round.isManuallyChamberable = false;
             if (data.thisWeaponsStovepipeData != null)
@@ -114,12 +114,9 @@ namespace Stovepipe.DoubleFeedPatches
             round.RootRigidbody.useGravity = true;
             round.RootRigidbody.maxAngularVelocity = 1000f;
             round.RootRigidbody.detectCollisions = true;
-            data.upperBulletCol.isTrigger = true;
             round.isMagazineLoadable = true;
-            
-
             round.GetComponent<BulletDoubleFeedData>().isThisBulletDoubleFeeding = false;
-
+            
             if (round == data.upperBullet)
             {
                 data.hasUpperBulletBeenRemoved = true;
@@ -133,11 +130,10 @@ namespace Stovepipe.DoubleFeedPatches
 
             if (data.hasUpperBulletBeenRemoved && data.hasLowerBulletBeenRemoved)
                 data.isDoubleFeeding = false;
-            
-            
+
             if (breakParentage) round.SetParentage(null);
             if (weaponRb == null) return;
-            
+
             round.RootRigidbody.velocity = weaponRb.velocity;
             round.RootRigidbody.angularVelocity = weaponRb.angularVelocity;
         }

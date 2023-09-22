@@ -11,8 +11,7 @@ namespace Stovepipe
         
         public float doubleFeedChance;
         public float doubleFeedMaxChance;
-
-        public CapsuleCollider upperBulletCol;
+        
         public FVRFireArmRound upperBullet;
         public FVRFireArmRound lowerBullet;
 

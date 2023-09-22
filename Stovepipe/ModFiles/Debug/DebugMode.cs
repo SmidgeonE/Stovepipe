@@ -30,10 +30,8 @@ namespace Stovepipe.Debug
         {
             var hasUserPressed = __instance.Input.TouchpadDown &&
                               Vector2.Angle(__instance.Input.TouchpadAxes, Vector2.right) < 45f;
-            var hasUserPressedDelete = __instance.Input.TouchpadDown &&
-                                 Vector2.Angle(__instance.Input.TouchpadAxes, Vector2.up) < 45f;
 
-            if (!hasUserPressed && !hasUserPressedDelete) return;
+            if (!hasUserPressed) return;
             if (__instance.CurrentInteractable == null) return;
 
             var currentInteractable = __instance.CurrentInteractable;
@@ -55,13 +53,8 @@ namespace Stovepipe.Debug
             }
 
             if (CurrentDebugWeapon == null) return;
-
-            if (IsDebuggingWeapon && hasUserPressedDelete)
-            {
-                IsDebuggingWeapon = false;
-                DestroyDebugRoundAndSaveValues(false);
-            }
-            else if (IsDebuggingWeapon)
+            
+            if (IsDebuggingWeapon)
             {
                 IsDebuggingWeapon = false;
                 DestroyDebugRoundAndSaveValues(true);

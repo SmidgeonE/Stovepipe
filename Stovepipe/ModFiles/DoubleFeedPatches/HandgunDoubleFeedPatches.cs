@@ -55,9 +55,9 @@ namespace Stovepipe.DoubleFeedPatches
             
             data.hasFinishedEjectingDoubleFeedRounds = true;
 
-            data.upperBulletCol = data.upperBullet.gameObject.GetComponent<CapsuleCollider>();
-            data.bulletHeight = data.upperBulletCol.height;
-            data.bulletRadius = data.upperBulletCol.radius;
+            var upperBulletCol = data.upperBullet.gameObject.GetComponent<CapsuleCollider>();
+            data.bulletHeight = upperBulletCol.height;
+            data.bulletRadius = upperBulletCol.radius;
             
             var upperBulletData = data.upperBullet.GetComponent<BulletDoubleFeedData>() ??
                                  data.upperBullet.gameObject.AddComponent<BulletDoubleFeedData>();
