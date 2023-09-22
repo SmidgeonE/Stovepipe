@@ -31,7 +31,7 @@ namespace Stovepipe.Debug
             var hasUserPressed = __instance.Input.TouchpadDown &&
                               Vector2.Angle(__instance.Input.TouchpadAxes, Vector2.right) < 45f;
             var hasUserPressedDelete = __instance.Input.TouchpadDown &&
-                                 Vector2.Angle(__instance.Input.TouchpadAxes, Vector2.right) > -45f;
+                                 Vector2.Angle(__instance.Input.TouchpadAxes, Vector2.up) < 45f;
 
             if (!hasUserPressed && !hasUserPressedDelete) return;
             if (__instance.CurrentInteractable == null) return;

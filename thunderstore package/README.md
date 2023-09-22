@@ -57,9 +57,9 @@ To save this, simply press down on the right joystick again and it will save it 
 
 Currently works for:
 
-(Stovepipes)
-1. Closed Bolt Weapons
-2. Handguns
+   (Stovepipes)			    (Double Feeds)
+1. Closed Bolt Weapons		1. Closed Bolt Weapons
+2. Handguns			2. Handguns
 3. Tube Fed Shotguns
 4. Open Bolt Weapons
 
@@ -81,6 +81,8 @@ If you have any issues / ideas / need help with modding, I am always available o
 
 
 # Changelog
+
+3.1.3 - Fixed multiple bugs. Can now discard changes in debug mode by pressing upwards.
 
 3.1.2 - Added probability creep, this modifies the probability so its less likely to jam again right after another jam, this can be adjusted in the config, as well as a flat-out stopping of any jams after a certain number of shots after it has already jammed.
 

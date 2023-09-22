@@ -116,7 +116,7 @@ namespace Stovepipe.DoubleFeedPatches
             }
             else
             {
-                var newFrontPos = __instance.Point_Bolt_Forward.localPosition.z - data.upperBulletCol.height * 1.2f;
+                var newFrontPos = __instance.Point_Bolt_Forward.localPosition.z - data.bulletHeight * 1.2f;
                 if (newFrontPos < ___m_boltZ_rear) newFrontPos = ___m_boltZ_rear;
                 
                 ___m_boltZ_forward = newFrontPos;
@@ -179,8 +179,8 @@ namespace Stovepipe.DoubleFeedPatches
             {
                 if (__instance.Weapon.Magazine.IsIntegrated || __instance.Weapon.Magazine.IsEnBloc)
                 {
-                    data.lowerBullet.gameObject.layer = normalLayer;
-                    data.upperBullet.gameObject.layer = normalLayer;
+                    if (lowerBulletExists) data.lowerBullet.gameObject.layer = normalLayer;
+                    if (upperBulletExists) data.upperBullet.gameObject.layer = normalLayer;
                     return;
                 }
                 
@@ -190,15 +190,8 @@ namespace Stovepipe.DoubleFeedPatches
             else
             {
                 if (lowerBulletExists) data.lowerBullet.gameObject.layer = normalLayer;
-                
-                if (upperBulletExists && lowerBulletExists)
-                {
-                    data.upperBullet.gameObject.layer = uninteractableLayer;
-                }
-                else if (upperBulletExists && !lowerBulletExists)
-                {
-                    data.upperBullet.gameObject.layer = normalLayer;
-                }
+                if (upperBulletExists && lowerBulletExists) data.upperBullet.gameObject.layer = uninteractableLayer;
+                if (upperBulletExists && !lowerBulletExists) data.upperBullet.gameObject.layer = normalLayer;
             }
         }
 

@@ -114,7 +114,7 @@ namespace Stovepipe.DoubleFeedPatches
             }
             else
             {
-                var newFrontPos = __instance.Point_Slide_Forward.localPosition.z - data.upperBulletCol.height * 1.1f;
+                var newFrontPos = __instance.Point_Slide_Forward.localPosition.z - data.bulletHeight * 1.1f;
                 ___m_slideZ_forward = newFrontPos;
             }
         }
