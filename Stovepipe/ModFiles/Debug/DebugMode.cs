@@ -148,9 +148,9 @@ namespace Stovepipe.Debug
         public static void WriteNewAdjustment(string nameOfGun, StovepipeAdjustment adjustments)
         {
             if (UserConfig.IsWriteToDefault.Value)
-                WriteOrReplaceInDict(nameOfGun, adjustments, UserConfig.Defaults, FailureScriptManager.DefaultsDir);
+                WriteOrReplaceInDict(nameOfGun, adjustments, UserConfig.Defaults, UserConfig.DefaultsDir);
             else
-                WriteOrReplaceInDict(nameOfGun, adjustments, UserConfig.UserDefs, FailureScriptManager.UserDefsDir);
+                WriteOrReplaceInDict(nameOfGun, adjustments, UserConfig.UserDefs, UserConfig.UserDefsDir);
         }
 
         private static void WriteOrReplaceInDict(string nameOfGun, StovepipeAdjustment adjustment,
@@ -190,6 +190,17 @@ namespace Stovepipe.Debug
             if (!IsDebuggingWeapon) return;
             
             ___m_killAfter = 5f;
+        }
+        
+        public static StovepipeAdjustment ReadAdjustment(string rawNameOfGun)
+        {
+            var cleanedName = rawNameOfGun.Remove(rawNameOfGun.Length - 7);
+
+            if (UserConfig.UserDefs.TryGetValue(cleanedName, out var adjustment)) return adjustment;
+
+            UserConfig.Defaults.TryGetValue(cleanedName, out adjustment);
+
+            return adjustment;
         }
     }
 }

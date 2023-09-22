@@ -5,6 +5,8 @@ namespace Stovepipe
 {
     public static class UserConfig
     {
+        public static string DefaultsDir;
+        public static string UserDefsDir;
         
         public static ConfigEntry<bool> IsDebug;
         public static ConfigEntry<bool> IsWriteToDefault;

@@ -107,7 +107,7 @@ namespace Stovepipe.StovepipePatches
             {
                 StartStovepipe(data);
                 data.randomPosAndRot = GenerateRandomRifleNoise();
-                data.Adjustments = FailureScriptManager.ReadAdjustment(__instance.Weapon.name);
+                data.Adjustments = DebugMode.ReadAdjustment(__instance.Weapon.name);
                 if (data.Adjustments != null) data.hasFoundAdjustments = true;
             }
             

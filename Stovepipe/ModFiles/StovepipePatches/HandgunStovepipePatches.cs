@@ -1,5 +1,6 @@
 ﻿using FistVR;
 using HarmonyLib;
+using Stovepipe.Debug;
 using Stovepipe.ModFiles;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -112,7 +113,7 @@ namespace Stovepipe.StovepipePatches
             {
                 StartStovepipe(slideData);
                 slideData.randomPosAndRot = GenerateRandomHandgunNoise();
-                slideData.Adjustments = FailureScriptManager.ReadAdjustment(__instance.Handgun.name);
+                slideData.Adjustments = DebugMode.ReadAdjustment(__instance.Handgun.name);
                 slideData.timeSinceStovepiping += Time.deltaTime;
                 
                 if (slideData.Adjustments != null) slideData.hasFoundAdjustments = true;

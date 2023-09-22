@@ -6,20 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="00e34b02-fdc5-4294-b447-9f3d7d1f4eb0" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Stovepipe.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Stovepipe.dir/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ModFiles/DataClasses/DoubleFeed/DoubleFeedData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ModFiles/DataClasses/DoubleFeed/DoubleFeedData.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ModFiles/DataClasses/Stovepipe/StovepipeData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ModFiles/DataClasses/Stovepipe/StovepipeData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ModFiles/Debug/DebugMode.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ModFiles/Debug/DebugMode.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ModFiles/DoubleFeedPatches/DoubleFeedBase.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ModFiles/DoubleFeedPatches/DoubleFeedBase.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ModFiles/FailureScriptManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ModFiles/FailureScriptManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ModFiles/StovepipePatches/StovepipeBase.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ModFiles/StovepipePatches/StovepipeBase.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/Debug/net35/Stovepipe.dll" beforeDir="false" afterPath="$PROJECT_DIR$/bin/Debug/net35/Stovepipe.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/Debug/net35/Stovepipe.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/bin/Debug/net35/Stovepipe.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net35/Stovepipe.dll" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net35/Stovepipe.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net35/Stovepipe.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net35/Stovepipe.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../thunderstore package/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../thunderstore package/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../thunderstore package/Stovepipe.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../thunderstore package/Stovepipe.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../thunderstore package/defaults.zip" beforeDir="false" afterPath="$PROJECT_DIR$/../thunderstore package/defaults.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../thunderstore package/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/../thunderstore package/manifest.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,6 +75,8 @@
       <workItem from="1694709251852" duration="870000" />
       <workItem from="1694723098799" duration="1671000" />
       <workItem from="1694889773891" duration="1893000" />
+      <workItem from="1695311662720" duration="195000" />
+      <workItem from="1695376964529" duration="469000" />
     </task>
     <servers />
   </component>

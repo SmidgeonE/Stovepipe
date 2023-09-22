@@ -14,8 +14,6 @@ namespace Stovepipe.ModFiles
     [BepInProcess("h3vr.exe")]
     public class FailureScriptManager : BaseUnityPlugin
     {
-        public static string DefaultsDir;
-        public static string UserDefsDir;
 
         // This is the value if they are upgrading from 1.x.x
         private static float _previousUserProbability;
@@ -42,23 +40,23 @@ namespace Stovepipe.ModFiles
         {
             var userDefsRoot = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/StovepipeData/";
 
-            UserDefsDir = userDefsRoot + "userdefinitions.json";
-            DefaultsDir = Paths.PluginPath + "/Smidgeon-Stovepipe/defaults.json";
+            UserConfig.UserDefsDir = userDefsRoot + "userdefinitions.json";
+            UserConfig.DefaultsDir = Paths.PluginPath + "/Smidgeon-Stovepipe/defaults.json";
 
-            if (!File.Exists(UserDefsDir))
+            if (!File.Exists(UserConfig.UserDefsDir))
             {
                 Directory.CreateDirectory(userDefsRoot);
-                File.Create(UserDefsDir).Dispose();
+                File.Create(UserConfig.UserDefsDir).Dispose();
             }
-            if (!File.Exists(DefaultsDir))
+            if (!File.Exists(UserConfig.DefaultsDir))
             {
-                File.Create(DefaultsDir).Dispose();
+                File.Create(UserConfig.DefaultsDir).Dispose();
             }
 
             UserConfig.Defaults =
-                JsonConvert.DeserializeObject<Dictionary<string, StovepipeAdjustment>>(File.ReadAllText(DefaultsDir));
+                JsonConvert.DeserializeObject<Dictionary<string, StovepipeAdjustment>>(File.ReadAllText(UserConfig.DefaultsDir));
             UserConfig.UserDefs =
-                JsonConvert.DeserializeObject<Dictionary<string, StovepipeAdjustment>>(File.ReadAllText(UserDefsDir));
+                JsonConvert.DeserializeObject<Dictionary<string, StovepipeAdjustment>>(File.ReadAllText(UserConfig.UserDefsDir));
 
             if (UserConfig.Defaults is null)
                 UserConfig.Defaults = new Dictionary<string, StovepipeAdjustment>();
@@ -93,17 +91,6 @@ namespace Stovepipe.ModFiles
                 Harmony.CreateAndPatchAll(typeof(TubeFedShotgunDebug));
                 Harmony.CreateAndPatchAll(typeof(OpenBoltDebug));
             }
-        }
-        
-        public static StovepipeAdjustment ReadAdjustment(string rawNameOfGun)
-        {
-            var cleanedName = rawNameOfGun.Remove(rawNameOfGun.Length - 7);
-
-            if (UserConfig.UserDefs.TryGetValue(cleanedName, out var adjustment)) return adjustment;
-
-            UserConfig.Defaults.TryGetValue(cleanedName, out adjustment);
-
-            return adjustment;
         }
 
         private void GenerateConfigBinds()
@@ -185,13 +172,5 @@ namespace Stovepipe.ModFiles
             
             File.WriteAllLines(dir, data);
         }
-    }
-
-    public enum WeaponType
-    {
-        Handgun,
-        Rifle,
-        TubeFedShotgun,
-        OpenBolt
     }
 }
