@@ -29,6 +29,10 @@ namespace Stovepipe.DoubleFeedPatches
             data.hasUpperBulletBeenRemoved = false;
             data.hasLowerBulletBeenRemoved = false;
             
+            var exampleRound = AM.GetRoundSelfPrefab(__instance.Handgun.Chamber.RoundType,
+                AM.GetDefaultRoundClass(__instance.Handgun.Chamber.RoundType)).GetGameObject();
+            if (exampleRound.GetComponent<FVRFireArmRound>().IsCaseless) return;
+            
             data.isDoubleFeeding = UnityEngine.Random.Range(0f, 1f) < data.doubleFeedChance;
             if (!data.isDoubleFeeding) return;
 

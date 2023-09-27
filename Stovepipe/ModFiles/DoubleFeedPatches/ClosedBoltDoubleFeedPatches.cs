@@ -17,7 +17,7 @@ namespace Stovepipe.DoubleFeedPatches
             if (__instance.Weapon.Magazine == null) return;
             if (__instance.Weapon.Magazine.m_numRounds < 2) return;
             if (__instance.Weapon.Chamber.GetRound() != null) return;
-
+            
             var stoveData = __instance.Weapon.Bolt.GetComponent<StovepipeData>();
             if (stoveData != null &&
                 (stoveData.IsStovepiping || stoveData.numOfRoundsSinceLastJam < UserConfig.MinRoundBeforeNextJam.Value)) return;
@@ -30,6 +30,11 @@ namespace Stovepipe.DoubleFeedPatches
             
             data.hasUpperBulletBeenRemoved = false;
             data.hasLowerBulletBeenRemoved = false;
+            
+            var exampleRound = AM.GetRoundSelfPrefab(__instance.Weapon.Chamber.RoundType,
+                AM.GetDefaultRoundClass(__instance.Weapon.Chamber.RoundType)).GetGameObject();
+            if (exampleRound.GetComponent<FVRFireArmRound>().IsCaseless) return;
+
             
             data.isDoubleFeeding = UnityEngine.Random.Range(0f, 1f) < data.doubleFeedChance;
             if (!data.isDoubleFeeding) return;
