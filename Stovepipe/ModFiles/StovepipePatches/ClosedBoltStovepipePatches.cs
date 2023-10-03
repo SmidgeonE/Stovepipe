@@ -64,6 +64,10 @@ namespace Stovepipe.StovepipePatches
             
             var weapon = __instance.Weapon;
 
+            // Weapons it doenst work with
+            if (weapon.name.Contains("MX")) return;
+            
+            
             if (data.numOfRoundsSinceLastJam < UserConfig.MinRoundBeforeNextJam.Value) return;
             if (!weapon.Chamber.IsFull) return;
             if (!weapon.Chamber.IsSpent) return;
@@ -85,21 +89,18 @@ namespace Stovepipe.StovepipePatches
         {
             var data = __instance.gameObject.GetComponent(typeof(StovepipeData)) 
                 as StovepipeData;
-
+            
             if (data is null) return;
-
             if (!data.hasCollectedWeaponCharacteristics)
             {
                 data.defaultFrontPosition = ___m_boltZ_forward;
                 data.hasCollectedWeaponCharacteristics = true;
             }
-            
             if (!data.IsStovepiping)
             {
                 if (!DebugMode.IsDebuggingWeapon) ___m_boltZ_forward = data.defaultFrontPosition;
                 return;
             }
-            
             /* Stovepipe the round...
              */
 
@@ -114,13 +115,14 @@ namespace Stovepipe.StovepipePatches
             /* Now setting the position and rotation while the bullet is stovepiping */
 
             var slideTransform = __instance.transform;
-
+            
             if (data.ejectedRound is null) return;
+            if (data.ejectedRound.IsCaseless) return;
             if (__instance.Weapon.Chamber.ProxyRound == null) return;
-
+            
             var weapon = __instance.Weapon;
             var bulletTransform = data.ejectedRound.transform;
-
+            
             if (data.hasFoundAdjustments)
             {
                 // ReSharper disable once PossibleNullReferenceException
@@ -130,7 +132,7 @@ namespace Stovepipe.StovepipePatches
                 data.timeSinceStovepiping += Time.deltaTime;
                 return;
             }
-            
+            UnityEngine.Debug.Log("i");
             // If we couldn't find an adjustment set by the user, we just use a procedural positioning:
 
             var gunTransform = __instance.Weapon.transform;
@@ -138,13 +140,13 @@ namespace Stovepipe.StovepipePatches
                             gunTransform.up * weapon.EjectionSpeed.y +
                             gunTransform.forward * weapon.EjectionSpeed.z).normalized;
             var gunTransformForward = gunTransform.forward;
-
+            UnityEngine.Debug.Log("j");
             if (!data.hasFoundIfItEjectsUpwards)
             {
                 data.ejectsUpwards = IsRifleThatEjectsUpwards(weapon.RoundPos_Ejection, __instance.transform, data.ejectedRound);
                 data.hasFoundIfItEjectsUpwards = true;
             }
-            
+            UnityEngine.Debug.Log("k");
             if (data.ejectsUpwards)
             {
                 bulletTransform.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
@@ -154,7 +156,7 @@ namespace Stovepipe.StovepipePatches
             {
                 bulletTransform.rotation = Quaternion.LookRotation(velDirec, -slideTransform.forward);
             }
-
+            UnityEngine.Debug.Log("l");
             bulletTransform.Rotate(slideTransform.forward, data.randomPosAndRot[1], Space.World);
             bulletTransform.Rotate(bulletTransform.right, data.randomPosAndRot[2], Space.World);
 
@@ -164,7 +166,7 @@ namespace Stovepipe.StovepipePatches
                                        + bulletTransform.forward * data.ejectedRoundHeight * 0.3f
                                        + bulletTransform.forward * data.randomPosAndRot[0];
             
-            
+            UnityEngine.Debug.Log("m");
             /* These are the weird cases where the default positioning doesnt work well */
 
             var weaponName = __instance.Weapon.name;
@@ -185,7 +187,7 @@ namespace Stovepipe.StovepipePatches
                 bulletTransform.position += gunTransform.forward * data.ejectedRoundRadius * 3;
             }
             
-            
+            UnityEngine.Debug.Log("n");
             /* Now setting the slide to the end of the bullet */
 
             var dx = weapon.Chamber.transform.localPosition.z - bulletTransform.localPosition.z - data.ejectedRoundHeight/2;
