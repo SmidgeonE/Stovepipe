@@ -30,21 +30,12 @@ namespace Stovepipe.StovepipePatches
 
         protected static void StartStovepipe(StovepipeData data)
         {
-            if (data == null || data.ejectedRound.RootRigidbody == null)
-            {
-                UnityEngine.Debug.Log("one of them is null");
-                data.hasBulletBeenStovepiped = false;
-                data.IsStovepiping = false;
-                return;
-            }
-
             data.ejectedRound.RootRigidbody.velocity = Vector3.zero;
             data.ejectedRound.RootRigidbody.angularVelocity = Vector3.zero;
             data.ejectedRound.RootRigidbody.maxAngularVelocity = 0;
             data.ejectedRound.RootRigidbody.useGravity = false;
             data.ejectedRound.RootRigidbody.detectCollisions = false;
 
-            
             data.hasBulletBeenStovepiped = true;
             data.timeSinceStovepiping = 0f;
             data.numOfRoundsSinceLastJam = 0;
