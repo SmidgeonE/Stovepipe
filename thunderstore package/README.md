@@ -57,9 +57,9 @@ To save this, simply press down on the right joystick again and it will save it 
 
 Currently works for:
 
-   (Stovepipes)			    (Double Feeds)
-1. Closed Bolt Weapons		1. Closed Bolt Weapons
-2. Handguns			2. Handguns
+   (Stovepipes)			    
+1. Closed Bolt Weapons		
+2. Handguns		
 3. Tube Fed Shotguns
 4. Open Bolt Weapons
 
@@ -81,6 +81,10 @@ If you have any issues / ideas / need help with modding, I am always available o
 
 
 # Changelog
+
+3.1.7 - Excluded ModulMX, as they can't stovepipe.
+
+3.1.6 - Fixed double feeding issue with caseless weapons.
 
 3.1.5 - Fixed yet another bug.
 
