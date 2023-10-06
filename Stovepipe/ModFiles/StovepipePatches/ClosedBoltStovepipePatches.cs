@@ -56,8 +56,7 @@ namespace Stovepipe.StovepipePatches
         [HarmonyPrefix]
         private static void StovepipeDiceroll(ClosedBolt __instance)
         {
-            var data = __instance.gameObject.GetComponent(typeof(StovepipeData)) 
-                as StovepipeData;
+            var data = __instance.gameObject.GetComponent<StovepipeData>();
 
             if (data == null) return;
             if (__instance.IsHeld) return;

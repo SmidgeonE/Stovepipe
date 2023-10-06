@@ -95,6 +95,8 @@ namespace Stovepipe.ModFiles
 
         private void GenerateConfigBinds()
         {
+            UserConfig.BatteryFailureProb = Config.Bind("Probability - Failure To Enter Battery", "Battery Failure Probability", 0.002f, "");
+            
             UserConfig.StovepipeHandgunProb = Config.Bind("Probability - Stovepipe", "Handgun Probability", 0.012f, "");
             UserConfig.StovepipeRifleProb = Config.Bind("Probability - Stovepipe", "Rifle Probability", 0.01f, "");
             UserConfig.StovepipeTubeFedProb = Config.Bind("Probability - Stovepipe", "Tube Fed Shotgun Probability", 0.01f, "");
@@ -125,6 +127,10 @@ namespace Stovepipe.ModFiles
                 "Keep this to true if you want stovepipes to be simulated");
             UserConfig.IsDoubleFeedEnabled = Config.Bind("Activation","enableDoubleFeed", true,
                 "Keep this to true if you want double feeds to be simulated");
+            UserConfig.IsBatteryFailureEnabled = Config.Bind("Activation","enableBatteryFailure", true,
+                "Keep this to true if you want failure to enter battery to be simulated.");
+            
+
 
             UserConfig.MinRoundBeforeNextJam = Config.Bind("Quality Of Life","Minimum Rounds Before Next Jam", 5,
                 "If you find the bullets seem to jam to frequently together, this can be tuned to reduce frustration.");

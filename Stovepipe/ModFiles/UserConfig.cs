@@ -13,7 +13,10 @@ namespace Stovepipe
 
         public static ConfigEntry<bool> IsStovepipeEnabled;
         public static ConfigEntry<bool> IsDoubleFeedEnabled;
-        
+        public static ConfigEntry<bool> IsBatteryFailureEnabled;
+
+        public static ConfigEntry<float> BatteryFailureProb;
+
         public static ConfigEntry<float> StovepipeHandgunProb;
         public static ConfigEntry<float> StovepipeRifleProb;
         public static ConfigEntry<float> StovepipeTubeFedProb;

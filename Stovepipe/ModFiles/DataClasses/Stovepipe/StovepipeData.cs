@@ -36,6 +36,9 @@ namespace Stovepipe
         public float stovepipeMaxProb;
 
         public DoubleFeedData thisDoubleFeedData;
+        
+        public bool isWeaponBatteryFailing;
+        public float pointOfBatteryFail;
 
         public StovepipeData()
         {
