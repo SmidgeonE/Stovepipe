@@ -1,4 +1,5 @@
-﻿using FistVR;
+﻿using System.Linq;
+using FistVR;
 using HarmonyLib;
 using Stovepipe.Debug;
 using Stovepipe.ModFiles;
@@ -64,7 +65,9 @@ namespace Stovepipe.StovepipePatches
 
             // Weapons it doenst work with
             if (weapon.name.Contains("MX")) return;
-            
+            if (weapon.FireSelector_Modes.All(
+                    x => x.ModeType != OpenBoltReceiver.FireSelectorModeType.Single)) return;
+
             if (data.isWeaponBatteryFailing) return;
             if (data.numOfRoundsSinceLastJam < UserConfig.MinRoundBeforeNextJam.Value) return;
             if (!weapon.Chamber.IsFull) return;
