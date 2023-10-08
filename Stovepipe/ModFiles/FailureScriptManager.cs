@@ -87,6 +87,7 @@ namespace Stovepipe.ModFiles
             if (UserConfig.IsBatteryFailureEnabled.Value)
             {
                 Harmony.CreateAndPatchAll(typeof(HandgunBatteryPatches));
+                Harmony.CreateAndPatchAll(typeof(ClosedBoltBatteryPatches));
             }
 
             if (UserConfig.IsDebug.Value)
