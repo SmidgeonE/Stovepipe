@@ -17,10 +17,13 @@ namespace Stovepipe.DoubleFeedPatches
             if (__instance.Weapon.Magazine == null) return;
             if (__instance.Weapon.Magazine.m_numRounds < 2) return;
             if (__instance.Weapon.Chamber.GetRound() != null) return;
-            
+
             var stoveData = __instance.Weapon.Bolt.GetComponent<StovepipeData>();
             if (stoveData != null &&
-                (stoveData.IsStovepiping || stoveData.numOfRoundsSinceLastJam < UserConfig.MinRoundBeforeNextJam.Value)) return;
+                (stoveData.IsStovepiping || 
+                 stoveData.numOfRoundsSinceLastJam < UserConfig.MinRoundBeforeNextJam.Value || 
+                 stoveData.isWeaponBatteryFailing)) return;
+            
             
             var data = __instance.Weapon.gameObject.GetComponent<DoubleFeedData>() ?? __instance.Weapon.gameObject.AddComponent<DoubleFeedData>();
             data.SetProbability(true);

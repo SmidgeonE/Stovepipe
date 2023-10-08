@@ -6,6 +6,7 @@ using HarmonyLib;
 using Newtonsoft.Json;
 using Stovepipe.Debug;
 using Stovepipe.DoubleFeedPatches;
+using Stovepipe.ModFiles.BatteryFailure;
 using Stovepipe.StovepipePatches;
 
 namespace Stovepipe.ModFiles
@@ -81,6 +82,11 @@ namespace Stovepipe.ModFiles
                 Harmony.CreateAndPatchAll(typeof(ClosedBoltDoubleFeedPatches));
                 Harmony.CreateAndPatchAll(typeof(DoubleFeedBase));
                 Harmony.CreateAndPatchAll(typeof(HandgunDoubleFeedPatches));
+            }
+
+            if (UserConfig.IsBatteryFailureEnabled.Value)
+            {
+                Harmony.CreateAndPatchAll(typeof(HandgunBatteryPatches));
             }
 
             if (UserConfig.IsDebug.Value)

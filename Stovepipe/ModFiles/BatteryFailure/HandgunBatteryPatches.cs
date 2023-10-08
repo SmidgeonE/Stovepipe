@@ -13,14 +13,15 @@ namespace Stovepipe.ModFiles.BatteryFailure
         {
             var data = __instance.GetComponent<StovepipeData>();
             if (data == null) return;
+            if (data.IsStovepiping) return;
+            if (data.isWeaponBatteryFailing) return;
 
             data.isWeaponBatteryFailing = UnityEngine.Random.Range(0f, 1f) < UserConfig.BatteryFailureProb.Value;
-            data.pointOfBatteryFail = UnityEngine.Random.Range(0f, 0.5f);
-            UnityEngine.Debug.Log("weapon failed to enter battery");
+            data.pointOfBatteryFail = UnityEngine.Random.Range(0.05f, 0.5f);
         }
 
         [HarmonyPatch(typeof(HandgunSlide), "UpdateSlide")]
-        [HarmonyPostfix]
+        [HarmonyPrefix]
         private static void SlidePositionPatch(HandgunSlide __instance, ref float ___m_slideZ_forward)
         {
             var data = __instance.GetComponent<StovepipeData>();
@@ -35,8 +36,9 @@ namespace Stovepipe.ModFiles.BatteryFailure
         }
 
         [HarmonyPatch(typeof(HandgunSlide), "UpdateSlide")]
-        [HarmonyPostfix]
-        private static void AllowSlideForwardWhenUserForcesForward(HandgunSlide __instance, ref float ___m_slideZ_forward)
+        [HarmonyPrefix]
+        private static void AllowSlideForwardWhenUserForcesForward(HandgunSlide __instance, 
+            ref float ___m_slideZ_forward, float ___m_slideZ_heldTarget)
         {
             if (!__instance.IsHeld) return;
             
@@ -45,12 +47,35 @@ namespace Stovepipe.ModFiles.BatteryFailure
             if (!data.isWeaponBatteryFailing) return;
 
             // i.e. if the users hand is infront of the weapon (they have put a lot of force in moving it forward)
-            if (Vector3.Dot((__instance.m_hand.transform.position - __instance.Point_Slide_Forward.position),
-                    __instance.transform.forward) > 0.1f)
+
+            if (___m_slideZ_heldTarget >= __instance.Point_Slide_Forward.localPosition.z)
             {
-                UnityEngine.Debug.Log("stopping failure to battery");
                 ___m_slideZ_forward = __instance.Point_Slide_Forward.localPosition.z;
+                __instance.Handgun.PlayAudioEvent(FirearmAudioEventType.BoltSlideForward);
+                data.isWeaponBatteryFailing = false;
             }
+        }
+
+        [HarmonyPatch(typeof(Handgun), "Fire")]
+        [HarmonyPrefix]
+        private static bool StopFromFiringIfBatteryFailure(Handgun __instance)
+        {
+            var data = __instance.Slide.GetComponent<StovepipeData>();
+            if (data == null) return true;
+
+            return !data.isWeaponBatteryFailing;
+        }
+
+        [HarmonyPatch(typeof(FVRInteractiveObject), "ForceBreakInteraction")]
+        [HarmonyPrefix]
+        private static bool StopHandFallingOffSlideWhileBatteryFailure(FVRInteractiveObject __instance)
+        {
+            if (!(__instance is HandgunSlide slide)) return true;
+            
+            var data = slide.GetComponent<StovepipeData>();
+            if (data == null) return true;
+
+            return !data.isWeaponBatteryFailing;
         }
     }
 }

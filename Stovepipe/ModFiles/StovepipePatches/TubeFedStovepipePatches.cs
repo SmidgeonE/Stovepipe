@@ -63,6 +63,7 @@ namespace Stovepipe.StovepipePatches
             
             var weapon = __instance.Shotgun;
 
+            if (data.isWeaponBatteryFailing) return;
             if (data.numOfRoundsSinceLastJam < UserConfig.MinRoundBeforeNextJam.Value) return;
             if (!weapon.Chamber.IsFull) return;
             if (!weapon.Chamber.IsSpent) return;

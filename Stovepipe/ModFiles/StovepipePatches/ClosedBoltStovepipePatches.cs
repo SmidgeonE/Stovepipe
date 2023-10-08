@@ -65,8 +65,8 @@ namespace Stovepipe.StovepipePatches
 
             // Weapons it doenst work with
             if (weapon.name.Contains("MX")) return;
-            
-            
+
+            if (data.isWeaponBatteryFailing) return;
             if (data.numOfRoundsSinceLastJam < UserConfig.MinRoundBeforeNextJam.Value) return;
             if (!weapon.Chamber.IsFull) return;
             if (!weapon.Chamber.IsSpent) return;
