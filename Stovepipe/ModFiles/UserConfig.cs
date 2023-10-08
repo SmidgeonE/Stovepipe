@@ -5,11 +5,15 @@ namespace Stovepipe
 {
     public static class UserConfig
     {
-        public static string DefaultsDir;
-        public static string UserDefsDir;
+        public static string DefaultStovepipeDir;
+        public static string UserDefStovepipeDir;
+
+        public static string DefaultDoubleFeedDir;
+        public static string UserDefDoubleFeedDir;
         
         public static ConfigEntry<bool> IsDebug;
         public static ConfigEntry<bool> IsWriteToDefault;
+        public static ConfigEntry<bool> IsDoubleFeedDebugMode;
 
         public static ConfigEntry<bool> IsStovepipeEnabled;
         public static ConfigEntry<bool> IsDoubleFeedEnabled;
@@ -33,7 +37,10 @@ namespace Stovepipe
         public static ConfigEntry<bool> UseProbabilityCreep;
         public static ConfigEntry<int> ProbabilityCreepNumRounds;
 
-        public static Dictionary<string, StovepipeAdjustment> Defaults;
-        public static Dictionary<string, StovepipeAdjustment> UserDefs;
+        public static Dictionary<string, StovepipeAdjustment> DefaultStovepipeAdjustments;
+        public static Dictionary<string, StovepipeAdjustment> UserDefinedStovepipeAdjustments;
+
+        public static Dictionary<string, DoubleFeedAdjustment> DefaultDoubleFeedAdjustments;
+        public static Dictionary<string, DoubleFeedAdjustment> UserDefinedDoubleFeedAdjustments;
     }
 }

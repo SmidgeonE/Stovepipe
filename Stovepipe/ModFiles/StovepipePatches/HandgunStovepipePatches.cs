@@ -114,7 +114,7 @@ namespace Stovepipe.StovepipePatches
             {
                 StartStovepipe(slideData);
                 slideData.randomPosAndRot = GenerateRandomHandgunNoise();
-                slideData.Adjustments = DebugMode.ReadAdjustment(__instance.Handgun.name);
+                slideData.Adjustments = DebugIO.ReadStovepipeAdjustment(__instance.Handgun.name);
                 slideData.timeSinceStovepiping += Time.deltaTime;
                 
                 if (slideData.Adjustments != null) slideData.hasFoundAdjustments = true;

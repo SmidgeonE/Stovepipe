@@ -29,6 +29,9 @@ namespace Stovepipe
 
         public StovepipeData thisWeaponsStovepipeData;
 
+        public DoubleFeedAdjustment Adjustments;
+        public bool hasFoundAdjustments;
+
         public float[,] BulletRandomness;
 
         public void SetProbability(bool weaponIsRifle)
