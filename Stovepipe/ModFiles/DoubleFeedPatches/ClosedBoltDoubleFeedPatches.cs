@@ -98,6 +98,7 @@ namespace Stovepipe.DoubleFeedPatches
                 lowerBulletTransform.localRotation = data.Adjustments.LowerBulletDir;
 
                 ___m_boltZ_forward = data.Adjustments.BoltZ;
+                return;
             }
 
             // Applying procedural positioning, assuming no adjustment has been found
@@ -132,7 +133,12 @@ namespace Stovepipe.DoubleFeedPatches
 
             var data = __instance.Weapon.GetComponent<DoubleFeedData>();
             if (data == null) return;
-            if (data.hasFoundAdjustments) return;
+
+            if (data.hasFoundAdjustments && data.isDoubleFeeding)
+            {
+                ___m_boltZ_forward = data.Adjustments.BoltZ;
+                return;
+            }
             
             if (!data.isDoubleFeeding)
                 ___m_boltZ_forward = __instance.Weapon.Bolt.Point_Bolt_Forward.localPosition.z;

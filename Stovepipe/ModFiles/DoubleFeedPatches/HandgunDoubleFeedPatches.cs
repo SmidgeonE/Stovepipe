@@ -1,5 +1,6 @@
 ﻿using FistVR;
 using HarmonyLib;
+using Stovepipe.Debug;
 using UnityEngine;
 
 namespace Stovepipe.DoubleFeedPatches
@@ -8,7 +9,7 @@ namespace Stovepipe.DoubleFeedPatches
     {
         [HarmonyPatch(typeof(HandgunSlide), "SlideEvent_ExtractRoundFromMag")]
         [HarmonyPostfix]
-        private static void DoubleFeedDiceroll(HandgunSlide __instance)
+        private static void DoubleFeedDiceroll(HandgunSlide __instance, ref float ___m_slideZ_forward)
         {
             if (__instance.IsHeld) return;
             if (__instance.Handgun.Magazine == null) return;
@@ -43,6 +44,9 @@ namespace Stovepipe.DoubleFeedPatches
             data.BulletRandomness = GenerateRandomOffsets();
             GenerateUnJammingProbs(data, false);
             data.hasFinishedEjectingDoubleFeedRounds = false;
+            
+            data.Adjustments = DebugIO.ReadDoubleFeedAdjustment(__instance.Handgun.name);
+            if (data.Adjustments != null) data.hasFoundAdjustments = true;
 
             var managedToChamber = __instance.Handgun.ChamberRound();
             if (!managedToChamber)
@@ -75,10 +79,25 @@ namespace Stovepipe.DoubleFeedPatches
 
             SetBulletToNonInteracting(data.upperBullet, data, true, __instance.Handgun.transform);
             SetBulletToNonInteracting(data.lowerBullet, data, true, __instance.Handgun.transform);
+            
+            var upperBulletTransform = data.upperBullet.transform;
+            var lowerBulletTransform = data.lowerBullet.transform;
+            
+            if (data.hasFoundAdjustments)
+            {
+                upperBulletTransform.localPosition = data.Adjustments.UpperBulletLocalPos;
+                upperBulletTransform.localRotation = data.Adjustments.UpperBulletDir;
+                
+                lowerBulletTransform.localPosition = data.Adjustments.LowerBulletLocalPos;
+                lowerBulletTransform.localRotation = data.Adjustments.LowerBulletDir;
+
+                ___m_slideZ_forward = data.Adjustments.BoltZ;
+                return;
+            }
+
 
             // Applying procedural positioning
 
-            var upperBulletTransform = data.upperBullet.transform;
             var chamberProxyRoundPos = __instance.Handgun.Chamber.ProxyRound.position;
 
             upperBulletTransform.position = chamberProxyRoundPos 
@@ -88,9 +107,7 @@ namespace Stovepipe.DoubleFeedPatches
             
             upperBulletTransform.Rotate(upperBulletTransform.up, data.BulletRandomness[0, 1], Space.Self);
             upperBulletTransform.Rotate(upperBulletTransform.right, data.BulletRandomness[0, 2], Space.Self);
-
-
-            var lowerBulletTransform = data.lowerBullet.transform;
+            
 
             lowerBulletTransform.position = chamberProxyRoundPos 
                                             - __instance.Handgun.transform.up * data.bulletRadius
@@ -107,17 +124,19 @@ namespace Stovepipe.DoubleFeedPatches
             ref float ___m_slideZ_forward)
         {
             var stovepipeData = __instance.GetComponent<StovepipeData>();
-            if (stovepipeData != null && stovepipeData.IsStovepiping)
+            if (stovepipeData != null && stovepipeData.IsStovepiping) return;
+
+            var data = __instance.Handgun.GetComponent<DoubleFeedData>();
+            if (data is null) return;
+
+            if (data.hasFoundAdjustments && data.isDoubleFeeding)
             {
+                ___m_slideZ_forward = data.Adjustments.BoltZ;
                 return;
             }
-            
-            var data = __instance.Handgun.GetComponent<DoubleFeedData>();
 
-            if (data is null || !data.isDoubleFeeding)
-            {
+            if (!data.isDoubleFeeding)
                 ___m_slideZ_forward = __instance.Point_Slide_Forward.localPosition.z;
-            }
             else
             {
                 var newFrontPos = __instance.Point_Slide_Forward.localPosition.z - data.bulletHeight * 1.1f;
