@@ -18,6 +18,10 @@ namespace Stovepipe.DoubleFeedPatches
 
             var stoveData = __instance.Handgun.Slide.GetComponent<StovepipeData>();
             
+            // Rejected weapons list
+
+            if (__instance.Handgun.name == "C96Mauser(Clone)") return;
+            
             if (stoveData != null &&
                 (stoveData.IsStovepiping || 
                  stoveData.numOfRoundsSinceLastJam < UserConfig.MinRoundBeforeNextJam.Value || 
