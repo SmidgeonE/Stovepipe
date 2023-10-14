@@ -1,3 +1,22 @@
+# Failure To Enter Battery
+
+Video Demonstration: https://youtu.be/jFWZ4heahxc
+
+3.2.0 Stovepipe brings a new type of failure, failure to enter battery! This is totally adjustable in terms of probability.
+
+There are 3 ways of fixing a failure to enter battery. First, you can force the slide forward. Next, you can cycle the slide and hope that it doesn't stick in the same place! Finally, if you have MagBoop installed, you can 'push' the slide forward, much like 'pushing' the magazine back into place.
+
+Note if you pull the trigger while its failed to enter battery, the hammer will have dropped, so you may have to completely cycle the action again.
+
+Note: Currently only works for handguns. I will most likely not add this to closed bolt weapons (m4, scar, etc.) because I can't seem to find a way to code the forward assist to work.
+
+
+
+# Double Feed Debug Mode
+
+There is now a double feed debug mode! Note you must ensure that the bullet that spawns at the top must be used as the 'top' bullet, otherwise it will not work. Check out the youtube video for more.
+
+
 # Double Feeds
 
 https://youtu.be/pm3irC9ZwD8 - Video of Double Feeds.
@@ -81,6 +100,8 @@ If you have any issues / ideas / need help with modding, I am always available o
 
 
 # Changelog
+
+3.2.0 - Added failure to enter battery. The main ways to fix this are to cycle the slide or push it forward with your hand. Note with the new MagBoop update you can send it home by pushing, much like a magazine. Removed odd weapons that don't work well with stovepipe. New Double-Feed debug mechanic, so you can change the position of the bullets for double feed!
 
 3.1.7 - Excluded ModulMX, as they can't stovepipe.
 
