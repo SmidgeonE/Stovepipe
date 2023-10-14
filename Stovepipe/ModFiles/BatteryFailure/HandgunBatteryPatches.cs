@@ -16,6 +16,9 @@ namespace Stovepipe.ModFiles.BatteryFailure
             if (data.IsStovepiping) return;
             if (data.isWeaponBatteryFailing) return;
 
+            var doubleFeedData = __instance.Handgun.GetComponent<DoubleFeedData>();
+            if (doubleFeedData != null && doubleFeedData.isDoubleFeeding) return;
+
             data.isWeaponBatteryFailing = UnityEngine.Random.Range(0f, 1f) < UserConfig.BatteryFailureProb.Value;
             data.pointOfBatteryFail = UnityEngine.Random.Range(0.05f, 0.5f);
         }
@@ -26,6 +29,10 @@ namespace Stovepipe.ModFiles.BatteryFailure
         {
             var data = __instance.GetComponent<StovepipeData>();
             if (data == null) return;
+            if (data.IsStovepiping) return;
+
+            var doubleFeedData = __instance.Handgun.GetComponent<DoubleFeedData>();
+            if (doubleFeedData != null && doubleFeedData.isDoubleFeeding) return;
 
             if (data.isWeaponBatteryFailing)
                 ___m_slideZ_forward = Mathf.Lerp(__instance.Point_Slide_Forward.localPosition.z,

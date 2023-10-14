@@ -128,7 +128,7 @@ namespace Stovepipe.DoubleFeedPatches
             ref float ___m_slideZ_forward)
         {
             var stovepipeData = __instance.GetComponent<StovepipeData>();
-            if (stovepipeData != null && stovepipeData.IsStovepiping) return;
+            if (stovepipeData != null && (stovepipeData.IsStovepiping || stovepipeData.isWeaponBatteryFailing)) return;
 
             var data = __instance.Handgun.GetComponent<DoubleFeedData>();
             if (data is null) return;

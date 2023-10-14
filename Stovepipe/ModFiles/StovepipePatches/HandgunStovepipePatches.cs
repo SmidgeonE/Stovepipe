@@ -87,11 +87,14 @@ namespace Stovepipe.StovepipePatches
         [HarmonyPrefix]
         private static void SlideAndBulletUpdate(HandgunSlide __instance, ref float ___m_slideZ_forward, ref float ___m_slideZ_current)
         {
-            var slideData = __instance.gameObject.GetComponent(typeof(StovepipeData)) 
-                as StovepipeData;
+            var doubleFeedData = __instance.Handgun.GetComponent<DoubleFeedData>();
+            if (doubleFeedData != null && doubleFeedData.isDoubleFeeding) return;
+
+            var slideData = __instance.gameObject.GetComponent<StovepipeData>();
 
             if (slideData is null) return;
-
+            if (slideData.isWeaponBatteryFailing) return;
+            
             if (!slideData.hasCollectedWeaponCharacteristics)
             {
                 slideData.defaultFrontPosition = ___m_slideZ_forward;
@@ -176,7 +179,11 @@ namespace Stovepipe.StovepipePatches
 
             if (slideData.IsStovepiping == false) return;
             if (slideData.timeSinceStovepiping < TimeUntilCanPhysicsSlideUnStovepipe) return;
-            if (___m_slideZ_current < ___m_slideZ_forward - 0.01f) UnStovepipe(slideData, true, __instance.Handgun.RootRigidbody);
+            if (___m_slideZ_current < ___m_slideZ_forward - 0.01f)
+            {
+                UnityEngine.Debug.Log("asdas");
+                UnStovepipe(slideData, true, __instance.Handgun.RootRigidbody);
+            }
         }
         
         [HarmonyPatch(typeof(HandgunSlide), "SlideEvent_ExtractRoundFromMag")]
@@ -204,6 +211,7 @@ namespace Stovepipe.StovepipePatches
             if (slideData == null) return;
             if (!slideData.IsStovepiping) return;
             
+            UnityEngine.Debug.Log("asdasdasdasd");
             UnStovepipe(slideData, true, __instance.Handgun.RootRigidbody);
         }
     }

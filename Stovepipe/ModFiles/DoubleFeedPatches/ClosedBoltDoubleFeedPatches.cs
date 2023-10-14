@@ -129,7 +129,7 @@ namespace Stovepipe.DoubleFeedPatches
             ref float ___m_boltZ_forward, float ___m_boltZ_rear)
         {
             var stovepipeData = __instance.Weapon.Bolt.GetComponent<StovepipeData>();
-            if (stovepipeData != null && stovepipeData.IsStovepiping) return;
+            if (stovepipeData != null && (stovepipeData.IsStovepiping || stovepipeData.isWeaponBatteryFailing)) return;
 
             var data = __instance.Weapon.GetComponent<DoubleFeedData>();
             if (data == null) return;

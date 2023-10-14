@@ -86,8 +86,7 @@ namespace Stovepipe.StovepipePatches
         [HarmonyPrefix]
         private static void BoltAndBulletUpdate(ClosedBolt __instance, ref float ___m_boltZ_forward, ref float ___m_boltZ_current)
         {
-            var data = __instance.gameObject.GetComponent(typeof(StovepipeData)) 
-                as StovepipeData;
+            var data = __instance.gameObject.GetComponent<StovepipeData>();
             
             if (data is null) return;
             if (!data.hasCollectedWeaponCharacteristics)
@@ -95,7 +94,7 @@ namespace Stovepipe.StovepipePatches
                 data.defaultFrontPosition = ___m_boltZ_forward;
                 data.hasCollectedWeaponCharacteristics = true;
             }
-            if (!data.IsStovepiping)
+            if (!data.IsStovepiping && !data.isWeaponBatteryFailing)
             {
                 if (!DebugMode.IsDebuggingWeapon) ___m_boltZ_forward = data.defaultFrontPosition;
                 return;
