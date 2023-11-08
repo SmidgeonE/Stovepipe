@@ -81,7 +81,6 @@ namespace Stovepipe.StovepipePatches
 
         public static void UnStovepipe(StovepipeData data, bool breakParentage, Rigidbody weaponRb)
         {
-            UnityEngine.Debug.Log("unstovepipeing");
             data.ejectedRound.RecoverRigidbody();
             data.ejectedRoundCollider.isTrigger = true;
             data.ejectedRound.RootRigidbody.useGravity = true;

@@ -11,6 +11,7 @@ namespace Stovepipe
         
         public float doubleFeedChance;
         public float doubleFeedMaxChance;
+        public bool hasSetDefaultChance;
         
         public FVRFireArmRound upperBullet;
         public FVRFireArmRound lowerBullet;
@@ -45,6 +46,7 @@ namespace Stovepipe
 
             doubleFeedChance = UserConfig.DoubleFeedHandgunProb.Value;
             doubleFeedMaxChance = doubleFeedChance;
+            hasSetDefaultChance = true;
         }
 
         public void SetDoubleFeedProbToMin()

@@ -28,7 +28,7 @@ namespace Stovepipe.DoubleFeedPatches
                  stoveData.isWeaponBatteryFailing)) return;
             
             var data = __instance.Handgun.gameObject.GetComponent<DoubleFeedData>() ?? __instance.Handgun.gameObject.AddComponent<DoubleFeedData>();
-            data.SetProbability(false);
+            if (!data.hasSetDefaultChance) data.SetProbability(false);
             data.thisWeaponsStovepipeData = stoveData;
             
             if (data.isDoubleFeeding) return;

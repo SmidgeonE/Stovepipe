@@ -49,10 +49,10 @@ namespace Stovepipe
         {
             if (!UserConfig.UseProbabilityCreep.Value) return;
             if (UserConfig.ProbabilityCreepNumRounds.Value == 0) return;
-
+            
             if (stovepipeProb < stovepipeMaxProb)
                 stovepipeProb += stovepipeMaxProb / UserConfig.ProbabilityCreepNumRounds.Value;
-            
+
             CheckAndIncreaseDoubleFeedProbability();
         }
 
@@ -75,12 +75,16 @@ namespace Stovepipe
                 case WeaponType.Rifle:
                     var bolt = gameObject.GetComponent<ClosedBolt>();
                     if (bolt == null) return;
-                    var rifleData = bolt.GetComponent<DoubleFeedData>();
+                    
+                    var rifleData = bolt.Weapon.GetComponent<DoubleFeedData>();
                     if (rifleData is null) return;
+
                     thisDoubleFeedData = rifleData;
                     if (rifleData.doubleFeedChance < rifleData.doubleFeedMaxChance)
+                    {
                         rifleData.doubleFeedChance += rifleData.doubleFeedMaxChance /
                                                       UserConfig.ProbabilityCreepNumRounds.Value;
+                    }
                     break;
             }
         }
