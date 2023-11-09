@@ -80,7 +80,7 @@ namespace Stovepipe.StovepipePatches
             data.IsStovepiping = Random.Range(0f, 1f) < data.stovepipeProb;
             data.hasBulletBeenStovepiped = false;
         }
-        
+
         [HarmonyPatch(typeof(ClosedBolt), "UpdateBolt")]
         [HarmonyPrefix]
         private static void BoltAndBulletUpdate(ClosedBolt __instance, ref float ___m_boltZ_forward, ref float ___m_boltZ_current)

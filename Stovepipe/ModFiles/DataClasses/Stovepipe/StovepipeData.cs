@@ -75,16 +75,14 @@ namespace Stovepipe
                 case WeaponType.Rifle:
                     var bolt = gameObject.GetComponent<ClosedBolt>();
                     if (bolt == null) return;
-                    
+
                     var rifleData = bolt.Weapon.GetComponent<DoubleFeedData>();
                     if (rifleData is null) return;
 
-                    thisDoubleFeedData = rifleData;
                     if (rifleData.doubleFeedChance < rifleData.doubleFeedMaxChance)
-                    {
                         rifleData.doubleFeedChance += rifleData.doubleFeedMaxChance /
                                                       UserConfig.ProbabilityCreepNumRounds.Value;
-                    }
+
                     break;
             }
         }

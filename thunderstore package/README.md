@@ -100,6 +100,8 @@ If you have any issues / ideas / need help with modding, I am always available o
 
 
 # Changelog
+ 
+3.2.1 - Fixed many bugs. Bullet creep should work more correctly now.
 
 3.2.0 - Added failure to enter battery. The main ways to fix this are to cycle the slide or push it forward with your hand. Note with the new MagBoop update you can send it home by pushing, much like a magazine. Removed odd weapons that don't work well with stovepipe. New Double-Feed debug mechanic, so you can change the position of the bullets for double feed!
 

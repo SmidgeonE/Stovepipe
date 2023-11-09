@@ -41,6 +41,7 @@ namespace Stovepipe
             {
                 doubleFeedChance = UserConfig.DoubleFeedRifleProb.Value;
                 doubleFeedMaxChance = doubleFeedChance;
+                hasSetDefaultChance = true;
                 return;
             }
 
