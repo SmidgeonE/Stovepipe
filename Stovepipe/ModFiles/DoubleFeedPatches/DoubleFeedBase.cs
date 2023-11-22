@@ -115,8 +115,9 @@ namespace Stovepipe.DoubleFeedPatches
             round.RootRigidbody.maxAngularVelocity = 1000f;
             round.RootRigidbody.detectCollisions = true;
             round.isMagazineLoadable = true;
+
             round.GetComponent<BulletDoubleFeedData>().isThisBulletDoubleFeeding = false;
-            
+
             if (round == data.upperBullet)
             {
                 data.hasUpperBulletBeenRemoved = true;

@@ -171,7 +171,8 @@ namespace Stovepipe.DoubleFeedPatches
             
             // Special Case: lower bullet falls out just by opening bolt, but the top one needs cajoling.
             
-            if (data.hasLowerBulletBeenRemoved && data.slideRackUnjamsLowerButRackAndJiggleUnjamsUpper)
+            if (data.hasLowerBulletBeenRemoved && !data.hasUpperBulletBeenRemoved
+                                               && data.slideRackUnjamsLowerButRackAndJiggleUnjamsUpper)
                 SetBulletToInteracting(data.upperBullet, data, true, __instance.Weapon.RootRigidbody);
         }
         

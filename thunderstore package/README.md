@@ -100,6 +100,10 @@ If you have any issues / ideas / need help with modding, I am always available o
 
 
 # Changelog
+
+3.2.3 - Fixed bug with double feeds sometimes not happening after 1st one.
+
+3.2.2 - New icon. Many thanks to Østrem for the great design!
  
 3.2.1 - Fixed many bugs. Bullet creep should work more correctly now.
 
