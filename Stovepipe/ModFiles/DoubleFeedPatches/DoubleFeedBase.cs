@@ -93,11 +93,7 @@ namespace Stovepipe.DoubleFeedPatches
             
             round.isMagazineLoadable = false;
             round.isManuallyChamberable = false;
-            if (data.thisWeaponsStovepipeData != null)
-            {
-                data.thisWeaponsStovepipeData.numOfRoundsSinceLastJam = 0;
-                data.thisWeaponsStovepipeData.SetStoveProbToMin();
-            }
+            if (data.thisWeaponsStovepipeData != null) data.thisWeaponsStovepipeData.numOfRoundsSinceLastJam = 0; 
             
             data.SetDoubleFeedProbToMin();
             round.StoreAndDestroyRigidbody();

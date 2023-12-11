@@ -151,6 +151,20 @@ namespace Stovepipe.DoubleFeedPatches
             }
         }
 
+        [HarmonyPatch(typeof(ClosedBoltWeapon), "Fire")]
+        [HarmonyPostfix]
+        private static void BeepUpdate(ClosedBoltWeapon __instance)
+        {
+            /*var data = __instance.GetComponent<DoubleFeedData>();
+            if (__instance.GetComponent<DoubleFeedData>() == null) return;
+            
+            UnityEngine.Debug.Log("Double Feed Prob : " + data.doubleFeedChance + " " + data.doubleFeedMaxChance);
+            
+            if (data.thisWeaponsStovepipeData != null)
+                UnityEngine.Debug.Log("stovepipe : " + data.thisWeaponsStovepipeData.stovepipeProb + 
+                                      " " + data.thisWeaponsStovepipeData.stovepipeMaxProb);*/
+        }
+
         [HarmonyPatch(typeof(ClosedBolt), "UpdateBolt")]
         [HarmonyPostfix]
         private static void UnBlockBulletsSometimesIfRackingSlideAndJiggling(ClosedBolt __instance)

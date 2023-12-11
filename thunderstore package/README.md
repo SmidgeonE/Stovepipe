@@ -101,6 +101,8 @@ If you have any issues / ideas / need help with modding, I am always available o
 
 # Changelog
 
+3.2.4 - Fixed so that when a stovepipe occurs, only stovepipe probabilities decrease when using probability creep, instead of both stovepipe and double feed probabilities.
+
 3.2.3 - Fixed bug with double feeds sometimes not happening after 1st one.
 
 3.2.2 - New icon. Many thanks to Østrem for the great design!
