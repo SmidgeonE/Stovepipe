@@ -226,14 +226,8 @@ namespace Stovepipe.StovepipePatches
             if (data == null) return true;
             if (!data.IsStovepiping) return true;
             if (data.ejectedRound is null) return true;
-            
-            if (Random.Range(0f, 1f) < UserConfig.StovepipeNextRoundNotChamberedProb.Value)
-            {
-                __instance.PlayAudioEvent(FirearmAudioEventType.BoltSlideForwardHeld, 1f);
-                return false;
-            }
 
-            return true;
+            return false;
         }
     }
 }
