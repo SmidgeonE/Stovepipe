@@ -204,9 +204,34 @@ namespace Stovepipe.StovepipePatches
 
             if (data is null) return true;
             if (!data.IsStovepiping) return true;
+
+            if (Random.Range(0f, 1f) < UserConfig.StovepipeNextRoundNotChamberedProb.Value)
+            {
+                __instance.Weapon.PlayAudioEvent(FirearmAudioEventType.BoltSlideForwardHeld, 1f);
+                return false;
+            }
+
+            return true;
+        }
+
+        [HarmonyPatch(typeof(ClosedBoltWeapon), "Fire")]
+        [HarmonyPrefix]
+        private static bool StopFromFiringIfStovepiping(ClosedBoltWeapon __instance)
+        {
+            var stoveData = __instance.Bolt.GetComponent<StovepipeData>();
+            if (stoveData is null) return true;
             
-            __instance.Weapon.PlayAudioEvent(FirearmAudioEventType.BoltSlideForwardHeld, 1f);
-            return false;
+            return !stoveData.IsStovepiping;
+        }
+        
+        [HarmonyPatch(typeof(ClosedBoltWeapon), "DropHammer")]
+        [HarmonyPrefix]
+        private static bool StopFromDroppingHammerIfStovepiping(ClosedBoltWeapon __instance)
+        {
+            var stoveData = __instance.Bolt.GetComponent<StovepipeData>();
+            if (stoveData is null) return true;
+            
+            return !stoveData.IsStovepiping;
         }
 
         [HarmonyPatch(typeof(ClosedBoltHandle), "UpdateInteraction")]

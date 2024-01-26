@@ -200,6 +200,9 @@ namespace Stovepipe.StovepipePatches
         private static bool StopShellFromEnteringTrackWhenStovepiping(TubeFedShotgun __instance)
         {
             var data = __instance.Bolt.GetComponent<StovepipeData>();
+            
+            if (Random.Range(0f, 1f) < UserConfig.StovepipeNextRoundNotChamberedProb.Value)
+                return false;
 
             return data == null || !data.IsStovepiping;
         }
@@ -221,6 +224,26 @@ namespace Stovepipe.StovepipePatches
                 return;
 
             UnStovepipe(data, true, __instance.Shotgun.RootRigidbody);
+        }
+        
+        [HarmonyPatch(typeof(TubeFedShotgun), "Fire")]
+        [HarmonyPrefix]
+        private static bool StopFromFiringIfStovepiping(TubeFedShotgun __instance)
+        {
+            var stoveData = __instance.Bolt.GetComponent<StovepipeData>();
+            if (stoveData is null) return true;
+            
+            return !stoveData.IsStovepiping;
+        }
+        
+        [HarmonyPatch(typeof(TubeFedShotgun), "ReleaseHammer")]
+        [HarmonyPrefix]
+        private static bool StopFromDroppingHammerIfStovepiping(TubeFedShotgun __instance)
+        {
+            var stoveData = __instance.Bolt.GetComponent<StovepipeData>();
+            if (stoveData is null) return true;
+            
+            return !stoveData.IsStovepiping;
         }
     }
 }

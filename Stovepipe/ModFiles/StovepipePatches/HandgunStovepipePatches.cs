@@ -196,9 +196,34 @@ namespace Stovepipe.StovepipePatches
             if (slideData == null) return true;
             if (!slideData.IsStovepiping) return true;
             
-            __instance.Handgun.PlayAudioEvent(FirearmAudioEventType.BoltSlideForwardHeld, 1f);
-            return false;
+            if (Random.Range(0f, 1f) < UserConfig.StovepipeNextRoundNotChamberedProb.Value)
+            {
+                __instance.Handgun.PlayAudioEvent(FirearmAudioEventType.BoltSlideForwardHeld, 1f);
+                return false;
+            }
 
+            return true;
+        }
+        
+        [HarmonyPatch(typeof(Handgun), "Fire")]
+        [HarmonyPrefix]
+        private static bool StopFromFiringIfStovepiping(Handgun __instance)
+        {
+            var stoveData = __instance.Slide.GetComponent<StovepipeData>();
+            if (stoveData is null) return true;
+            
+            return !stoveData.IsStovepiping;
+        }
+        
+        [HarmonyPatch(typeof(Handgun), "DeCockHammer")]
+        [HarmonyPatch(typeof(Handgun), "DropHammer")]
+        [HarmonyPrefix]
+        private static bool StopFromDroppingHammerIfStovepiping(Handgun __instance)
+        {
+            var stoveData = __instance.Slide.GetComponent<StovepipeData>();
+            if (stoveData is null) return true;
+            
+            return !stoveData.IsStovepiping;
         }
 
         [HarmonyPatch(typeof(HandgunSlide), "BeginInteraction")]

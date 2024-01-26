@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using BepInEx;
 using HarmonyLib;
+using Microsoft.SqlServer.Server;
 using Newtonsoft.Json;
 using Stovepipe.Debug;
 using Stovepipe.DoubleFeedPatches;
@@ -131,6 +132,9 @@ namespace Stovepipe.ModFiles
                 "Tube Fed Shotgun Probability", 0.008f, "");
             UserConfig.StovepipeOpenBoltProb = Config.Bind("Probability - Stovepipe", 
                 "Open Bolt Probability", 0.008f, "");
+            UserConfig.StovepipeNextRoundNotChamberedProb = Config.Bind("Probability - Stovepipe", 
+                "Probability Next Round Doesnt Chamber", 0.1f, 
+                "When a stovepipe occurs, usually the next bullet will successfully chamber. This adjusts the chance that the bullet is blocked by the stovepiped cartridge");
             
             UserConfig.DoubleFeedHandgunProb = Config.Bind("Probability - Double Feed", 
                 "Handgun Probability", 0.008f, "");

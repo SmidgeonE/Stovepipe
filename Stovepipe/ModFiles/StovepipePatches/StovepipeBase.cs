@@ -188,7 +188,7 @@ namespace Stovepipe.StovepipePatches
             
             ___m_killAfter = 5f;
         }
-        
+
         [HarmonyPatch(typeof(FVRFireArmRound), "BeginInteraction")]
         [HarmonyPrefix]
         private static void UnstovepipeWhenGrabbed(FVRFireArmRound __instance)
