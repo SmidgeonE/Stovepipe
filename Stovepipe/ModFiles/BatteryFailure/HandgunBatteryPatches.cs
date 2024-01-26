@@ -73,6 +73,17 @@ namespace Stovepipe.ModFiles.BatteryFailure
             return !data.isWeaponBatteryFailing;
         }
 
+        [HarmonyPatch(typeof(Handgun), "DropHammer")]
+        [HarmonyPatch(typeof(Handgun), "DeCockHammer")]
+        [HarmonyPrefix]
+        private static bool StopHammerFallingIfNotInBattery(Handgun __instance)
+        {
+            var data = __instance.Slide.GetComponent<StovepipeData>();
+            if (data == null) return true;
+            
+            return !data.isWeaponBatteryFailing;
+        }
+
         [HarmonyPatch(typeof(FVRInteractiveObject), "ForceBreakInteraction")]
         [HarmonyPrefix]
         private static bool StopHandFallingOffSlideWhileBatteryFailure(FVRInteractiveObject __instance)

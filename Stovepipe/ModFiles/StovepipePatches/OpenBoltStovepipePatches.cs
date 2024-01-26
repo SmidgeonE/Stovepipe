@@ -235,15 +235,5 @@ namespace Stovepipe.StovepipePatches
 
             return true;
         }
-        
-        [HarmonyPatch(typeof(OpenBoltReceiver), "Fire")]
-        [HarmonyPrefix]
-        private static bool StopFromFiringIfStovepiping(OpenBoltReceiver __instance)
-        {
-            var stoveData = __instance.Bolt.GetComponent<StovepipeData>();
-            if (stoveData is null) return true;
-            
-            return !stoveData.IsStovepiping;
-        }
     }
 }
