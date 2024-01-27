@@ -101,6 +101,10 @@ If you have any issues / ideas / need help with modding, I am always available o
 
 # Changelog
 
+3.3.0 - Adjusted stovepipe behaviour, now generally a bullet will be chambered when a stovepipe occurs. The probability of this can be changed in the config under Probabilities - Stovepipe.
+ Adjusted failure to enter battery so that the trigger no longer causes the hammer to drop, making booping the slide more useful.
+
+
 3.2.4 - Fixed so that when a stovepipe occurs, only stovepipe probabilities decrease when using probability creep, instead of both stovepipe and double feed probabilities.
 
 3.2.3 - Fixed bug with double feeds sometimes not happening after 1st one.
