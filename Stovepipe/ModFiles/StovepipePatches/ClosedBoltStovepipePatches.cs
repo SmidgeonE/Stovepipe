@@ -297,5 +297,29 @@ namespace Stovepipe.StovepipePatches
 
             UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
         }
+        
+        [HarmonyPatch(typeof(ClosedBolt), "BoltEvent_EjectRound")]
+        [HarmonyPrefix]
+        private static bool StopEjectingRoundIfStovepiping(ClosedBolt __instance)
+        {
+            var data = __instance.GetComponent<StovepipeData>();
+
+            if (!data) return true;
+            if (!data.IsStovepiping) return true;
+            
+            return __instance.Weapon.Chamber.IsSpent;
+        }
+        
+        [HarmonyPatch(typeof(ClosedBolt), "BoltEvent_ExtractRoundFromMag")]
+        [HarmonyPrefix]
+        private static bool StopExtractingRoundIfBulletIsAlreadyInChamber(ClosedBolt __instance)
+        {
+            var data = __instance.GetComponent<StovepipeData>();
+
+            if (!data) return true;
+            if (!data.IsStovepiping) return true;
+            
+            return !__instance.Weapon.Chamber.IsFull;
+        }
     }
 }

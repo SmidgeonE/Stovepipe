@@ -239,5 +239,29 @@ namespace Stovepipe.StovepipePatches
             UnityEngine.Debug.Log("asdasdasdasd");
             UnStovepipe(slideData, true, __instance.Handgun.RootRigidbody);
         }
+        
+        [HarmonyPatch(typeof(HandgunSlide), "SlideEvent_EjectRound")]
+        [HarmonyPrefix]
+        private static bool StopEjectingRoundIfStovepiping(HandgunSlide __instance)
+        {
+            var data = __instance.GetComponent<StovepipeData>();
+
+            if (!data) return true;
+            if (!data.IsStovepiping) return true;
+            
+            return __instance.Handgun.Chamber.IsSpent;
+        }
+        
+        [HarmonyPatch(typeof(HandgunSlide), "SlideEvent_ExtractRoundFromMag")]
+        [HarmonyPrefix]
+        private static bool StopExtractingRoundIfBulletIsAlreadyInChamber(HandgunSlide __instance)
+        {
+            var data = __instance.GetComponent<StovepipeData>();
+
+            if (!data) return true;
+            if (!data.IsStovepiping) return true;
+            
+            return !__instance.Handgun.Chamber.IsFull;
+        }
     }
 }
