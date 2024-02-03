@@ -101,6 +101,8 @@ If you have any issues / ideas / need help with modding, I am always available o
 
 # Changelog
 
+3.3.2 - Hopefully fixed so that shells don't despawn when they shouldn't. Fixed internal magazine having weapons.
+
 3.3.1 - Fixed issue where in a stovepipe sometimes 2 rounds would be chambered.
 
 3.3.0 - Adjusted stovepipe behaviour, now generally a bullet will be chambered when a stovepipe occurs. The probability of this can be changed in the config under Probabilities - Stovepipe.

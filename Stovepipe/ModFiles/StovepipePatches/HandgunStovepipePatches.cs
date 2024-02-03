@@ -180,10 +180,7 @@ namespace Stovepipe.StovepipePatches
             if (slideData.IsStovepiping == false) return;
             if (slideData.timeSinceStovepiping < TimeUntilCanPhysicsSlideUnStovepipe) return;
             if (___m_slideZ_current < ___m_slideZ_forward - 0.01f)
-            {
-                UnityEngine.Debug.Log("asdas");
                 UnStovepipe(slideData, true, __instance.Handgun.RootRigidbody);
-            }
         }
         
         [HarmonyPatch(typeof(HandgunSlide), "SlideEvent_ExtractRoundFromMag")]
@@ -236,7 +233,6 @@ namespace Stovepipe.StovepipePatches
             if (slideData == null) return;
             if (!slideData.IsStovepiping) return;
             
-            UnityEngine.Debug.Log("asdasdasdasd");
             UnStovepipe(slideData, true, __instance.Handgun.RootRigidbody);
         }
         
