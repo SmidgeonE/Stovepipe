@@ -12,6 +12,7 @@ namespace Stovepipe
         public float doubleFeedChance;
         public float doubleFeedMaxChance;
         public bool hasSetDefaultChance;
+        public bool usesIntegralMagazines;
         
         public FVRFireArmRound upperBullet;
         public FVRFireArmRound lowerBullet;
@@ -53,6 +54,29 @@ namespace Stovepipe
         public void SetDoubleFeedProbToMin()
         {
             doubleFeedChance = doubleFeedMaxChance / UserConfig.ProbabilityCreepNumRounds.Value;
+        }
+
+        private void Start()
+        {
+            var weaponScript = gameObject.GetComponent<FVRFireArm>();
+            if (!weaponScript) return;
+            
+            switch (weaponScript.MagazineType)
+            {
+                case FireArmMagazineType.mag_InternalGeneric:
+                case FireArmMagazineType.m792x57mmMauserInternal:
+                case FireArmMagazineType.mC96MauserInternal:
+                case FireArmMagazineType.m38MosinInternal:
+                case FireArmMagazineType.m1903SpringfieldInteral:
+                case FireArmMagazineType.aJohnson1941Internal:
+                case FireArmMagazineType.mM40Internal:
+                case FireArmMagazineType.mModel70Internal:
+                    usesIntegralMagazines = true;
+                return;
+                
+                default:
+                    return;
+            }
         }
     }
 }

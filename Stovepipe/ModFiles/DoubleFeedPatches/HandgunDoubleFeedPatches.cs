@@ -194,13 +194,13 @@ namespace Stovepipe.DoubleFeedPatches
             var data = __instance.Handgun.GetComponent<DoubleFeedData>();
             if (data is null) return;
             if (!data.isDoubleFeeding) return;
-            if (__instance.Handgun.MagazineType == FireArmMagazineType.mag_InternalGeneric) return;
-
+            if (data.usesIntegralMagazines) return;
 
             var uninteractableLayer = LayerMask.NameToLayer("Water");
             var normalLayer = LayerMask.NameToLayer("Interactable");
             var lowerBulletExists = !data.hasLowerBulletBeenRemoved;
-
+            
+            
             if (__instance.Handgun.Magazine != null)
             {
                 if (lowerBulletExists) data.lowerBullet.gameObject.layer = uninteractableLayer;

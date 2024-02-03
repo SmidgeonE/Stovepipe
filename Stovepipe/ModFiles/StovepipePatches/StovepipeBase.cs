@@ -186,7 +186,21 @@ namespace Stovepipe.StovepipePatches
             
             if (!bulletData.data.IsStovepiping) return;
             
-            ___m_killAfter = 5f;
+            switch (GM.Options.SimulationOptions.ShellTime)
+            {
+                case SimulationOptions.SpentShellDespawnTime.Seconds_5:
+                    ___m_killAfter = 5f;
+                    break;
+                case SimulationOptions.SpentShellDespawnTime.Seconds_10:
+                    ___m_killAfter = 10f;
+                    break;
+                case SimulationOptions.SpentShellDespawnTime.Seconds_30:
+                    ___m_killAfter = 30f;
+                    break;
+                case SimulationOptions.SpentShellDespawnTime.Infinite:
+                    ___m_killAfter = 999999f;
+                    break;
+            }
         }
 
         [HarmonyPatch(typeof(FVRFireArmRound), "BeginInteraction")]
