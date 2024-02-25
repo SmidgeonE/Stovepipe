@@ -195,16 +195,23 @@ namespace Stovepipe.StovepipePatches
         }
         */
 
-        [HarmonyPatch(typeof(TubeFedShotgun), "TransferShellToUpperTrack")]
+        [HarmonyPatch(typeof(TubeFedShotgunBolt), "BoltEvent_ExtractRoundFromMag")]
         [HarmonyPrefix]
-        private static bool StopShellFromEnteringTrackWhenStovepiping(TubeFedShotgun __instance)
+        private static bool AbortExtractingMagIfStovepiping(TubeFedShotgunBolt __instance)
         {
-            var data = __instance.Bolt.GetComponent<StovepipeData>();
-            
-            if (Random.Range(0f, 1f) < UserConfig.StovepipeNextRoundNotChamberedProb.Value)
-                return false;
+            var data = __instance.gameObject.GetComponent(typeof(StovepipeData)) 
+                as StovepipeData;
 
-            return data == null || !data.IsStovepiping;
+            if (data is null) return true;
+            if (!data.IsStovepiping) return true;
+
+            if (Random.Range(0f, 1f) < UserConfig.StovepipeNextRoundNotChamberedProb.Value)
+            {
+                __instance.Shotgun.PlayAudioEvent(FirearmAudioEventType.BoltSlideForwardHeld, 1f);
+                return false;
+            }
+
+            return true;
         }
 
         [HarmonyPatch(typeof(TubeFedShotgunBolt), "UpdateBolt")]
@@ -244,6 +251,18 @@ namespace Stovepipe.StovepipePatches
             if (stoveData is null) return true;
             
             return !stoveData.IsStovepiping;
+        }
+
+        [HarmonyPatch(typeof(TubeFedShotgunBolt), "BoltEvent_EjectRound")]
+        [HarmonyPrefix]
+        private static bool StopFromEjectingIfStovepiping(TubeFedShotgunBolt __instance)
+        {
+            var data = __instance.GetComponent<StovepipeData>();
+
+            if (!data) return true;
+            if (!data.IsStovepiping) return true;
+            
+            return __instance.Shotgun.Chamber.IsSpent;
         }
     }
 }
