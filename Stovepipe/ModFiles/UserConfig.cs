@@ -26,6 +26,7 @@ namespace Stovepipe
         public static ConfigEntry<float> StovepipeTubeFedProb;
         public static ConfigEntry<float> StovepipeOpenBoltProb;
         public static ConfigEntry<float> StovepipeNextRoundNotChamberedProb;
+        public static ConfigEntry<bool> EnableHittingStovepipedBulletOut;
 
         public static ConfigEntry<float> DoubleFeedHandgunProb;
         public static ConfigEntry<float> DoubleFeedRifleProb;

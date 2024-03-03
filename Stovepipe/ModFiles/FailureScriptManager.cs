@@ -95,6 +95,7 @@ namespace Stovepipe.ModFiles
                 Harmony.CreateAndPatchAll(typeof(ClosedBoltStovepipePatches));
                 Harmony.CreateAndPatchAll(typeof(TubeFedStovepipePatches));
                 Harmony.CreateAndPatchAll(typeof(OpenBoltStovepipePatches));
+                Harmony.CreateAndPatchAll(typeof(StovepipeHandGrabPatches));
             }
 
             if (UserConfig.IsDoubleFeedEnabled.Value)
@@ -135,6 +136,13 @@ namespace Stovepipe.ModFiles
             UserConfig.StovepipeNextRoundNotChamberedProb = Config.Bind("Probability - Stovepipe", 
                 "Probability Next Round Doesnt Chamber", 0.1f, 
                 "When a stovepipe occurs, usually the next bullet will successfully chamber. This adjusts the chance that the bullet is blocked by the stovepiped cartridge");
+
+            /*
+            UserConfig.EnableHittingStovepipedBulletOut = Config.Bind("Activation",
+                "Enable Being able to hit the bullet out when stovepiped.", true,
+                "This allows, when you have a stovepiped round," +
+                " if you hold the grip down, you can just 'hit' the round out of the gun with your controller, without having to grab it directly.");
+                */
             
             UserConfig.DoubleFeedHandgunProb = Config.Bind("Probability - Double Feed", 
                 "Handgun Probability", 0.008f, "");

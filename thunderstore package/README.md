@@ -101,6 +101,8 @@ If you have any issues / ideas / need help with modding, I am always available o
 
 # Changelog
 
+3.3.4 - Fixed issue with most recent ar-15s having weird stovepipe issues.
+
 3.3.3 - Fixed issue with shotguns not loading shells sometimes. 
 
 3.3.2 - Hopefully fixed so that shells don't despawn when they shouldn't. Fixed internal magazine having weapons.
