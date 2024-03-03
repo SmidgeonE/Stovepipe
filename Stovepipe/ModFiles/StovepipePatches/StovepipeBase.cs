@@ -89,6 +89,7 @@ namespace Stovepipe.StovepipePatches
             data.ejectedRound.RootRigidbody.maxAngularVelocity = 1000f;
             data.ejectedRound.RootRigidbody.detectCollisions = true;
             data.timeSinceStovepiping = 0f;
+            data.hasBulletsPositionBeenSet = false;
 
             if (breakParentage) data.ejectedRound.SetParentage(null);
             if (weaponRb == null) return;

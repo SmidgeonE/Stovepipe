@@ -101,6 +101,8 @@ If you have any issues / ideas / need help with modding, I am always available o
 
 # Changelog
 
+3.3.3 - Fixed issue with shotguns not loading shells sometimes. 
+
 3.3.2 - Hopefully fixed so that shells don't despawn when they shouldn't. Fixed internal magazine having weapons.
 
 3.3.1 - Fixed issue where in a stovepipe sometimes 2 rounds would be chambered.

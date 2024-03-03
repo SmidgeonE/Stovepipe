@@ -116,6 +116,7 @@ namespace Stovepipe.StovepipePatches
             if (data.ejectedRound is null) return;
             if (data.ejectedRound.IsCaseless) return;
             if (__instance.Weapon.Chamber.ProxyRound == null) return;
+            if (data.hasBulletsPositionBeenSet) return;
             
             var weapon = __instance.Weapon;
             var bulletTransform = data.ejectedRound.transform;
@@ -127,6 +128,7 @@ namespace Stovepipe.StovepipePatches
                 bulletTransform.localRotation = data.Adjustments.BulletDir;
                 ___m_boltZ_forward = data.Adjustments.BoltZ;
                 data.timeSinceStovepiping += Time.deltaTime;
+                data.hasBulletsPositionBeenSet = true;
                 return;
             }
             // If we couldn't find an adjustment set by the user, we just use a procedural positioning:
@@ -191,7 +193,7 @@ namespace Stovepipe.StovepipePatches
             if (isThisAnAK) ___m_boltZ_forward -= 2 * data.ejectedRoundRadius;
 
             
-
+            data.hasBulletsPositionBeenSet = true;
             data.timeSinceStovepiping += Time.deltaTime;
         }
 

@@ -30,6 +30,7 @@ namespace Stovepipe
         public bool hasFoundAdjustments;
         public WeaponType weaponType;
         public int numOfRoundsSinceLastJam;
+        public bool hasBulletsPositionBeenSet;
         
         
         public float stovepipeProb;
