@@ -56,14 +56,17 @@ namespace Stovepipe.StovepipePatches
         [HarmonyPrefix]
         private static void StovepipeDiceroll(ClosedBolt __instance)
         {
-            var data = __instance.gameObject.GetComponent(typeof(StovepipeData)) 
-                as StovepipeData;
+            var data = __instance.gameObject.GetComponent<StovepipeData>();
 
             if (data == null) return;
             if (__instance.IsHeld) return;
             
             var weapon = __instance.Weapon;
 
+            // Weapons it doenst work with
+            if (weapon.name.Contains("MX")) return;
+
+            if (data.isWeaponBatteryFailing) return;
             if (data.numOfRoundsSinceLastJam < UserConfig.MinRoundBeforeNextJam.Value) return;
             if (!weapon.Chamber.IsFull) return;
             if (!weapon.Chamber.IsSpent) return;
@@ -78,28 +81,23 @@ namespace Stovepipe.StovepipePatches
             data.hasBulletBeenStovepiped = false;
         }
 
-
         [HarmonyPatch(typeof(ClosedBolt), "UpdateBolt")]
         [HarmonyPrefix]
         private static void BoltAndBulletUpdate(ClosedBolt __instance, ref float ___m_boltZ_forward, ref float ___m_boltZ_current)
         {
-            var data = __instance.gameObject.GetComponent(typeof(StovepipeData)) 
-                as StovepipeData;
-
+            var data = __instance.gameObject.GetComponent<StovepipeData>();
+            
             if (data is null) return;
-
             if (!data.hasCollectedWeaponCharacteristics)
             {
                 data.defaultFrontPosition = ___m_boltZ_forward;
                 data.hasCollectedWeaponCharacteristics = true;
             }
-            
-            if (!data.IsStovepiping)
+            if (!data.IsStovepiping && !data.isWeaponBatteryFailing)
             {
                 if (!DebugMode.IsDebuggingWeapon) ___m_boltZ_forward = data.defaultFrontPosition;
                 return;
             }
-            
             /* Stovepipe the round...
              */
 
@@ -107,20 +105,22 @@ namespace Stovepipe.StovepipePatches
             {
                 StartStovepipe(data);
                 data.randomPosAndRot = GenerateRandomRifleNoise();
-                data.Adjustments = DebugMode.ReadAdjustment(__instance.Weapon.name);
+                data.Adjustments = DebugIO.ReadStovepipeAdjustment(__instance.Weapon.name);
                 if (data.Adjustments != null) data.hasFoundAdjustments = true;
             }
             
             /* Now setting the position and rotation while the bullet is stovepiping */
 
             var slideTransform = __instance.transform;
-
+            
             if (data.ejectedRound is null) return;
+            if (data.ejectedRound.IsCaseless) return;
             if (__instance.Weapon.Chamber.ProxyRound == null) return;
-
+            if (data.hasBulletsPositionBeenSet) return;
+            
             var weapon = __instance.Weapon;
             var bulletTransform = data.ejectedRound.transform;
-
+            
             if (data.hasFoundAdjustments)
             {
                 // ReSharper disable once PossibleNullReferenceException
@@ -128,9 +128,9 @@ namespace Stovepipe.StovepipePatches
                 bulletTransform.localRotation = data.Adjustments.BulletDir;
                 ___m_boltZ_forward = data.Adjustments.BoltZ;
                 data.timeSinceStovepiping += Time.deltaTime;
+                data.hasBulletsPositionBeenSet = true;
                 return;
             }
-            
             // If we couldn't find an adjustment set by the user, we just use a procedural positioning:
 
             var gunTransform = __instance.Weapon.transform;
@@ -138,13 +138,12 @@ namespace Stovepipe.StovepipePatches
                             gunTransform.up * weapon.EjectionSpeed.y +
                             gunTransform.forward * weapon.EjectionSpeed.z).normalized;
             var gunTransformForward = gunTransform.forward;
-
+            
             if (!data.hasFoundIfItEjectsUpwards)
             {
                 data.ejectsUpwards = IsRifleThatEjectsUpwards(weapon.RoundPos_Ejection, __instance.transform, data.ejectedRound);
                 data.hasFoundIfItEjectsUpwards = true;
             }
-            
             if (data.ejectsUpwards)
             {
                 bulletTransform.rotation = Quaternion.LookRotation(slideTransform.up, -slideTransform.forward);
@@ -163,7 +162,6 @@ namespace Stovepipe.StovepipePatches
                                        - gunTransformForward * data.ejectedRoundHeight / 2
                                        + bulletTransform.forward * data.ejectedRoundHeight * 0.3f
                                        + bulletTransform.forward * data.randomPosAndRot[0];
-            
             
             /* These are the weird cases where the default positioning doesnt work well */
 
@@ -185,7 +183,6 @@ namespace Stovepipe.StovepipePatches
                 bulletTransform.position += gunTransform.forward * data.ejectedRoundRadius * 3;
             }
             
-            
             /* Now setting the slide to the end of the bullet */
 
             var dx = weapon.Chamber.transform.localPosition.z - bulletTransform.localPosition.z - data.ejectedRoundHeight/2;
@@ -196,7 +193,7 @@ namespace Stovepipe.StovepipePatches
             if (isThisAnAK) ___m_boltZ_forward -= 2 * data.ejectedRoundRadius;
 
             
-
+            data.hasBulletsPositionBeenSet = true;
             data.timeSinceStovepiping += Time.deltaTime;
         }
 
@@ -209,9 +206,34 @@ namespace Stovepipe.StovepipePatches
 
             if (data is null) return true;
             if (!data.IsStovepiping) return true;
+
+            if (Random.Range(0f, 1f) < UserConfig.StovepipeNextRoundNotChamberedProb.Value)
+            {
+                __instance.Weapon.PlayAudioEvent(FirearmAudioEventType.BoltSlideForwardHeld, 1f);
+                return false;
+            }
+
+            return true;
+        }
+
+        [HarmonyPatch(typeof(ClosedBoltWeapon), "Fire")]
+        [HarmonyPrefix]
+        private static bool StopFromFiringIfStovepiping(ClosedBoltWeapon __instance)
+        {
+            var stoveData = __instance.Bolt.GetComponent<StovepipeData>();
+            if (stoveData is null) return true;
             
-            __instance.Weapon.PlayAudioEvent(FirearmAudioEventType.BoltSlideForwardHeld, 1f);
-            return false;
+            return !stoveData.IsStovepiping;
+        }
+        
+        [HarmonyPatch(typeof(ClosedBoltWeapon), "DropHammer")]
+        [HarmonyPrefix]
+        private static bool StopFromDroppingHammerIfStovepiping(ClosedBoltWeapon __instance)
+        {
+            var stoveData = __instance.Bolt.GetComponent<StovepipeData>();
+            if (stoveData is null) return true;
+            
+            return !stoveData.IsStovepiping;
         }
 
         [HarmonyPatch(typeof(ClosedBoltHandle), "UpdateInteraction")]
@@ -276,6 +298,30 @@ namespace Stovepipe.StovepipePatches
                 !CouldBulletFallOutGunHorizontally(__instance.Weapon.RootRigidbody, data.ejectedRound.transform.forward)) return;
 
             UnStovepipe(data, true, __instance.Weapon.RootRigidbody);
+        }
+        
+        [HarmonyPatch(typeof(ClosedBolt), "BoltEvent_EjectRound")]
+        [HarmonyPrefix]
+        private static bool StopEjectingRoundIfStovepiping(ClosedBolt __instance)
+        {
+            var data = __instance.GetComponent<StovepipeData>();
+
+            if (!data) return true;
+            if (!data.IsStovepiping) return true;
+            
+            return __instance.Weapon.Chamber.IsSpent;
+        }
+        
+        [HarmonyPatch(typeof(ClosedBolt), "BoltEvent_ExtractRoundFromMag")]
+        [HarmonyPrefix]
+        private static bool StopExtractingRoundIfBulletIsAlreadyInChamber(ClosedBolt __instance)
+        {
+            var data = __instance.GetComponent<StovepipeData>();
+
+            if (!data) return true;
+            if (!data.IsStovepiping) return true;
+            
+            return !__instance.Weapon.Chamber.IsFull;
         }
     }
 }

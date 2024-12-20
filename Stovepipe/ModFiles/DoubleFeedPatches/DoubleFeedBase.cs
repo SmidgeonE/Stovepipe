@@ -93,11 +93,7 @@ namespace Stovepipe.DoubleFeedPatches
             
             round.isMagazineLoadable = false;
             round.isManuallyChamberable = false;
-            if (data.thisWeaponsStovepipeData != null)
-            {
-                data.thisWeaponsStovepipeData.numOfRoundsSinceLastJam = 0;
-                data.thisWeaponsStovepipeData.SetStoveProbToMin();
-            }
+            if (data.thisWeaponsStovepipeData != null) data.thisWeaponsStovepipeData.numOfRoundsSinceLastJam = 0; 
             
             data.SetDoubleFeedProbToMin();
             round.StoreAndDestroyRigidbody();
@@ -115,8 +111,9 @@ namespace Stovepipe.DoubleFeedPatches
             round.RootRigidbody.maxAngularVelocity = 1000f;
             round.RootRigidbody.detectCollisions = true;
             round.isMagazineLoadable = true;
+
             round.GetComponent<BulletDoubleFeedData>().isThisBulletDoubleFeeding = false;
-            
+
             if (round == data.upperBullet)
             {
                 data.hasUpperBulletBeenRemoved = true;

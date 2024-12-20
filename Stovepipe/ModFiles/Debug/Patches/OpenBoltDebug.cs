@@ -22,10 +22,9 @@ namespace Stovepipe.Debug
             }
             else
             {
-                if (!DebugMode.HasSetFrontBoltPos) DebugMode.CurrentBoltForward = ___m_boltZ_current;
+                if (!DebugMode.HasSetFrontBoltPos) DebugMode.CurrentBoltForward = __instance.transform.localPosition.z;
 
                 ___m_boltZ_forward = DebugMode.CurrentBoltForward;
-                
                 DebugMode.HasSetFrontBoltPos = true;
             }
         }

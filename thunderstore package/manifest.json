@@ -1,7 +1,7 @@
 {
 	"name": "Stovepipe",
-	"version_number": "3.1.5",
-	"description": "Now featuring double-feed failures for Handguns as well as ARs/BRs/SMGs! Watch video on Thunderstore for a showcase. More high quality default positions thanks to @drummerdude2003. Implements graphical stovepipe and double-feed failures to weapons.",
+	"version_number": "3.3.4", 
+	"description": "Featuring a new failure method: Failure to enter battery! Check Thunderstore / Youtube for more info. More high quality default positions thanks to @drummerdude2003. Implements graphical failures to weapons, such as Stovepipe and Double feeds.",
 	"website_url": "https://github.com/SmidgeonE/Stovepipe",
 	"dependencies": ["Stratum-Mason-1.0.4"]
 }

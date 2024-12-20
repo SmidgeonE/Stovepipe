@@ -35,6 +35,7 @@ namespace Stovepipe.StovepipePatches
             data.ejectedRound.RootRigidbody.maxAngularVelocity = 0;
             data.ejectedRound.RootRigidbody.useGravity = false;
             data.ejectedRound.RootRigidbody.detectCollisions = false;
+
             data.hasBulletBeenStovepiped = true;
             data.timeSinceStovepiping = 0f;
             data.numOfRoundsSinceLastJam = 0;
@@ -88,6 +89,7 @@ namespace Stovepipe.StovepipePatches
             data.ejectedRound.RootRigidbody.maxAngularVelocity = 1000f;
             data.ejectedRound.RootRigidbody.detectCollisions = true;
             data.timeSinceStovepiping = 0f;
+            data.hasBulletsPositionBeenSet = false;
 
             if (breakParentage) data.ejectedRound.SetParentage(null);
             if (weaponRb == null) return;
@@ -185,9 +187,23 @@ namespace Stovepipe.StovepipePatches
             
             if (!bulletData.data.IsStovepiping) return;
             
-            ___m_killAfter = 5f;
+            switch (GM.Options.SimulationOptions.ShellTime)
+            {
+                case SimulationOptions.SpentShellDespawnTime.Seconds_5:
+                    ___m_killAfter = 5f;
+                    break;
+                case SimulationOptions.SpentShellDespawnTime.Seconds_10:
+                    ___m_killAfter = 10f;
+                    break;
+                case SimulationOptions.SpentShellDespawnTime.Seconds_30:
+                    ___m_killAfter = 30f;
+                    break;
+                case SimulationOptions.SpentShellDespawnTime.Infinite:
+                    ___m_killAfter = 999999f;
+                    break;
+            }
         }
-        
+
         [HarmonyPatch(typeof(FVRFireArmRound), "BeginInteraction")]
         [HarmonyPrefix]
         private static void UnstovepipeWhenGrabbed(FVRFireArmRound __instance)

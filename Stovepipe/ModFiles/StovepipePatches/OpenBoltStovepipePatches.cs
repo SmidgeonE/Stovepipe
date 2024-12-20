@@ -1,4 +1,5 @@
-﻿using FistVR;
+﻿using System.Linq;
+using FistVR;
 using HarmonyLib;
 using Stovepipe.Debug;
 using Stovepipe.ModFiles;
@@ -62,6 +63,12 @@ namespace Stovepipe.StovepipePatches
             
             var weapon = __instance.Receiver;
 
+            // Weapons it doenst work with
+            if (weapon.name.Contains("MX")) return;
+            if (weapon.FireSelector_Modes.All(
+                    x => x.ModeType != OpenBoltReceiver.FireSelectorModeType.Single)) return;
+
+            if (data.isWeaponBatteryFailing) return;
             if (data.numOfRoundsSinceLastJam < UserConfig.MinRoundBeforeNextJam.Value) return;
             if (!weapon.Chamber.IsFull) return;
             if (!weapon.Chamber.IsSpent) return;
@@ -106,7 +113,7 @@ namespace Stovepipe.StovepipePatches
             {
                 StartStovepipe(data);
                 data.randomPosAndRot = GenerateRandomRifleNoise();
-                data.Adjustments = DebugMode.ReadAdjustment(__instance.Receiver.name);
+                data.Adjustments = DebugIO.ReadStovepipeAdjustment(__instance.Receiver.name);
                 if (data.Adjustments != null) data.hasFoundAdjustments = true;
             }
             

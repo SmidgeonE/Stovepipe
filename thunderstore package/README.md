@@ -1,3 +1,22 @@
+# Failure To Enter Battery
+
+Video Demonstration: https://youtu.be/jFWZ4heahxc
+
+3.2.0 Stovepipe brings a new type of failure, failure to enter battery! This is totally adjustable in terms of probability.
+
+There are 3 ways of fixing a failure to enter battery. First, you can force the slide forward. Next, you can cycle the slide and hope that it doesn't stick in the same place! Finally, if you have MagBoop installed, you can 'push' the slide forward, much like 'pushing' the magazine back into place.
+
+Note if you pull the trigger while its failed to enter battery, the hammer will have dropped, so you may have to completely cycle the action again.
+
+Note: Currently only works for handguns. I will most likely not add this to closed bolt weapons (m4, scar, etc.) because I can't seem to find a way to code the forward assist to work.
+
+
+
+# Double Feed Debug Mode
+
+There is now a double feed debug mode! Note you must ensure that the bullet that spawns at the top must be used as the 'top' bullet, otherwise it will not work. Check out the youtube video for more.
+
+
 # Double Feeds
 
 https://youtu.be/pm3irC9ZwD8 - Video of Double Feeds.
@@ -57,9 +76,9 @@ To save this, simply press down on the right joystick again and it will save it 
 
 Currently works for:
 
-   (Stovepipes)			    (Double Feeds)
-1. Closed Bolt Weapons		1. Closed Bolt Weapons
-2. Handguns			2. Handguns
+   (Stovepipes)			    
+1. Closed Bolt Weapons		
+2. Handguns		
 3. Tube Fed Shotguns
 4. Open Bolt Weapons
 
@@ -81,6 +100,31 @@ If you have any issues / ideas / need help with modding, I am always available o
 
 
 # Changelog
+
+3.3.4 - Fixed issue with most recent ar-15s having weird stovepipe issues.
+
+3.3.3 - Fixed issue with shotguns not loading shells sometimes. 
+
+3.3.2 - Hopefully fixed so that shells don't despawn when they shouldn't. Fixed internal magazine having weapons.
+
+3.3.1 - Fixed issue where in a stovepipe sometimes 2 rounds would be chambered.
+
+3.3.0 - Adjusted stovepipe behaviour, now generally a bullet will be chambered when a stovepipe occurs. The probability of this can be changed in the config under Probabilities - Stovepipe.
+ Adjusted failure to enter battery so that the trigger no longer causes the hammer to drop, making booping the slide more useful.
+
+3.2.4 - Fixed so that when a stovepipe occurs, only stovepipe probabilities decrease when using probability creep, instead of both stovepipe and double feed probabilities.
+
+3.2.3 - Fixed bug with double feeds sometimes not happening after 1st one.
+
+3.2.2 - New icon. Many thanks to Østrem for the great design!
+ 
+3.2.1 - Fixed many bugs. Bullet creep should work more correctly now.
+
+3.2.0 - Added failure to enter battery. The main ways to fix this are to cycle the slide or push it forward with your hand. Note with the new MagBoop update you can send it home by pushing, much like a magazine. Removed odd weapons that don't work well with stovepipe. New Double-Feed debug mechanic, so you can change the position of the bullets for double feed!
+
+3.1.7 - Excluded ModulMX, as they can't stovepipe.
+
+3.1.6 - Fixed double feeding issue with caseless weapons.
 
 3.1.5 - Fixed yet another bug.
 

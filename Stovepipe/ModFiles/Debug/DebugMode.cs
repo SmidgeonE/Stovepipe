@@ -1,27 +1,27 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using FistVR;
 using HarmonyLib;
 using Newtonsoft.Json;
 using Stovepipe.ModFiles;
 using UnityEngine;
 using Valve.VR.InteractionSystem;
+using Object = System.Object;
 
 namespace Stovepipe.Debug
 {
-    public class DebugMode
+    public static class DebugMode
     {
         public static bool IsDebuggingWeapon;
         public static FVRFireArm CurrentDebugWeapon;
 
-        private static GameObject _currentDebugRound;
-        private static FVRFireArmRound _currentDebugRoundScript;
+        private static GameObject _currentStovepipeDebugRound;
+        private static FVRFireArmRound _currentStovepipeDebugRoundScript;
+        private static readonly GameObject[] DoubleFeedDebugBullets = new GameObject[2];
 
         public static bool HasSetFrontBoltPos;
         public static float CurrentBoltForward;
-        
-        private static readonly JsonSerializerSettings IgnoreSelfReference = new JsonSerializerSettings
-            { ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
 
 
         [HarmonyPatch(typeof(FVRViveHand), "Update")]
@@ -57,101 +57,135 @@ namespace Stovepipe.Debug
             if (IsDebuggingWeapon)
             {
                 IsDebuggingWeapon = false;
-                DestroyDebugRoundAndSaveValues(true);
+                if (!UserConfig.IsDoubleFeedDebugMode.Value) StovepipeResetDebugAndSaveVals();
+                else DoubleFeedResetDebugAndSaveVals();
             }
             else
             {
                 IsDebuggingWeapon = true;
-                CreateDebugRound();
+                if (!UserConfig.IsDoubleFeedDebugMode.Value) StovepipeCreateDebugRound();
+                else DoubleFeedCreateDebugRounds();
             }
+        }
+
+        private static void DoubleFeedResetDebugAndSaveVals()
+        {
+            var name = CurrentDebugWeapon.gameObject.name;
+            name = name.Remove(name.Length - 7);
+
+            var adjustment = new DoubleFeedAdjustment
+            {
+                UpperBulletLocalPos = DoubleFeedDebugBullets[0].transform.localPosition,
+                UpperBulletDir = DoubleFeedDebugBullets[0].transform.localRotation,
+                
+                LowerBulletLocalPos = DoubleFeedDebugBullets[1].transform.localPosition,
+                LowerBulletDir = DoubleFeedDebugBullets[1].transform.localRotation,
+                
+                BoltZ = CurrentBoltForward
+            };
+
+            DebugIO.WriteNewAdjustment(name, adjustment);
+            UnityEngine.Object.Destroy(DoubleFeedDebugBullets[0]);
+            UnityEngine.Object.Destroy(DoubleFeedDebugBullets[1]);
+        }
+
+        private static void DoubleFeedCreateDebugRounds()
+        {
+
+            DoubleFeedDebugBullets[0] = GenerateDebugRound();
+            if (DoubleFeedDebugBullets[0] == null) return;
+
+            DoubleFeedDebugBullets[1] = GenerateDebugRound();
+
+
+            foreach (var round in DoubleFeedDebugBullets)
+            {
+                var roundScript = round.GetComponent<FVRFireArmRound>();
+                var rb = roundScript.RootRigidbody;
+                rb.detectCollisions = false;
+                rb.useGravity = false;
+                round.GetComponent<CapsuleCollider>().isTrigger = false;
+                roundScript.StoreAndDestroyRigidbody();
+                round.transform.parent = CurrentDebugWeapon.transform;
+            }
+
+            DoubleFeedDebugBullets[0].transform.position += CurrentDebugWeapon.transform.up * 0.02f;
         }
         
-        private static void CreateDebugRound()
+        private static void StovepipeCreateDebugRound()
         {
-            FVRObject bulletObj;
-
-            switch (CurrentDebugWeapon)
-            {
-                case Handgun handgun:
-                    bulletObj =
-                        AM.GetRoundSelfPrefab(handgun.RoundType, AM.GetDefaultRoundClass(handgun.RoundType));
-                    _currentDebugRound = UnityEngine.Object.Instantiate(bulletObj.GetGameObject(),
-                        handgun.RoundPos_Ejection.position,
-                        Quaternion.Euler(CurrentDebugWeapon.transform.right)) as GameObject;
-                    break;
-                
-                case ClosedBoltWeapon closedBoltWeapon:
-                    bulletObj =
-                        AM.GetRoundSelfPrefab(closedBoltWeapon.RoundType, AM.GetDefaultRoundClass(closedBoltWeapon.RoundType));
-                    _currentDebugRound = UnityEngine.Object.Instantiate(bulletObj.GetGameObject(),
-                        closedBoltWeapon.RoundPos_Ejection.position,
-                        Quaternion.Euler(CurrentDebugWeapon.transform.right)) as GameObject;
-                    break;
-                
-                case TubeFedShotgun tubeFedShotgun:
-                    bulletObj =
-                        AM.GetRoundSelfPrefab(tubeFedShotgun.RoundType, AM.GetDefaultRoundClass(tubeFedShotgun.RoundType));
-                    _currentDebugRound = UnityEngine.Object.Instantiate(bulletObj.GetGameObject(),
-                        tubeFedShotgun.RoundPos_Ejection.position,
-                        Quaternion.Euler(CurrentDebugWeapon.transform.right)) as GameObject;
-                    break;
-                
-                case OpenBoltReceiver openBolt:
-                    bulletObj =
-                        AM.GetRoundSelfPrefab(openBolt.RoundType, AM.GetDefaultRoundClass(openBolt.RoundType));
-                    _currentDebugRound = UnityEngine.Object.Instantiate(bulletObj.GetGameObject(),
-                        openBolt.RoundPos_Ejection.position,
-                        Quaternion.Euler(CurrentDebugWeapon.transform.right)) as GameObject;
-                    break;
-            }
-
-            if (_currentDebugRound == null) return;
+            _currentStovepipeDebugRound = GenerateDebugRound();
+            if (_currentStovepipeDebugRound == null) return;
 
 
-            _currentDebugRoundScript = _currentDebugRound.GetComponent<FVRFireArmRound>();
-            _currentDebugRoundScript.Fire();
+            _currentStovepipeDebugRoundScript = _currentStovepipeDebugRound.GetComponent<FVRFireArmRound>();
+            _currentStovepipeDebugRoundScript.Fire();
 
-            var rb = _currentDebugRoundScript.RootRigidbody;
+            var rb = _currentStovepipeDebugRoundScript.RootRigidbody;
             rb.detectCollisions = false;
             rb.useGravity = false;
-            _currentDebugRound.GetComponent<CapsuleCollider>().isTrigger = false;
-            _currentDebugRoundScript.StoreAndDestroyRigidbody();
-            _currentDebugRound.transform.parent = CurrentDebugWeapon.transform;
-            
-            
-            
+            _currentStovepipeDebugRound.GetComponent<CapsuleCollider>().isTrigger = false;
+            _currentStovepipeDebugRoundScript.StoreAndDestroyRigidbody();
+            _currentStovepipeDebugRound.transform.parent = CurrentDebugWeapon.transform;
         }
 
-        private static void DestroyDebugRoundAndSaveValues(bool writeAdjustment)
+        private static void StovepipeResetDebugAndSaveVals()
         {
             var name = CurrentDebugWeapon.gameObject.name;
             name = name.Remove(name.Length - 7);
             
             var adjustment = new StovepipeAdjustment
             {
-                    BulletDir = _currentDebugRound.transform.localRotation,
-                    BulletLocalPos = _currentDebugRound.transform.localPosition,
+                    BulletDir = _currentStovepipeDebugRound.transform.localRotation,
+                    BulletLocalPos = _currentStovepipeDebugRound.transform.localPosition,
                     BoltZ = CurrentBoltForward
             };
-            
-            if (writeAdjustment) WriteNewAdjustment(name, adjustment);
-            UnityEngine.Object.Destroy(_currentDebugRound);
+
+            DebugIO.WriteNewAdjustment(name, adjustment);
+            UnityEngine.Object.Destroy(_currentStovepipeDebugRound);
         }
         
-        public static void WriteNewAdjustment(string nameOfGun, StovepipeAdjustment adjustments)
+        private static GameObject GenerateDebugRound()
         {
-            if (UserConfig.IsWriteToDefault.Value)
-                WriteOrReplaceInDict(nameOfGun, adjustments, UserConfig.Defaults, UserConfig.DefaultsDir);
-            else
-                WriteOrReplaceInDict(nameOfGun, adjustments, UserConfig.UserDefs, UserConfig.UserDefsDir);
-        }
+            FVRObject bulletObj;
+            var bulletGameObj = new GameObject();
+            
+            switch (CurrentDebugWeapon)
+            {
+                case Handgun handgun:
+                    bulletObj =
+                        AM.GetRoundSelfPrefab(handgun.RoundType, AM.GetDefaultRoundClass(handgun.RoundType));
+                    bulletGameObj = UnityEngine.Object.Instantiate(bulletObj.GetGameObject(),
+                        handgun.RoundPos_Ejection.position,
+                        Quaternion.Euler(CurrentDebugWeapon.transform.right)) as GameObject;
+                    break;
 
-        private static void WriteOrReplaceInDict(string nameOfGun, StovepipeAdjustment adjustment,
-            IDictionary<string, StovepipeAdjustment> dict, string dictDir)
-        {
-            if (dict.TryGetValue(nameOfGun, out _)) dict.Remove(nameOfGun);
-            dict.Add(nameOfGun, adjustment);
-            File.WriteAllText(dictDir, JsonConvert.SerializeObject(dict, Formatting.Indented, IgnoreSelfReference));
+                case ClosedBoltWeapon closedBoltWeapon:
+                    bulletObj =
+                        AM.GetRoundSelfPrefab(closedBoltWeapon.RoundType, AM.GetDefaultRoundClass(closedBoltWeapon.RoundType));
+                    bulletGameObj = UnityEngine.Object.Instantiate(bulletObj.GetGameObject(),
+                        closedBoltWeapon.RoundPos_Ejection.position,
+                        Quaternion.Euler(CurrentDebugWeapon.transform.right)) as GameObject;
+                    break;
+
+                case TubeFedShotgun tubeFedShotgun:
+                    bulletObj =
+                        AM.GetRoundSelfPrefab(tubeFedShotgun.RoundType, AM.GetDefaultRoundClass(tubeFedShotgun.RoundType));
+                    bulletGameObj = UnityEngine.Object.Instantiate(bulletObj.GetGameObject(),
+                        tubeFedShotgun.RoundPos_Ejection.position,
+                        Quaternion.Euler(CurrentDebugWeapon.transform.right)) as GameObject;
+                    break;
+
+                case OpenBoltReceiver openBolt:
+                    bulletObj =
+                        AM.GetRoundSelfPrefab(openBolt.RoundType, AM.GetDefaultRoundClass(openBolt.RoundType));
+                    bulletGameObj = UnityEngine.Object.Instantiate(bulletObj.GetGameObject(),
+                        openBolt.RoundPos_Ejection.position,
+                        Quaternion.Euler(CurrentDebugWeapon.transform.right)) as GameObject;
+                    break;
+            }
+
+            return bulletGameObj;
         }
 
         [HarmonyPatch(typeof(FVRPhysicalObject), "EndInteraction")]
@@ -159,7 +193,8 @@ namespace Stovepipe.Debug
         private static void InteractionEndDestroyRigidBodyPatch(FVRPhysicalObject __instance)
         {
             if (!IsDebuggingWeapon) return;
-            if (__instance != _currentDebugRoundScript) return;
+            if (__instance != _currentStovepipeDebugRoundScript && 
+                !DoubleFeedDebugBullets.Contains(__instance.gameObject)) return;
             
             __instance.StoreAndDestroyRigidbody();
             __instance.transform.parent = CurrentDebugWeapon.transform;
@@ -170,7 +205,8 @@ namespace Stovepipe.Debug
         private static void InteractionDestroyRigidBodyPatch(FVRPhysicalObject __instance)
         {
             if (!IsDebuggingWeapon) return;
-            if (__instance != _currentDebugRoundScript) return;
+            if (__instance != _currentStovepipeDebugRoundScript && 
+                !DoubleFeedDebugBullets.Contains(__instance.gameObject)) return;
             if (__instance.RootRigidbody == null) return;
 
             __instance.RootRigidbody.detectCollisions = false;
@@ -183,17 +219,6 @@ namespace Stovepipe.Debug
             if (!IsDebuggingWeapon) return;
             
             ___m_killAfter = 5f;
-        }
-        
-        public static StovepipeAdjustment ReadAdjustment(string rawNameOfGun)
-        {
-            var cleanedName = rawNameOfGun.Remove(rawNameOfGun.Length - 7);
-
-            if (UserConfig.UserDefs.TryGetValue(cleanedName, out var adjustment)) return adjustment;
-
-            UserConfig.Defaults.TryGetValue(cleanedName, out adjustment);
-
-            return adjustment;
         }
     }
 }

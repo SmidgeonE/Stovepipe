@@ -67,6 +67,7 @@ namespace Stovepipe.StovepipePatches
             
             var handgun = __instance.Handgun;
 
+            if (slideData.isWeaponBatteryFailing) return;
             if (slideData.numOfRoundsSinceLastJam < UserConfig.MinRoundBeforeNextJam.Value) return;
             if (!handgun.Chamber.IsFull) return;
             if (!handgun.Chamber.IsSpent) return;
@@ -86,11 +87,14 @@ namespace Stovepipe.StovepipePatches
         [HarmonyPrefix]
         private static void SlideAndBulletUpdate(HandgunSlide __instance, ref float ___m_slideZ_forward, ref float ___m_slideZ_current)
         {
-            var slideData = __instance.gameObject.GetComponent(typeof(StovepipeData)) 
-                as StovepipeData;
+            var doubleFeedData = __instance.Handgun.GetComponent<DoubleFeedData>();
+            if (doubleFeedData != null && doubleFeedData.isDoubleFeeding) return;
+
+            var slideData = __instance.gameObject.GetComponent<StovepipeData>();
 
             if (slideData is null) return;
-
+            if (slideData.isWeaponBatteryFailing) return;
+            
             if (!slideData.hasCollectedWeaponCharacteristics)
             {
                 slideData.defaultFrontPosition = ___m_slideZ_forward;
@@ -113,7 +117,7 @@ namespace Stovepipe.StovepipePatches
             {
                 StartStovepipe(slideData);
                 slideData.randomPosAndRot = GenerateRandomHandgunNoise();
-                slideData.Adjustments = DebugMode.ReadAdjustment(__instance.Handgun.name);
+                slideData.Adjustments = DebugIO.ReadStovepipeAdjustment(__instance.Handgun.name);
                 slideData.timeSinceStovepiping += Time.deltaTime;
                 
                 if (slideData.Adjustments != null) slideData.hasFoundAdjustments = true;
@@ -175,7 +179,8 @@ namespace Stovepipe.StovepipePatches
 
             if (slideData.IsStovepiping == false) return;
             if (slideData.timeSinceStovepiping < TimeUntilCanPhysicsSlideUnStovepipe) return;
-            if (___m_slideZ_current < ___m_slideZ_forward - 0.01f) UnStovepipe(slideData, true, __instance.Handgun.RootRigidbody);
+            if (___m_slideZ_current < ___m_slideZ_forward - 0.01f)
+                UnStovepipe(slideData, true, __instance.Handgun.RootRigidbody);
         }
         
         [HarmonyPatch(typeof(HandgunSlide), "SlideEvent_ExtractRoundFromMag")]
@@ -188,9 +193,34 @@ namespace Stovepipe.StovepipePatches
             if (slideData == null) return true;
             if (!slideData.IsStovepiping) return true;
             
-            __instance.Handgun.PlayAudioEvent(FirearmAudioEventType.BoltSlideForwardHeld, 1f);
-            return false;
+            if (Random.Range(0f, 1f) < UserConfig.StovepipeNextRoundNotChamberedProb.Value)
+            {
+                __instance.Handgun.PlayAudioEvent(FirearmAudioEventType.BoltSlideForwardHeld, 1f);
+                return false;
+            }
 
+            return true;
+        }
+        
+        [HarmonyPatch(typeof(Handgun), "Fire")]
+        [HarmonyPrefix]
+        private static bool StopFromFiringIfStovepiping(Handgun __instance)
+        {
+            var stoveData = __instance.Slide.GetComponent<StovepipeData>();
+            if (stoveData is null) return true;
+            
+            return !stoveData.IsStovepiping;
+        }
+        
+        [HarmonyPatch(typeof(Handgun), "DeCockHammer")]
+        [HarmonyPatch(typeof(Handgun), "DropHammer")]
+        [HarmonyPrefix]
+        private static bool StopFromDroppingHammerIfStovepiping(Handgun __instance)
+        {
+            var stoveData = __instance.Slide.GetComponent<StovepipeData>();
+            if (stoveData is null) return true;
+            
+            return !stoveData.IsStovepiping;
         }
 
         [HarmonyPatch(typeof(HandgunSlide), "BeginInteraction")]
@@ -204,6 +234,30 @@ namespace Stovepipe.StovepipePatches
             if (!slideData.IsStovepiping) return;
             
             UnStovepipe(slideData, true, __instance.Handgun.RootRigidbody);
+        }
+        
+        [HarmonyPatch(typeof(HandgunSlide), "SlideEvent_EjectRound")]
+        [HarmonyPrefix]
+        private static bool StopEjectingRoundIfStovepiping(HandgunSlide __instance)
+        {
+            var data = __instance.GetComponent<StovepipeData>();
+
+            if (!data) return true;
+            if (!data.IsStovepiping) return true;
+            
+            return __instance.Handgun.Chamber.IsSpent;
+        }
+        
+        [HarmonyPatch(typeof(HandgunSlide), "SlideEvent_ExtractRoundFromMag")]
+        [HarmonyPrefix]
+        private static bool StopExtractingRoundIfBulletIsAlreadyInChamber(HandgunSlide __instance)
+        {
+            var data = __instance.GetComponent<StovepipeData>();
+
+            if (!data) return true;
+            if (!data.IsStovepiping) return true;
+            
+            return !__instance.Handgun.Chamber.IsFull;
         }
     }
 }
