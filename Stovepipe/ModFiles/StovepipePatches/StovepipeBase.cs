@@ -32,6 +32,7 @@ namespace Stovepipe.StovepipePatches
         {
             DebugMode.DebugLog("Starting Stovepipe");
             if (data is null) return;
+            if (data.ejectedRound == null) return;
             if (data.thisDoubleFeedData != null && data.thisDoubleFeedData.isDoubleFeeding) return;
             if (data.ejectedRound.RootRigidbody is null) return;
            
