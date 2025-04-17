@@ -200,8 +200,8 @@ namespace Stovepipe.DoubleFeedPatches
             var normalLayer = LayerMask.NameToLayer("Interactable");
             var lowerBulletExists = !data.hasLowerBulletBeenRemoved;
             
-            
-            if (__instance.Handgun.Magazine != null)
+            if (__instance.Handgun.Magazine != null && 
+                !__instance.Handgun.Magazine.IsEnBloc && !__instance.Handgun.Magazine.IsIntegrated)
             {
                 if (lowerBulletExists) data.lowerBullet.gameObject.layer = uninteractableLayer;
             }
