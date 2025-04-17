@@ -30,6 +30,9 @@ namespace Stovepipe.StovepipePatches
 
         protected static void StartStovepipe(StovepipeData data)
         {
+            if (data is null) return;
+            if (data.thisDoubleFeedData.isDoubleFeeding) return;
+            
             data.ejectedRound.RootRigidbody.velocity = Vector3.zero;
             data.ejectedRound.RootRigidbody.angularVelocity = Vector3.zero;
             data.ejectedRound.RootRigidbody.maxAngularVelocity = 0;
