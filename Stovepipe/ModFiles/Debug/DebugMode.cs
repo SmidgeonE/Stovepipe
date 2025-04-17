@@ -23,6 +23,12 @@ namespace Stovepipe.Debug
         public static bool HasSetFrontBoltPos;
         public static float CurrentBoltForward;
 
+        public static void DebugLog(string message)
+        {
+            if (!UserConfig.IsDebug.Value) return;
+            
+            UnityEngine.Debug.Log(message);
+        }
 
         [HarmonyPatch(typeof(FVRViveHand), "Update")]
         [HarmonyPostfix]
