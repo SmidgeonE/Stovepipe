@@ -222,19 +222,19 @@ namespace Stovepipe.DoubleFeedPatches
             {
                 if (__instance.Weapon.Magazine.IsIntegrated || __instance.Weapon.Magazine.IsEnBloc)
                 {
-                    if (lowerBulletExists) data.lowerBullet.gameObject.layer = normalLayer;
-                    if (upperBulletExists) data.upperBullet.gameObject.layer = normalLayer;
+                    if (lowerBulletExists) TryChangeBulletLayer(data.lowerBullet, normalLayer);
+                    if (upperBulletExists) TryChangeBulletLayer(data.upperBullet, normalLayer);
                     return;
                 }
                 
-                if (lowerBulletExists) data.lowerBullet.gameObject.layer = uninteractableLayer;
-                if (upperBulletExists) data.upperBullet.gameObject.layer = uninteractableLayer;
+                if (lowerBulletExists) TryChangeBulletLayer(data.lowerBullet, uninteractableLayer);
+                if (upperBulletExists) TryChangeBulletLayer(data.upperBullet, uninteractableLayer);
             }
             else
             {
-                if (lowerBulletExists) data.lowerBullet.gameObject.layer = normalLayer;
-                if (upperBulletExists && lowerBulletExists) data.upperBullet.gameObject.layer = uninteractableLayer;
-                if (upperBulletExists && !lowerBulletExists) data.upperBullet.gameObject.layer = normalLayer;
+                if (lowerBulletExists) TryChangeBulletLayer(data.lowerBullet, normalLayer);
+                if (upperBulletExists && lowerBulletExists) TryChangeBulletLayer(data.upperBullet, uninteractableLayer);
+                if (upperBulletExists && !lowerBulletExists) TryChangeBulletLayer(data.upperBullet, normalLayer);
             }
         }
 

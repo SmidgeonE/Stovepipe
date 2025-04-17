@@ -174,5 +174,16 @@ namespace Stovepipe.DoubleFeedPatches
             data.slideRackUnjamsUpperBullet = true;
             data.slideRackAndJiggleUnjamsLowerBullet = Random.Range(0f, 1f) < UserConfig.LowerBulletShakeyProb.Value;
         }
+
+        protected static void TryChangeBulletLayer(FVRFireArmRound round, int layer)
+        {
+            if (round is null)
+            {
+                UnityEngine.Debug.Log("DoubleFeed: Bullet null at layer change!");
+                return;
+            }
+
+            round.gameObject.layer = layer;
+        }
     }
 }
