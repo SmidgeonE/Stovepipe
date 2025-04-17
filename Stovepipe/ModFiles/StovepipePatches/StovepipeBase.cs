@@ -36,27 +36,27 @@ namespace Stovepipe.StovepipePatches
             if (data.thisDoubleFeedData != null && data.thisDoubleFeedData.isDoubleFeeding) return;
             if (data.ejectedRound.RootRigidbody is null) return;
            
-            UnityEngine.Debug.Log("Checkpoint 1");
+            DebugMode.DebugLog("Checkpoint 1");
             data.ejectedRound.RootRigidbody.velocity = Vector3.zero;
             data.ejectedRound.RootRigidbody.angularVelocity = Vector3.zero;
             data.ejectedRound.RootRigidbody.maxAngularVelocity = 0;
             data.ejectedRound.RootRigidbody.useGravity = false;
             data.ejectedRound.RootRigidbody.detectCollisions = false;
 
-            UnityEngine.Debug.Log("Checkpoint 2");
+            DebugMode.DebugLog("Checkpoint 1");
             data.hasBulletBeenStovepiped = true;
             data.timeSinceStovepiping = 0f;
             data.numOfRoundsSinceLastJam = 0;
             data.SetStoveProbToMin();
             
-            UnityEngine.Debug.Log("Checkpoint 3");
+            DebugMode.DebugLog("Checkpoint 3");
             if (data.thisDoubleFeedData != null) data.thisDoubleFeedData.SetDoubleFeedProbToMin();
 
-            UnityEngine.Debug.Log("CheckPoint 3");
+            DebugMode.DebugLog("CheckPoint 3");
             data.ejectedRound.StoreAndDestroyRigidbody();
             data.ejectedRoundCollider.isTrigger = false;
 
-            UnityEngine.Debug.Log("CheckPoint 4");
+            DebugMode.DebugLog("CheckPoint 4");
             switch (data.weaponType)
             {
                 case WeaponType.Handgun:
@@ -64,7 +64,7 @@ namespace Stovepipe.StovepipePatches
                     break;
                 case WeaponType.Rifle:
                     data.ejectedRound.SetParentage(data.GetComponent<ClosedBolt>().Weapon.transform);
-                    UnityEngine.Debug.Log("Checkpoint 5");
+                    DebugMode.DebugLog("Checkpoint 5");
                     break;
                 case WeaponType.TubeFedShotgun:
                     data.ejectedRound.SetParentage(data.GetComponent<TubeFedShotgunBolt>().Shotgun.transform);
